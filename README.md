@@ -22,4 +22,4 @@ The system will:
 6. UI layer
 
 ## Status
-Initial milestone / scaffolding phase.
+Initial milestone & scaffolding phase.
