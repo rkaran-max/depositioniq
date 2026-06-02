@@ -1,10 +1,18 @@
 # DepositionIQ
 
-DepositionIQ is a Streamlit-based vertical slice for an LLM-powered legal reasoning
-agent that analyzes deposition transcripts. The current implementation runs
-end-to-end without model training or an API key by using deterministic, explainable
-fallback rules for claim extraction, contradiction detection, verification,
-cross-examination planning, and report generation.
+DepositionIQ is a prototype legal AI system for analyzing deposition transcripts.
+This repository currently contains two complementary project tracks:
+
+1. **Python/Streamlit prototype backend** in `app.py` and `src/`
+   This is the working vertical slice. It runs end-to-end without model training or
+   an API key by using deterministic, explainable fallback rules for claim
+   extraction, contradiction detection, verification, cross-examination planning,
+   witness profiling, PDF extraction, OCR fallback, and report generation.
+2. **Next.js polished frontend prototype** in `frontend/`
+   This is a YC-demo-ready interface concept built with Next.js, TypeScript,
+   Tailwind CSS, shadcn-style components, lucide-react icons, and framer-motion.
+   It currently displays realistic DepositionIQ mock outputs from
+   `frontend/lib/mock-analysis.ts` and is not yet wired to the Python backend.
 
 ## Features
 
@@ -32,6 +40,25 @@ cross-examination planning, and report generation.
 ```text
 .
 ├── app.py
+├── frontend
+│   ├── app
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── claim-table.tsx
+│   │   ├── contradiction-card.tsx
+│   │   ├── courtshadow-panel.tsx
+│   │   ├── metric-card.tsx
+│   │   ├── report-panel.tsx
+│   │   ├── sidebar.tsx
+│   │   ├── witness-profile.tsx
+│   │   └── ui
+│   ├── lib
+│   │   ├── mock-analysis.ts
+│   │   └── utils.ts
+│   ├── package.json
+│   └── README.md
 ├── requirements.txt
 ├── README.md
 ├── samples
@@ -47,6 +74,40 @@ cross-examination planning, and report generation.
     ├── cross_exam_generator.py
     └── report_generator.py
 ```
+
+## Prototype Tracks
+
+### Python/Streamlit Backend Prototype
+
+The backend prototype is the functional analysis pipeline. It accepts pasted
+transcript text or uploaded PDFs, cleans/extracts transcript text, segments speaker
+turns, extracts structured witness claims, detects and verifies contradictions,
+generates cross-examination questions, builds a witness profile, and produces a
+downloadable Markdown report.
+
+Primary files:
+
+- `app.py`: Streamlit application and UI orchestration.
+- `src/`: Modular legal reasoning pipeline.
+- `samples/`: Sample transcript and sample output.
+
+### Next.js Frontend Prototype
+
+The frontend prototype is a polished product interface for DepositionIQ. It includes
+a dark AI-startup dashboard, sidebar navigation, upload panel, metrics, claims table,
+contradiction cards, cross-examination strategy cards, witness profile panel,
+CourtShadow panel, and report panel.
+
+Primary files:
+
+- `frontend/app/page.tsx`: Main dashboard and landing experience.
+- `frontend/components/`: Reusable UI components.
+- `frontend/lib/mock-analysis.ts`: Realistic sample DepositionIQ outputs used by
+  the UI before backend integration.
+
+The frontend is intentionally mock-driven for now. Backend integration can be added
+later by replacing the mock exports in `frontend/lib/mock-analysis.ts` with API calls
+to the Python analysis pipeline.
 
 ## Architecture
 
@@ -179,6 +240,8 @@ Cross-examination questions are represented as:
 
 ## Getting Started
 
+### Run the Python/Streamlit Prototype
+
 Create and activate a virtual environment:
 
 ```bash
@@ -207,6 +270,22 @@ PDFs, review the extracted text, and click **Analyze Deposition**.
 No API key is required for the demo. The backend uses deterministic fallback logic
 so the sample transcript produces stable claims, verified contradictions, generated
 cross-examination questions, and a downloadable Markdown report.
+
+### Run the Next.js Frontend Prototype
+
+From the repository root:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open `http://localhost:3000`.
+
+The frontend does not require backend services yet. It renders realistic sample
+claims, contradictions, witness intelligence, attorney attention levels, and report
+content from `frontend/lib/mock-analysis.ts`.
 
 ## Error Handling
 

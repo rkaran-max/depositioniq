@@ -25,70 +25,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  claims,
+  contradictions,
+  depositionMetrics,
+  intelligenceSummary,
+  sampleTranscript,
+  strategyCards,
+  witnessProfile,
+} from "@/lib/mock-analysis";
 
-const claims = [
-  {
-    id: "C-001",
-    claim:
-      "The witness states that most incoming emails were deleted as part of ordinary practice.",
-    topic: "Email Retention",
-    certainty: "High",
-    confidence: "96%",
-    citation: "Gates Dep. 589:4-15",
-  },
-  {
-    id: "C-002",
-    claim:
-      "The witness cannot recall any specific DR DOS message that he deleted or caused to be deleted.",
-    topic: "DR DOS Communications",
-    certainty: "Medium",
-    confidence: "91%",
-    citation: "Gates Dep. 589:20-25",
-  },
-  {
-    id: "C-003",
-    claim:
-      "The witness says he does not preserve most sent emails, except rare self-copy instances.",
-    topic: "Document Preservation",
-    certainty: "High",
-    confidence: "95%",
-    citation: "Gates Dep. 590:11-22",
-  },
-];
-
-const contradictions = [
-  {
-    severity: "Medium" as const,
-    title: "Memory testimony versus deletion practice",
-    summary:
-      "The witness describes broad email deletion behavior while disclaiming recall of specific DR DOS messages. The tension is factual and should be tested against retention policy and message logs.",
-    citations: ["589:4-15", "589:20-25", "590:8-14"],
-    verified: true,
-  },
-  {
-    severity: "Low" as const,
-    title: "Sent-email preservation scope",
-    summary:
-      "The witness indicates sent messages were generally not preserved, with rare exceptions for self-copying. Follow-up should clarify whether that practice applied during the relevant DR DOS period.",
-    citations: ["590:11-22"],
-    verified: false,
-  },
-];
-
-const strategyCards = [
-  {
-    title: "Pin down retention policy",
-    body: "Ask whether Microsoft had a written email retention policy and whether the witness understood it during the DR DOS period.",
-  },
-  {
-    title: "Separate practice from recollection",
-    body: "Distinguish general deletion habits from specific recollection of DR DOS-related communications.",
-  },
-  {
-    title: "Establish custodian trail",
-    body: "Identify where sent messages, self-copies, backups, and custodian mailboxes would have resided.",
-  },
-];
+const metricIcons = [Gavel, AlertTriangle, CheckCircle2, ShieldAlert];
 
 export default function Home() {
   return (
@@ -183,9 +130,7 @@ export default function Home() {
                     <Textarea
                       placeholder="Paste deposition transcript text here..."
                       className="h-full min-h-48 resize-none"
-                      defaultValue={
-                        "Q: Did you preserve DR DOS-related messages?\nA: I don't preserve most e-mail I receive or send."
-                      }
+                      defaultValue={sampleTranscript}
                     />
                   </div>
                 </div>
@@ -201,21 +146,22 @@ export default function Home() {
                 <div className="flex items-start gap-3 rounded-xl border border-amber-300/20 bg-amber-300/10 p-4">
                   <ShieldAlert className="mt-0.5 size-5 text-amber-200" />
                   <div>
-                    <div className="font-medium text-white">Medium contradiction risk</div>
+                    <div className="font-medium text-white">
+                      {intelligenceSummary.contradictionRisk}
+                    </div>
                     <p className="mt-1 text-sm leading-6 text-slate-400">
-                      Email deletion practices and DR DOS recall should receive focused
-                      attorney review before examination.
+                      {intelligenceSummary.body}
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
                     <div className="text-slate-500">Dominant topics</div>
-                    <div className="mt-1 text-white">Email retention, DR DOS</div>
+                    <div className="mt-1 text-white">{intelligenceSummary.dominantTopics}</div>
                   </div>
                   <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3">
                     <div className="text-slate-500">Attorney attention</div>
-                    <div className="mt-1 text-white">High priority</div>
+                    <div className="mt-1 text-white">{intelligenceSummary.attorneyAttention}</div>
                   </div>
                 </div>
               </CardContent>
@@ -223,30 +169,18 @@ export default function Home() {
           </section>
 
           <section className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard label="Claims Extracted" value="18" detail="5 high-value claims" icon={Gavel} tone="sky" />
-            <MetricCard label="Contradictions Found" value="3" detail="1 verified candidate" icon={AlertTriangle} tone="amber" />
-            <MetricCard label="Verified Issues" value="2" detail="Transcript-supported" icon={CheckCircle2} tone="emerald" />
-            <MetricCard label="Attorney Attention Level" value="High" detail="Preservation vector" icon={ShieldAlert} tone="rose" />
+            {depositionMetrics.map((metric, index) => (
+              <MetricCard
+                key={metric.label}
+                {...metric}
+                icon={metricIcons[index]}
+              />
+            ))}
           </section>
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
             <ClaimTable claims={claims} />
-            <WitnessProfile
-              name="Bill Gates"
-              overview="The witness testified about email deletion practices, limited preservation of sent messages, and recollection gaps concerning DR DOS-related communications. The profile flags record-retention and timeline follow-up vectors without drawing legal conclusions."
-              topics={["Email deletion practices", "Document retention", "DR DOS communications"]}
-              vulnerabilities={[
-                "Memory gaps on specific DR DOS messages",
-                "Document retention and preservation issues",
-                "Timeline ambiguity around deleted communications",
-              ]}
-              strengths={[
-                "Several claims have transcript citations",
-                "Limited verified contradiction exposure",
-                "Clear testimony on ordinary email practices",
-              ]}
-              risk="Medium"
-            />
+            <WitnessProfile {...witnessProfile} />
           </section>
 
           <section id="contradictions" className="mt-4 grid gap-4 xl:grid-cols-2">
