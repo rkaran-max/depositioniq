@@ -201,12 +201,12 @@ def main() -> None:
         "Deposition transcript",
         value=initial_text,
         height=300,
-        help="Paste deposition Q/A text here, then run the deterministic pipeline.",
+        help="Paste deposition Q/A text here, then run the deterministic fallback pipeline.",
     )
 
-    analyze = st.button("Analyze Transcript", type="primary", use_container_width=True)
+    analyze = st.button("Analyze Deposition", type="primary", use_container_width=True)
     if not analyze:
-        st.info("Paste a transcript or use the bundled sample, then click Analyze Transcript.")
+        st.info("Paste a transcript or use the bundled sample, then click Analyze Deposition.")
         return
 
     try:
@@ -231,7 +231,8 @@ def main() -> None:
         st.write(
             "DepositionIQ separates ingestion, segmentation, claim extraction, "
             "contradiction detection, verification, cross-exam generation, and reporting. "
-            "This vertical slice uses deterministic rules, so it runs without model training."
+            "This vertical slice uses deterministic fallback rules, so it runs without "
+            "model training or an API key."
         )
         st.dataframe(
             pd.DataFrame(results["segments"]),

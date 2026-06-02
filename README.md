@@ -2,13 +2,14 @@
 
 DepositionIQ is a Streamlit-based vertical slice for an LLM-powered legal reasoning
 agent that analyzes deposition transcripts. The current implementation runs
-end-to-end without model training by using deterministic, explainable rules for
-claim extraction, contradiction detection, verification, cross-examination planning,
-and report generation.
+end-to-end without model training or an API key by using deterministic, explainable
+fallback rules for claim extraction, contradiction detection, verification,
+cross-examination planning, and report generation.
 
 ## Features
 
 - Paste transcript text directly into the Streamlit interface.
+- Click **Analyze Deposition** to run the full pipeline.
 - Load the bundled sample transcript.
 - Segment transcript lines into speaker turns.
 - Extract structured witness claims with topic, entity, polarity, certainty, and evidence.
@@ -174,8 +175,12 @@ Run the app:
 streamlit run app.py
 ```
 
-Click **Analyze Transcript** to run the sample transcript or paste your own
+Click **Analyze Deposition** to run the sample transcript or paste your own
 deposition excerpt using `Q:` and `A:` line prefixes.
+
+No API key is required for the demo. The backend uses deterministic fallback logic
+so the sample transcript produces stable claims, verified contradictions, generated
+cross-examination questions, and a downloadable Markdown report.
 
 ## Error Handling
 
