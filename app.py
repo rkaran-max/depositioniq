@@ -110,6 +110,67 @@ def render_metric_row(results: dict) -> None:
     cols[4].metric("Questions", len(results["questions"]))
 
 
+def attorney_attention_level(risk: str, contradictions: list[dict], claims: list[dict]) -> str:
+    """Return a concise recommended attorney attention level."""
+    verified = sum(1 for item in contradictions if item.get("status") == "verified")
+    low_certainty = sum(1 for claim in claims if claim.get("certainty") == "low")
+    if risk == "High" or verified >= 2:
+        return "High"
+    if risk == "Medium" or verified or low_certainty:
+        return "Moderate"
+    return "Routine"
+
+
+def witness_credibility_risk(results: dict) -> str:
+    """Summarize credibility risk without making legal conclusions."""
+    risk = results["witness_profile"]["contradiction_risk"]
+    low_certainty = any(claim.get("certainty") == "low" for claim in results["claims"])
+    if risk == "High":
+        return "Elevated"
+    if risk == "Medium" or low_certainty:
+        return "Watch"
+    return "Limited"
+
+
+def render_intelligence_summary(results: dict) -> None:
+    """Render a concise attorney-facing executive summary card."""
+    profile = results["witness_profile"]
+    contradictions = results["contradictions"]
+    claims = results["claims"]
+    risk = profile["contradiction_risk"]
+    attention = attorney_attention_level(risk, contradictions, claims)
+    credibility = witness_credibility_risk(results)
+    dominant_topics = ", ".join(profile["key_topics"][:3]) or "No dominant topic identified"
+    verified_count = sum(1 for item in contradictions if item.get("status") == "verified")
+
+    st.subheader("Deposition Intelligence Summary")
+    st.markdown(
+        """
+        <div style="border:1px solid #cbd5e1;border-radius:8px;padding:1rem;background:#f8fafc;margin-bottom:1rem;">
+        <div style="font-size:0.9rem;color:#475569;margin-bottom:0.5rem;">Executive readout for attorney review</div>
+        """,
+        unsafe_allow_html=True,
+    )
+    cols = st.columns(3)
+    cols[0].metric("Claims Extracted", len(claims))
+    cols[1].metric("Contradictions Found", len(contradictions))
+    cols[2].metric("Contradiction Risk", risk)
+
+    cols = st.columns(3)
+    cols[0].metric("Witness Credibility Risk", credibility)
+    cols[1].metric("Attorney Attention", attention)
+    cols[2].metric("Verified Issues", verified_count)
+
+    st.markdown(f"**Dominant Topics:** {dominant_topics}")
+    st.write(
+        f"{profile['name']} generated {len(claims)} extracted claims across "
+        f"{dominant_topics}. The current record shows {len(contradictions)} "
+        f"contradiction candidate(s), with {verified_count} verified by transcript support. "
+        f"Recommended attorney attention level: **{attention}**."
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 def render_claims(claims: list[dict]) -> None:
     """Render extracted claim cards."""
     if not claims:
@@ -424,6 +485,7 @@ def main() -> None:
         st.header("Case Overview")
         transcript = results["transcript"]
         st.caption(f"Transcript ID: `{transcript.transcript_id}`")
+        render_intelligence_summary(results)
         render_metric_row(results)
         render_case_summary(results["case_summary"])
         st.write(
