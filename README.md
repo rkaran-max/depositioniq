@@ -14,7 +14,8 @@ cross-examination planning, and report generation.
 - Click **Analyze Deposition** to run the full pipeline.
 - Load the bundled sample transcript.
 - Segment transcript lines into speaker turns.
-- Extract structured witness claims with topic, entity, polarity, certainty, and evidence.
+- Extract structured witness claims with speaker, legal topic, claim text, citation,
+  and confidence.
 - Detect potential contradictions across claims.
 - Verify whether claims are grounded in transcript text.
 - Verify contradiction candidates using source-supported claims and shared context.
@@ -57,8 +58,10 @@ DepositionIQ follows a pipeline architecture:
 
 3. **Claim Extraction (`src/claim_extractor.py`)**
    Extracts factual claims from witness answers. The current implementation uses
-   transparent rules to assign topic, entity, polarity, certainty, confidence,
-   evidence, and question context.
+   transparent rules to assign attorney-facing topics such as Email Retention,
+   Document Preservation, DR DOS Communications, Personal Knowledge, Timeline, and
+   Other. It also removes filler language and returns speaker, claim, citation, and
+   confidence fields for review.
 
 4. **Contradiction Detection (`src/contradiction_detector.py`)**
    Compares claims that share the same topic and entity. It flags direct polarity
@@ -132,14 +135,10 @@ Claims are represented as dictionaries like:
     "id": "C001",
     "segment_id": "S002",
     "speaker": "Witness",
-    "text": "I reviewed and approved most vendor onboarding requests.",
-    "claim_type": "approval",
-    "topic": "approval",
-    "entity": "Helix Supply",
-    "polarity": "positive",
-    "certainty": "high",
-    "confidence": 0.82,
-    "evidence": "Line 4: I reviewed and approved most vendor onboarding requests.",
+    "claim": "The witness deleted email messages relating to DR DOS.",
+    "citation": "Lines 95-98",
+    "topic": "DR DOS Communications",
+    "confidence": 0.96,
     "verification_status": "supported",
 }
 ```

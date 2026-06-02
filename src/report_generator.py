@@ -17,7 +17,7 @@ class ReportGenerator:
     ) -> str:
         """Build a Markdown report from pipeline outputs."""
         claim_lines = "\n".join(
-            f"- **{claim['id']}** ({claim['verification_status']}): {claim['text']}"
+            f"- **{claim['id']}** [{claim['topic']}, {claim['citation']}]: {claim['claim']}"
             for claim in claims
         )
         contradiction_lines = "\n".join(

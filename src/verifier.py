@@ -9,9 +9,15 @@ class EvidenceVerifier:
     def verify(self, claims: list[dict], transcript_text: str) -> list[dict]:
         """Attach placeholder verification status to each claim."""
         verified_claims: list[dict] = []
+        normalized_transcript = " ".join(transcript_text.split())
 
         for claim in claims:
-            status = "supported" if claim["text"] in transcript_text else "needs_review"
+            normalized_claim = " ".join(claim["text"].split())
+            status = (
+                "supported"
+                if normalized_claim in normalized_transcript
+                else "needs_review"
+            )
             verified_claim = {
                 **claim,
                 "verification_status": status,

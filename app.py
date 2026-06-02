@@ -87,13 +87,11 @@ def render_claims(claims: list[dict]) -> None:
         pd.DataFrame(claims)[
             [
                 "id",
+                "speaker",
+                "claim",
+                "citation",
                 "topic",
-                "entity",
-                "polarity",
-                "certainty",
                 "confidence",
-                "verification_status",
-                "text",
             ]
         ],
         use_container_width=True,
@@ -101,13 +99,14 @@ def render_claims(claims: list[dict]) -> None:
     )
 
     for claim in claims:
-        with st.expander(f"{claim['id']} - {claim['topic']} / {claim['entity']}"):
-            st.write(claim["text"])
+        with st.expander(f"{claim['id']} - {claim['topic']}"):
+            st.write(claim["claim"])
             cols = st.columns(4)
-            cols[0].metric("Polarity", claim["polarity"])
-            cols[1].metric("Certainty", claim["certainty"])
+            cols[0].metric("Speaker", claim["speaker"])
+            cols[1].metric("Citation", claim["citation"])
             cols[2].metric("Confidence", f"{claim['confidence']:.0%}")
             cols[3].metric("Verification", claim["verification_status"])
+            st.caption(f"Legal issue: {claim['topic']}")
             st.caption(f"Question context: {claim['question_context']}")
             st.caption(f"Evidence: {claim['evidence']}")
 

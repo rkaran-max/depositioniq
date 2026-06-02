@@ -57,8 +57,9 @@ class ContradictionDetector:
     def _comparable(self, left: dict, right: dict) -> bool:
         """Return whether two claims discuss the same factual lane."""
         same_topic = left["topic"] == right["topic"]
+        same_scope = left.get("contradiction_scope") == right.get("contradiction_scope")
         same_entity = left["entity"] == right["entity"] and left["entity"] != "general"
-        return same_topic and same_entity
+        return same_topic and same_scope and same_entity
 
     def _contradiction_type(self, left: dict, right: dict) -> str | None:
         """Classify the contradiction relationship, if one exists."""
