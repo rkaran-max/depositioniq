@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from src.claim_extractor import ClaimExtractor
+from src.case_summary import CaseSummaryGenerator
 from src.contradiction_detector import ContradictionDetector
 from src.cross_exam_generator import CrossExamGenerator
 from src.ingest import TranscriptIngestor
@@ -40,6 +41,7 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
     verifier = EvidenceVerifier()
     cross_exam_generator = CrossExamGenerator()
     report_generator = ReportGenerator()
+    case_summary_generator = CaseSummaryGenerator()
 
     transcript = ingestor.ingest_text(transcript_text, metadata=metadata)
     segments = segmenter.segment(transcript)
@@ -50,8 +52,9 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
         contradictions, verified_claims
     )
     questions = cross_exam_generator.generate(verified_contradictions, verified_claims)
+    case_summary = case_summary_generator.generate(transcript.source_text, verified_claims)
     report = report_generator.generate(
-        transcript, verified_claims, verified_contradictions, questions
+        transcript, verified_claims, verified_contradictions, questions, case_summary
     )
 
     return {
@@ -60,6 +63,7 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
         "claims": verified_claims,
         "contradictions": verified_contradictions,
         "questions": questions,
+        "case_summary": case_summary,
         "report": report,
     }
 
@@ -109,6 +113,26 @@ def render_claims(claims: list[dict]) -> None:
             st.caption(f"Legal issue: {claim['topic']}")
             st.caption(f"Question context: {claim['question_context']}")
             st.caption(f"Evidence: {claim['evidence']}")
+
+
+def render_case_summary(case_summary: dict) -> None:
+    """Render the attorney-facing deposition summary."""
+    st.subheader("Deposition Review Summary")
+    st.metric("Witness", case_summary["witness"])
+
+    cols = st.columns(3)
+    with cols[0]:
+        st.markdown("**Key Themes**")
+        for item in case_summary["key_themes"]:
+            st.write(f"- {item}")
+    with cols[1]:
+        st.markdown("**Notable Testimony**")
+        for item in case_summary["notable_testimony"]:
+            st.write(f"- {item}")
+    with cols[2]:
+        st.markdown("**Potential Areas for Follow-Up**")
+        for item in case_summary["follow_up_areas"]:
+            st.write(f"- {item}")
 
 
 def render_contradictions(contradictions: list[dict]) -> None:
@@ -299,6 +323,7 @@ def main() -> None:
         transcript = results["transcript"]
         st.caption(f"Transcript ID: `{transcript.transcript_id}`")
         render_metric_row(results)
+        render_case_summary(results["case_summary"])
         st.write(
             "DepositionIQ separates ingestion, segmentation, claim extraction, "
             "contradiction detection, verification, cross-exam generation, and reporting. "

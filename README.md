@@ -20,6 +20,7 @@ cross-examination planning, and report generation.
 - Verify whether claims are grounded in transcript text.
 - Verify contradiction candidates using source-supported claims and shared context.
 - Generate cross-examination questions tied to verified issues.
+- Summarize witness, key themes, notable testimony, and follow-up areas.
 - Display clean Streamlit tabs, metrics, tables, expanders, and downloadable reports.
 - Produce a downloadable Markdown report.
 

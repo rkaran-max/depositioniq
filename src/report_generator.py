@@ -14,6 +14,7 @@ class ReportGenerator:
         claims: list[dict],
         contradictions: list[dict],
         questions: list[dict],
+        case_summary: dict | None = None,
     ) -> str:
         """Build a Markdown report from pipeline outputs."""
         claim_lines = "\n".join(
@@ -29,6 +30,15 @@ class ReportGenerator:
             for question in questions
         )
         verified_count = sum(1 for item in contradictions if item.get("status") == "verified")
+        case_summary = case_summary or {
+            "witness": "Unknown witness",
+            "key_themes": [],
+            "notable_testimony": [],
+            "follow_up_areas": [],
+        }
+        key_theme_lines = "\n".join(f"- {item}" for item in case_summary["key_themes"])
+        notable_lines = "\n".join(f"- {item}" for item in case_summary["notable_testimony"])
+        follow_up_lines = "\n".join(f"- {item}" for item in case_summary["follow_up_areas"])
 
         return f"""# DepositionIQ Report
 
@@ -42,6 +52,18 @@ class ReportGenerator:
 - Potential contradictions: `{len(contradictions)}`
 - Verified contradictions: `{verified_count}`
 - Cross-examination questions: `{len(questions)}`
+
+## Deposition Review Summary
+- Witness: **{case_summary["witness"]}**
+
+### Key Themes
+{key_theme_lines or "- No key themes identified."}
+
+### Notable Testimony
+{notable_lines or "- No notable testimony identified."}
+
+### Potential Areas for Follow-Up
+{follow_up_lines or "- No follow-up areas identified."}
 
 ## Claims
 {claim_lines or "- No claims extracted."}
