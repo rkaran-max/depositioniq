@@ -60,6 +60,42 @@
     background-size: 100% 8px;
   }
 
+  .hero-mesh {
+    background:
+      linear-gradient(100deg, transparent 0%, rgba(34, 211, 238, 0.15) 42%, transparent 62%),
+      repeating-linear-gradient(
+        100deg,
+        transparent 0 28px,
+        rgba(34, 211, 238, 0.14) 29px,
+        transparent 30px
+      );
+    filter: blur(10px);
+    transform: skewY(-8deg);
+    animation: mesh-drift 14s ease-in-out infinite alternate;
+  }
+
+  .marquee-track {
+    animation: marquee-scroll 32s linear infinite;
+  }
+
+  @keyframes mesh-drift {
+    from {
+      transform: translateX(-4%) skewY(-8deg);
+    }
+    to {
+      transform: translateX(4%) skewY(-8deg);
+    }
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
   .text-balance {
     text-wrap: balance;
   }
