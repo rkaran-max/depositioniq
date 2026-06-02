@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  Braces,
   FileSearch,
   Gavel,
   MessageSquareQuote,
@@ -13,38 +14,53 @@ import {
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "Overview", icon: BarChart3 },
-  { label: "Claims", icon: FileSearch },
-  { label: "Contradictions", icon: ShieldAlert },
-  { label: "Cross-Examination", icon: MessageSquareQuote },
-  { label: "Witness Profile", icon: UserRound },
-  { label: "CourtShadow", icon: Network },
-  { label: "Report", icon: ScrollText },
+  { label: "Overview", icon: BarChart3, id: "overview" },
+  { label: "Agent Pipeline", icon: Braces, id: "agent-pipeline" },
+  { label: "Claims Graph", icon: FileSearch, id: "claims-graph" },
+  { label: "Contradiction Review", icon: ShieldAlert, id: "contradiction-review" },
+  { label: "Cross-Exam Strategy", icon: MessageSquareQuote, id: "cross-examination" },
+  { label: "Witness Profile", icon: UserRound, id: "courtshadow" },
+  { label: "CourtShadow", icon: Network, id: "courtshadow" },
+  { label: "Report Export", icon: ScrollText, id: "report" },
 ];
 
 export function Sidebar() {
   return (
-    <aside className="hidden min-h-[calc(100vh-2rem)] w-72 shrink-0 rounded-2xl border border-white/10 bg-slate-950/60 p-4 shadow-glass backdrop-blur-xl lg:block">
-      <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="flex size-10 items-center justify-center rounded-xl border border-sky-300/20 bg-sky-300/10">
+    <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-72 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/90 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:block">
+      <div className="mb-7 flex items-center gap-3 px-1">
+        <div className="flex size-9 items-center justify-center rounded-lg border border-sky-300/20 bg-sky-300/10">
           <Gavel className="size-5 text-sky-200" />
         </div>
         <div>
-          <div className="text-sm font-semibold text-white">DepositionIQ</div>
-          <div className="text-xs text-slate-500">Litigation intelligence OS</div>
+          <div className="text-sm font-medium text-white">DepositionIQ</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
+            agent console
+          </div>
         </div>
       </div>
 
-      <nav className="space-y-1">
+      <div className="mb-3 rounded-lg border border-emerald-300/15 bg-emerald-300/5 p-3">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300">
+          system.active
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-500">
+          <span>reasoner:on</span>
+          <span>ocr:ready</span>
+          <span>claims:18</span>
+          <span>risk:med</span>
+        </div>
+      </div>
+
+      <nav className="space-y-1 border-t border-white/10 pt-3">
         {navItems.map((item, index) => {
           const Icon = item.icon;
           return (
             <a
               key={item.label}
-              href={`#${item.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
+              href={`#${item.id}`}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400 transition hover:bg-white/[0.06] hover:text-white",
-                index === 0 && "bg-white/[0.07] text-white",
+                "group flex items-center gap-3 rounded-lg px-3 py-2 font-mono text-[11px] text-slate-500 transition hover:bg-white/[0.05] hover:text-white",
+                index === 0 && "border border-sky-300/15 bg-sky-300/10 text-sky-100",
               )}
             >
               <Icon className="size-4 text-slate-500 transition group-hover:text-sky-300" />
@@ -54,12 +70,14 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.04] p-4">
-        <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Case Mode</div>
-        <div className="mt-2 text-sm font-medium text-white">High-signal review</div>
-        <p className="mt-2 text-xs leading-5 text-slate-400">
-          Tuned for deposition contradiction triage, preservation issues, and
-          cross-examination prep.
+      <div className="mt-4 rounded-lg border border-white/10 bg-[#0B0F17] p-4">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
+          case.kernel
+        </div>
+        <div className="mt-2 text-sm font-medium text-white">microsoft / drdos</div>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Retention vectors, custodian uncertainty, testimony conflicts, and
+          cross-examination target synthesis.
         </p>
       </div>
     </aside>

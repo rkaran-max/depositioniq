@@ -17,6 +17,29 @@ export type Contradiction = {
   verified: boolean;
 };
 
+export type PipelineStage = {
+  id: string;
+  label: string;
+  status: "complete" | "active" | "queued";
+  latency: string;
+  output: string;
+};
+
+export type AgentTraceEvent = {
+  time: string;
+  event: string;
+  detail: string;
+  status: "ok" | "review" | "warn";
+};
+
+export type EvidenceTrace = {
+  id: string;
+  source: string;
+  signal: string;
+  excerpt: string;
+  confidence: string;
+};
+
 export const sampleTranscript =
   "Q: Did you preserve DR DOS-related messages?\nA: I don't preserve most e-mail I receive or send.\n\nQ: Did you delete e-mails relating to DR DOS?\nA: I delete most incoming e-mails after reading them. I cannot recall any specific DR DOS message I deleted.\n\nQ: Were sent messages preserved elsewhere?\nA: I usually did not preserve sent mail unless I copied myself, which was rare.";
 
@@ -59,6 +82,77 @@ export const intelligenceSummary = {
   dominantTopics: "Email retention, DR DOS",
   attorneyAttention: "High priority",
 };
+
+export const pipelineStages: PipelineStage[] = [
+  {
+    id: "ingest",
+    label: "ingest.transcript",
+    status: "complete",
+    latency: "241ms",
+    output: "94 testimony turns",
+  },
+  {
+    id: "segment",
+    label: "segment.testimony",
+    status: "complete",
+    latency: "118ms",
+    output: "Q/A boundaries locked",
+  },
+  {
+    id: "extract",
+    label: "extract.claims",
+    status: "complete",
+    latency: "632ms",
+    output: "18 structured claims",
+  },
+  {
+    id: "verify",
+    label: "verify.conflicts",
+    status: "active",
+    latency: "811ms",
+    output: "3 contradiction candidates",
+  },
+  {
+    id: "generate",
+    label: "generate.cross_exam",
+    status: "queued",
+    latency: "pending",
+    output: "7 attorney prompts",
+  },
+];
+
+export const agentTrace: AgentTraceEvent[] = [
+  {
+    time: "00:00.241",
+    event: "transcript.ingested",
+    detail: "Normalized witness-answer turns and preserved Gates Dep. citation markers.",
+    status: "ok",
+  },
+  {
+    time: "00:00.514",
+    event: "topic.router",
+    detail: "Routed 11 claims into Email Retention, Document Preservation, and DR DOS Communications.",
+    status: "ok",
+  },
+  {
+    time: "00:01.049",
+    event: "contradiction.scan",
+    detail: "Detected tension between broad deletion practice and specific memory disclaimer.",
+    status: "review",
+  },
+  {
+    time: "00:01.387",
+    event: "evidence.linker",
+    detail: "Attached source spans 589:4-15, 589:20-25, and 590:11-22 to verified issue K-001.",
+    status: "ok",
+  },
+  {
+    time: "00:01.922",
+    event: "risk.model",
+    detail: "Preservation vector elevated attorney attention because custodian trail remains unresolved.",
+    status: "warn",
+  },
+];
 
 export const claims: Claim[] = [
   {
@@ -142,6 +236,61 @@ export const strategyCards = [
     body:
       "Identify where sent messages, self-copies, backups, and custodian mailboxes would have resided.",
   },
+];
+
+export const claimsGraph = [
+  {
+    source: "Email deletion practice",
+    target: "DR DOS recall gap",
+    weight: "0.82",
+    relation: "memory tension",
+  },
+  {
+    source: "Sent mail preservation",
+    target: "Custodian trail",
+    weight: "0.74",
+    relation: "record availability",
+  },
+  {
+    source: "Retention policy",
+    target: "Follow-up target",
+    weight: "0.91",
+    relation: "exam priority",
+  },
+];
+
+export const evidenceTrace: EvidenceTrace[] = [
+  {
+    id: "E-589-04",
+    source: "Gates Dep. 589:4-15",
+    signal: "incoming_mail_deleted",
+    excerpt:
+      "Witness describes ordinary practice of deleting most incoming email after reading.",
+    confidence: "96%",
+  },
+  {
+    id: "E-589-20",
+    source: "Gates Dep. 589:20-25",
+    signal: "specific_recall_gap",
+    excerpt:
+      "Witness cannot recall specific DR DOS messages deleted or caused to be deleted.",
+    confidence: "91%",
+  },
+  {
+    id: "E-590-11",
+    source: "Gates Dep. 590:11-22",
+    signal: "sent_mail_not_preserved",
+    excerpt:
+      "Witness states sent emails generally were not preserved unless copied to self.",
+    confidence: "95%",
+  },
+];
+
+export const reportArtifacts = [
+  "claims.md",
+  "contradiction_review.md",
+  "witness_profile.md",
+  "cross_exam_plan.md",
 ];
 
 export const witnessProfile = {
