@@ -62,16 +62,28 @@
 
   .hero-mesh {
     background:
-      linear-gradient(100deg, transparent 0%, rgba(34, 211, 238, 0.15) 42%, transparent 62%),
+      linear-gradient(100deg, transparent 0%, rgba(34, 211, 238, 0.08) 42%, transparent 62%),
       repeating-linear-gradient(
         100deg,
         transparent 0 28px,
-        rgba(34, 211, 238, 0.14) 29px,
+        rgba(34, 211, 238, 0.08) 29px,
         transparent 30px
       );
     filter: blur(10px);
     transform: skewY(-8deg);
     animation: mesh-drift 14s ease-in-out infinite alternate;
+  }
+
+  .deposition-record-layer {
+    background-image:
+      linear-gradient(115deg, transparent 0 18%, rgba(34, 211, 238, 0.08) 18.2%, transparent 18.8% 100%),
+      repeating-linear-gradient(
+        0deg,
+        transparent 0 34px,
+        rgba(148, 163, 184, 0.08) 35px,
+        transparent 36px
+      );
+    animation: record-drift 24s ease-in-out infinite alternate;
   }
 
   .marquee-track {
@@ -84,6 +96,15 @@
     }
     to {
       transform: translateX(4%) skewY(-8deg);
+    }
+  }
+
+  @keyframes record-drift {
+    from {
+      transform: translate3d(-1.5%, -1%, 0);
+    }
+    to {
+      transform: translate3d(1.5%, 1%, 0);
     }
   }
 

@@ -4,20 +4,20 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "bg-sky-400 text-slate-950 shadow-[0_0_40px_rgba(56,189,248,0.28)] hover:bg-sky-300",
+          "border-cyan-300/35 bg-cyan-300 text-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_0_28px_rgba(34,211,238,0.18)] hover:border-cyan-100 hover:bg-cyan-200 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_0_36px_rgba(34,211,238,0.24)]",
         secondary:
-          "border border-white/10 bg-white/5 text-slate-100 hover:bg-white/10",
-        ghost: "text-slate-300 hover:bg-white/5 hover:text-white",
+          "border-white/12 bg-white/[0.035] text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:border-cyan-300/35 hover:bg-cyan-300/[0.06] hover:text-white",
+        ghost: "border-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white",
       },
       size: {
-        default: "h-11 px-5",
-        sm: "h-9 px-3",
-        lg: "h-12 px-6 text-base",
+        default: "h-10 px-4",
+        sm: "h-8 px-3 text-xs",
+        lg: "h-11 px-5 text-sm",
       },
     },
     defaultVariants: {
