@@ -214,14 +214,25 @@ class ClaimExtractor:
         ]
         if any(marker in lowered for marker in negative_markers):
             return "negative"
-        if "i do not remember" in lowered or "i don't remember" in lowered:
+        if (
+            "i do not remember" in lowered
+            or "i don't remember" in lowered
+            or "i do not recall" in lowered
+            or "i don't recall" in lowered
+        ):
             return "uncertain"
         return "positive"
 
     def _infer_certainty(self, text: str) -> str:
         """Classify answer certainty from common deposition phrasing."""
         lowered = text.lower()
-        if "do not remember" in lowered or "don't remember" in lowered or "not sure" in lowered:
+        if (
+            "do not remember" in lowered
+            or "don't remember" in lowered
+            or "do not recall" in lowered
+            or "don't recall" in lowered
+            or "not sure" in lowered
+        ):
             return "low"
         if "believe" in lowered or "probably" in lowered or "as far as i know" in lowered:
             return "medium"

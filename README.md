@@ -21,6 +21,9 @@ cross-examination planning, and report generation.
 - Verify contradiction candidates using source-supported claims and shared context.
 - Generate cross-examination questions tied to verified issues.
 - Summarize witness, key themes, notable testimony, and follow-up areas.
+- Generate a dedicated Witness Profile with contradiction risk, strengths,
+  vulnerabilities, cross-examination targets, suggested follow-up questions, and
+  supporting citations.
 - Display clean Streamlit tabs, metrics, tables, expanders, and downloadable reports.
 - Produce a downloadable Markdown report.
 
@@ -83,7 +86,9 @@ DepositionIQ follows a pipeline architecture:
 
 8. **Streamlit UI (`app.py`)**
    Orchestrates the pipeline and presents results in five tabs:
-   Overview, Claims, Contradictions, Cross Examination, and Report.
+   Overview, Witness Profile, Claims, Contradictions, Cross Examination, and Report.
+   The Witness Profile tab includes an export button that adds the profile to the
+   downloadable final report.
 
 ## Working Vertical Slice
 

@@ -15,6 +15,8 @@ class ReportGenerator:
         contradictions: list[dict],
         questions: list[dict],
         case_summary: dict | None = None,
+        witness_profile: dict | None = None,
+        include_witness_profile: bool = False,
     ) -> str:
         """Build a Markdown report from pipeline outputs."""
         claim_lines = "\n".join(
@@ -39,6 +41,11 @@ class ReportGenerator:
         key_theme_lines = "\n".join(f"- {item}" for item in case_summary["key_themes"])
         notable_lines = "\n".join(f"- {item}" for item in case_summary["notable_testimony"])
         follow_up_lines = "\n".join(f"- {item}" for item in case_summary["follow_up_areas"])
+        witness_profile_section = (
+            self._witness_profile_section(witness_profile)
+            if include_witness_profile and witness_profile
+            else ""
+        )
 
         return f"""# DepositionIQ Report
 
@@ -65,6 +72,8 @@ class ReportGenerator:
 ### Potential Areas for Follow-Up
 {follow_up_lines or "- No follow-up areas identified."}
 
+{witness_profile_section}
+
 ## Claims
 {claim_lines or "- No claims extracted."}
 
@@ -79,3 +88,46 @@ This report is generated from placeholder logic. In a production system, each st
 would call validated legal-reasoning prompts, retrieval tools, citation checks, and
 human review workflows before use in legal strategy.
 """
+
+    def _witness_profile_section(self, witness_profile: dict) -> str:
+        """Render the witness profile as Markdown for report export."""
+        return f"""## Witness Profile
+
+### Name
+{witness_profile["name"]}
+
+### Overview
+{witness_profile["overview"]}
+
+### Key Topics
+{self._numberless_list(witness_profile["key_topics"])}
+
+### Important Claims
+{self._numberless_list(witness_profile["important_claims"])}
+
+### Potential Areas of Vulnerability
+{self._numberless_list(witness_profile["potential_vulnerabilities"])}
+
+### Potential Areas of Strength
+{self._numberless_list(witness_profile["potential_strengths"])}
+
+### Contradiction Risk
+{witness_profile["contradiction_risk"]}
+
+### Cross-Examination Targets
+{self._numbered_list(witness_profile["cross_examination_targets"])}
+
+### Suggested Follow-Up Questions
+{self._numbered_list(witness_profile["suggested_follow_up_questions"])}
+
+### Supporting Citations
+{self._numberless_list(witness_profile["supporting_citations"])}
+"""
+
+    def _numberless_list(self, items: list[str]) -> str:
+        """Render a Markdown bullet list."""
+        return "\n".join(f"- {item}" for item in items) or "- None identified."
+
+    def _numbered_list(self, items: list[str]) -> str:
+        """Render a Markdown numbered list."""
+        return "\n".join(f"{index}. {item}" for index, item in enumerate(items, start=1)) or "1. None identified."

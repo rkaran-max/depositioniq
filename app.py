@@ -15,6 +15,7 @@ from src.ingest import TranscriptIngestor
 from src.report_generator import ReportGenerator
 from src.segment import TranscriptSegmenter
 from src.verifier import EvidenceVerifier
+from src.witness_profile import WitnessProfileGenerator
 
 
 SAMPLE_TRANSCRIPT_PATH = Path("samples/sample_transcript.txt")
@@ -42,6 +43,7 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
     cross_exam_generator = CrossExamGenerator()
     report_generator = ReportGenerator()
     case_summary_generator = CaseSummaryGenerator()
+    witness_profile_generator = WitnessProfileGenerator()
 
     transcript = ingestor.ingest_text(transcript_text, metadata=metadata)
     segments = segmenter.segment(transcript)
@@ -53,8 +55,21 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
     )
     questions = cross_exam_generator.generate(verified_contradictions, verified_claims)
     case_summary = case_summary_generator.generate(transcript.source_text, verified_claims)
+    witness_profile = witness_profile_generator.generate(
+        case_summary,
+        verified_claims,
+        verified_contradictions,
+        questions,
+        segments,
+    )
     report = report_generator.generate(
-        transcript, verified_claims, verified_contradictions, questions, case_summary
+        transcript,
+        verified_claims,
+        verified_contradictions,
+        questions,
+        case_summary,
+        witness_profile,
+        include_witness_profile=False,
     )
 
     return {
@@ -64,8 +79,22 @@ def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
         "contradictions": verified_contradictions,
         "questions": questions,
         "case_summary": case_summary,
+        "witness_profile": witness_profile,
         "report": report,
     }
+
+
+def build_report(results: dict, include_witness_profile: bool) -> str:
+    """Build the current downloadable report."""
+    return ReportGenerator().generate(
+        results["transcript"],
+        results["claims"],
+        results["contradictions"],
+        results["questions"],
+        results["case_summary"],
+        results["witness_profile"],
+        include_witness_profile=include_witness_profile,
+    )
 
 
 def render_metric_row(results: dict) -> None:
@@ -133,6 +162,72 @@ def render_case_summary(case_summary: dict) -> None:
         st.markdown("**Potential Areas for Follow-Up**")
         for item in case_summary["follow_up_areas"]:
             st.write(f"- {item}")
+
+
+def risk_indicator(risk: str) -> tuple[str, str]:
+    """Return color and label for contradiction risk."""
+    palette = {
+        "Low": ("#16a34a", "Low"),
+        "Medium": ("#d97706", "Medium"),
+        "High": ("#dc2626", "High"),
+    }
+    return palette.get(risk, ("#64748b", risk))
+
+
+def render_witness_profile(witness_profile: dict) -> None:
+    """Render a polished litigation-focused witness profile."""
+    color, label = risk_indicator(witness_profile["contradiction_risk"])
+    st.subheader("Witness Profile")
+
+    top_cols = st.columns([1.1, 2.2, 1])
+    top_cols[0].metric("Name", witness_profile["name"])
+    with top_cols[1]:
+        st.markdown("**Overview**")
+        st.write(witness_profile["overview"])
+    with top_cols[2]:
+        st.markdown("**Contradiction Risk**")
+        st.markdown(
+            f"""
+            <div style="border:1px solid {color};border-radius:8px;padding:0.75rem;background:{color}18;">
+              <div style="font-size:0.8rem;color:#475569;">Risk Level</div>
+              <div style="font-size:1.5rem;font-weight:700;color:{color};">{label}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    left, middle, right = st.columns(3)
+    with left:
+        with st.expander("Key Topics", expanded=True):
+            for topic in witness_profile["key_topics"]:
+                st.write(f"- {topic}")
+        with st.expander("Important Claims", expanded=True):
+            for claim in witness_profile["important_claims"]:
+                st.write(f"- {claim}")
+
+    with middle:
+        with st.expander("Potential Areas of Vulnerability", expanded=True):
+            for item in witness_profile["potential_vulnerabilities"]:
+                st.write(f"- {item}")
+        with st.expander("Potential Areas of Strength", expanded=True):
+            for item in witness_profile["potential_strengths"]:
+                st.write(f"- {item}")
+
+    with right:
+        with st.expander("Cross-Examination Targets", expanded=True):
+            for index, target in enumerate(witness_profile["cross_examination_targets"], start=1):
+                st.write(f"{index}. {target}")
+        with st.expander("Suggested Follow-Up Questions", expanded=True):
+            for index, question in enumerate(witness_profile["suggested_follow_up_questions"], start=1):
+                st.write(f"{index}. {question}")
+
+    with st.expander("Supporting Citations", expanded=True):
+        for citation in witness_profile["supporting_citations"]:
+            st.write(f"- {citation}")
+
+    with st.expander("Transcript Excerpts"):
+        for excerpt in witness_profile["transcript_excerpts"]:
+            st.code(excerpt, language="text")
 
 
 def render_contradictions(contradictions: list[dict]) -> None:
@@ -233,6 +328,10 @@ def main() -> None:
 
     st.title("DepositionIQ")
     st.caption("Deterministic legal reasoning vertical slice for deposition analysis.")
+    if "analysis_results" not in st.session_state:
+        st.session_state.analysis_results = None
+    if "include_witness_profile_report" not in st.session_state:
+        st.session_state.include_witness_profile_report = False
 
     with st.sidebar:
         st.header("Analysis Setup")
@@ -300,22 +399,25 @@ def main() -> None:
             st.info("Upload one or more deposition PDFs to begin. Scanned PDFs will use OCR when available.")
 
     analyze = st.button("Analyze Deposition", type="primary", use_container_width=True)
-    if not analyze:
+    if not analyze and st.session_state.analysis_results is None:
         st.info("Provide raw transcript text or upload PDFs, then click Analyze Deposition.")
         return
 
-    try:
-        results = run_pipeline(transcript_text, metadata=metadata)
-    except ValueError as exc:
-        st.error(str(exc))
-        return
-    except Exception as exc:
-        st.error("DepositionIQ could not complete the analysis.")
-        st.exception(exc)
-        return
+    if analyze:
+        try:
+            st.session_state.analysis_results = run_pipeline(transcript_text, metadata=metadata)
+            st.session_state.include_witness_profile_report = False
+        except ValueError as exc:
+            st.error(str(exc))
+            return
+        except Exception as exc:
+            st.error("DepositionIQ could not complete the analysis.")
+            st.exception(exc)
+            return
 
-    overview_tab, claims_tab, contradictions_tab, cross_exam_tab, report_tab = st.tabs(
-        ["Overview", "Claims", "Contradictions", "Cross Examination", "Report"]
+    results = st.session_state.analysis_results
+    overview_tab, profile_tab, claims_tab, contradictions_tab, cross_exam_tab, report_tab = st.tabs(
+        ["Overview", "Witness Profile", "Claims", "Contradictions", "Cross Examination", "Report"]
     )
 
     with overview_tab:
@@ -340,6 +442,12 @@ def main() -> None:
         st.header("Extracted Claims")
         render_claims(results["claims"])
 
+    with profile_tab:
+        render_witness_profile(results["witness_profile"])
+        if st.button("Export Witness Profile Into Final Report", type="primary"):
+            st.session_state.include_witness_profile_report = True
+            st.success("Witness Profile will be included in the downloadable final report.")
+
     with contradictions_tab:
         st.header("Potential Contradictions")
         render_contradictions(results["contradictions"])
@@ -350,10 +458,18 @@ def main() -> None:
 
     with report_tab:
         st.header("Generated Report")
-        st.markdown(results["report"])
+        report = build_report(
+            results,
+            include_witness_profile=st.session_state.include_witness_profile_report,
+        )
+        if st.session_state.include_witness_profile_report:
+            st.success("Witness Profile is included in this report export.")
+        else:
+            st.info("Use the Witness Profile tab to export the profile into the final report.")
+        st.markdown(report)
         st.download_button(
             "Download Markdown Report",
-            data=results["report"],
+            data=report,
             file_name="depositioniq_report.md",
             mime="text/markdown",
         )
