@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  BookOpenText,
   Braces,
   FileSearch,
   Gavel,
@@ -16,7 +17,9 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Overview", icon: BarChart3, id: "overview" },
   { label: "Agent Pipeline", icon: Braces, id: "agent-pipeline" },
-  { label: "Claims Graph", icon: FileSearch, id: "claims-graph" },
+  { label: "Lawyer Workflow", icon: FileSearch, id: "lawyer-workflow" },
+  { label: "Claim Map", icon: FileSearch, id: "claims-graph" },
+  { label: "Evidence Viewer", icon: BookOpenText, id: "transcript-evidence-viewer" },
   { label: "Contradiction Review", icon: ShieldAlert, id: "contradiction-review" },
   { label: "Cross-Exam Strategy", icon: MessageSquareQuote, id: "cross-examination" },
   { label: "Witness Profile", icon: UserRound, id: "courtshadow" },

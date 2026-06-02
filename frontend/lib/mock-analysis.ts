@@ -15,6 +15,9 @@ export type Contradiction = {
   summary: string;
   citations: string[];
   verified: boolean;
+  whyItMatters: string;
+  linkedEvidence: string[];
+  objective: string;
 };
 
 export type PipelineStage = {
@@ -38,6 +41,48 @@ export type EvidenceTrace = {
   signal: string;
   excerpt: string;
   confidence: string;
+};
+
+export type ClaimRelationshipNode = {
+  id: string;
+  topic: string;
+  claimCount: number;
+  risk: "Low" | "Medium" | "High";
+  linkedContradictions: number;
+  attorneyUse: string;
+};
+
+export type ClaimRelationshipEdge = {
+  from: string;
+  to: string;
+  relationship: "supports" | "creates tension with" | "requires follow-up" | "linked by citation";
+  citations: string[];
+};
+
+export type TranscriptEvidence = {
+  id: string;
+  citation: string;
+  text: string;
+  highlights: string[];
+  extractedClaim: string;
+  relatedContradiction?: string;
+  crossExamRelevance: "Low" | "Medium" | "High";
+};
+
+export type CrossExamCard = {
+  objective: string;
+  primaryQuestion: string;
+  followUpQuestion: string;
+  citation: string;
+  attorneyNote: string;
+  risk: "Low" | "Medium" | "High";
+};
+
+export type LawyerWorkflowStep = {
+  step: string;
+  title: string;
+  description: string;
+  output: string;
 };
 
 export const sampleTranscript =
@@ -201,6 +246,11 @@ export const contradictions: Contradiction[] = [
       "The witness describes broad email deletion behavior while disclaiming recall of specific DR DOS messages. The tension is factual and should be tested against retention policy and message logs.",
     citations: ["589:4-15", "589:20-25", "590:8-14"],
     verified: true,
+    whyItMatters:
+      "The witness's inability to recall a specific DR DOS email does not resolve whether relevant email existed and was deleted under the stated practice.",
+    linkedEvidence: ["E-589-04", "E-589-20"],
+    objective:
+      "Separate ordinary deletion practice from the narrower claim that no specific DR DOS message is remembered.",
   },
   {
     severity: "Low",
@@ -209,6 +259,11 @@ export const contradictions: Contradiction[] = [
       "The witness indicates sent messages were generally not preserved, with rare exceptions for self-copying. Follow-up should clarify whether that practice applied during the relevant DR DOS period.",
     citations: ["590:11-22"],
     verified: false,
+    whyItMatters:
+      "Sent mail could be an independent source of DR DOS communications, but the testimony leaves the preservation exception undefined.",
+    linkedEvidence: ["E-590-11"],
+    objective:
+      "Identify whether any self-copied sent mail, backups, or custodian mailboxes preserved relevant communications.",
   },
   {
     severity: "Medium",
@@ -217,45 +272,120 @@ export const contradictions: Contradiction[] = [
       "The testimony leaves open whether deleted incoming mail, rare self-copied sent mail, backups, or custodian mailboxes could preserve relevant DR DOS communications.",
     citations: ["590:11-22", "591:2-12"],
     verified: true,
+    whyItMatters:
+      "The preservation path matters because the witness's personal practice may not describe every location where responsive messages could exist.",
+    linkedEvidence: ["E-590-11", "E-591-02"],
+    objective:
+      "Force a record-source inventory before moving from lack of recollection to absence of evidence.",
   },
 ];
 
-export const strategyCards = [
+export const strategyCards: CrossExamCard[] = [
   {
-    title: "Pin down retention policy",
-    body:
-      "Ask whether Microsoft had a written email retention policy and whether the witness understood it during the DR DOS period.",
+    objective:
+      "Separate general email deletion practice from specific memory denial.",
+    primaryQuestion:
+      "You testified that you delete most incoming emails after reading them, correct?",
+    followUpQuestion:
+      "So your inability to recall a specific DR DOS email does not mean such an email never existed, correct?",
+    citation: "Gates Dep. 589:4-15, 589:20-25",
+    attorneyNote:
+      "Use this sequence to prevent the witness from converting lack of memory into absence of records.",
+    risk: "High",
   },
   {
-    title: "Separate practice from recollection",
-    body:
-      "Distinguish general deletion habits from specific recollection of DR DOS-related communications.",
+    objective:
+      "Establish whether preservation duties or policies constrained deletion practices.",
+    primaryQuestion:
+      "During the relevant DR DOS period, were you aware of any obligation to preserve business communications?",
+    followUpQuestion:
+      "What policy or instruction told you which emails could be deleted and which had to be retained?",
+    citation: "Gates Dep. 590:8-14, 591:2-12",
+    attorneyNote:
+      "Do not ask for a legal conclusion; ask for facts about instructions, policy, and practice.",
+    risk: "Medium",
   },
   {
-    title: "Establish custodian trail",
-    body:
-      "Identify where sent messages, self-copies, backups, and custodian mailboxes would have resided.",
+    objective:
+      "Map the record locations where sent or deleted messages might still exist.",
+    primaryQuestion:
+      "You said you generally did not preserve messages you sent unless you copied yourself, correct?",
+    followUpQuestion:
+      "Where would self-copied messages, server backups, or custodian mailbox records have been stored?",
+    citation: "Gates Dep. 590:11-22, 591:2-12",
+    attorneyNote:
+      "This supports a document-source inventory without accusing the witness of spoliation.",
+    risk: "Medium",
   },
 ];
 
-export const claimsGraph = [
+export const claimRelationshipNodes: ClaimRelationshipNode[] = [
   {
-    source: "Email deletion practice",
-    target: "DR DOS recall gap",
-    weight: "0.82",
-    relation: "memory tension",
+    id: "email-retention",
+    topic: "Email Retention",
+    claimCount: 6,
+    risk: "High",
+    linkedContradictions: 2,
+    attorneyUse: "Anchor deletion practice before testing memory testimony.",
   },
   {
-    source: "Sent mail preservation",
-    target: "Custodian trail",
-    weight: "0.74",
-    relation: "record availability",
+    id: "drdos-communications",
+    topic: "DR DOS Communications",
+    claimCount: 4,
+    risk: "Medium",
+    linkedContradictions: 1,
+    attorneyUse: "Tie recall gaps to specific communication categories.",
   },
   {
-    source: "Retention policy",
-    target: "Follow-up target",
-    weight: "0.91",
-    relation: "exam priority",
+    id: "document-preservation",
+    topic: "Document Preservation",
+    claimCount: 5,
+    risk: "High",
+    linkedContradictions: 2,
+    attorneyUse: "Identify policy and custodian-source follow-up.",
+  },
+  {
+    id: "memory-recall",
+    topic: "Memory / Recall Gaps",
+    claimCount: 3,
+    risk: "Medium",
+    linkedContradictions: 2,
+    attorneyUse: "Separate lack of recollection from nonexistence of records.",
+  },
+  {
+    id: "cross-exam-targets",
+    topic: "Cross-Examination Targets",
+    claimCount: 7,
+    risk: "High",
+    linkedContradictions: 3,
+    attorneyUse: "Convert verified tensions into attorney question sequences.",
+  },
+];
+
+export const claimRelationshipEdges: ClaimRelationshipEdge[] = [
+  {
+    from: "Email Retention",
+    to: "Memory / Recall Gaps",
+    relationship: "creates tension with",
+    citations: ["589:4-15", "589:20-25"],
+  },
+  {
+    from: "Document Preservation",
+    to: "Cross-Examination Targets",
+    relationship: "requires follow-up",
+    citations: ["590:11-22", "591:2-12"],
+  },
+  {
+    from: "DR DOS Communications",
+    to: "Memory / Recall Gaps",
+    relationship: "linked by citation",
+    citations: ["589:20-25"],
+  },
+  {
+    from: "Email Retention",
+    to: "Document Preservation",
+    relationship: "supports",
+    citations: ["589:4-15", "590:11-22"],
   },
 ];
 
@@ -283,6 +413,92 @@ export const evidenceTrace: EvidenceTrace[] = [
     excerpt:
       "Witness states sent emails generally were not preserved unless copied to self.",
     confidence: "95%",
+  },
+  {
+    id: "E-591-02",
+    source: "Gates Dep. 591:2-12",
+    signal: "custodian_source_unknown",
+    excerpt:
+      "Witness does not identify a specific custodian source for deleted DR DOS communications.",
+    confidence: "88%",
+  },
+];
+
+export const transcriptEvidence: TranscriptEvidence[] = [
+  {
+    id: "E-589-04",
+    citation: "Gates Dep. 589:4-15",
+    text:
+      "Q. What was your practice with incoming email? A. I delete most incoming e-mails after I read them. If I did not need the message for current work, I generally did not keep it.",
+    highlights: ["I delete most incoming e-mails"],
+    extractedClaim:
+      "The witness states that most incoming emails were deleted as part of ordinary practice.",
+    relatedContradiction: "Memory testimony versus deletion practice",
+    crossExamRelevance: "High",
+  },
+  {
+    id: "E-589-20",
+    citation: "Gates Dep. 589:20-25",
+    text:
+      "Q. Do you recall deleting any DR DOS-related email? A. I don't recall any specific message relating to DR DOS that I deleted or caused to be deleted.",
+    highlights: ["I don't recall any specific message"],
+    extractedClaim:
+      "The witness cannot recall any specific DR DOS message that he deleted or caused to be deleted.",
+    relatedContradiction: "Memory testimony versus deletion practice",
+    crossExamRelevance: "High",
+  },
+  {
+    id: "E-590-11",
+    citation: "Gates Dep. 590:11-22",
+    text:
+      "Q. Did you preserve messages that you sent? A. I don't preserve messages that I send unless I copy myself, and that was not my usual practice.",
+    highlights: ["I don't preserve messages that I send"],
+    extractedClaim:
+      "The witness says he does not preserve most sent emails, except rare self-copy instances.",
+    relatedContradiction: "Sent-email preservation scope",
+    crossExamRelevance: "Medium",
+  },
+  {
+    id: "E-591-02",
+    citation: "Gates Dep. 591:2-12",
+    text:
+      "Q. Where would a DR DOS communication be located if it was not in your mailbox? A. I don't know which backup, server, or custodian location would have retained it.",
+    highlights: ["I don't know which backup, server, or custodian location"],
+    extractedClaim:
+      "The witness does not identify a specific custodian source for deleted DR DOS communications.",
+    relatedContradiction: "Custodian trail uncertainty",
+    crossExamRelevance: "High",
+  },
+];
+
+export const lawyerWorkflow: LawyerWorkflowStep[] = [
+  {
+    step: "01",
+    title: "Review evidence",
+    description:
+      "Start with citation-linked excerpts and confirm each extracted claim against the transcript text.",
+    output: "Supported claim set",
+  },
+  {
+    step: "02",
+    title: "Test contradiction",
+    description:
+      "Compare memory disclaimers against deletion and preservation testimony before treating a gap as meaningful.",
+    output: "Verified issue list",
+  },
+  {
+    step: "03",
+    title: "Draft cross-exam",
+    description:
+      "Convert each verified issue into an objective, primary question, follow-up, and attorney note.",
+    output: "Question sequence",
+  },
+  {
+    step: "04",
+    title: "Export report",
+    description:
+      "Bundle claims, evidence spans, contradiction review, and cross-examination targets into attorney-ready Markdown.",
+    output: "DepositionIQ report",
   },
 ];
 
