@@ -114,12 +114,14 @@ DepositionIQ supports two transcript input modes:
 
 - **Raw text:** Paste transcript text directly into the app. This is the fastest path
   for demos and works best when transcript turns use `Q:` and `A:` prefixes.
-- **PDF upload:** Upload one or more deposition PDFs with selectable text. The app
-  extracts page text with `pypdf`, cleans line breaks, normalizes `Q:` / `A:` turns,
+- **PDF upload:** Upload one or more deposition PDFs. The app first extracts embedded
+  text with `pypdf`; when a PDF has no selectable text, it falls back to local macOS
+  Vision OCR if available. It then cleans line breaks, normalizes `Q:` / `A:` turns,
   and displays the extracted text for review before analysis.
 
-Scanned image-only PDFs are not OCR'd by this vertical slice. For scanned PDFs, run
-OCR first and upload either the OCR-enhanced PDF or the extracted text.
+OCR fallback currently targets macOS via the built-in Vision framework and Swift.
+On non-macOS systems, image-only PDFs should be OCR'd externally first, then uploaded
+as OCR-enhanced PDFs or pasted as extracted text.
 
 ## Data Structures
 
@@ -207,7 +209,8 @@ The app validates transcript input before analysis:
 
 - Empty input produces a user-facing error.
 - Input without witness answers marked by `A:` produces a user-facing error.
-- PDFs without selectable text produce a user-facing OCR guidance message.
+- PDFs without selectable text use macOS Vision OCR when available, otherwise they
+  produce a user-facing OCR guidance message.
 - Unexpected pipeline failures are displayed in Streamlit with exception details for
   debugging.
 

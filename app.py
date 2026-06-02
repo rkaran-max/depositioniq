@@ -242,7 +242,10 @@ def main() -> None:
             "Upload deposition transcript PDFs",
             type=["pdf"],
             accept_multiple_files=True,
-            help="Upload PDFs with selectable text. Scanned PDFs require OCR first.",
+            help=(
+                "Upload text-layer or scanned PDFs. Image-only PDFs use local "
+                "macOS Vision OCR when available."
+            ),
         )
         if uploaded_files:
             try:
@@ -271,7 +274,7 @@ def main() -> None:
                 "files": [item["filename"] for item in file_summaries],
             }
         else:
-            st.info("Upload one or more text-layer deposition PDFs to begin.")
+            st.info("Upload one or more deposition PDFs to begin. Scanned PDFs will use OCR when available.")
 
     analyze = st.button("Analyze Deposition", type="primary", use_container_width=True)
     if not analyze:
