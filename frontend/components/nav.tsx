@@ -1,6 +1,5 @@
 "use client";
 
-import { Gavel } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const links = [
@@ -15,9 +14,11 @@ export function Nav() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#070707]/75 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4">
         <a href="#" className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg border border-cyan-300/20 bg-cyan-300/10">
-            <Gavel className="size-4 text-cyan-200" />
-          </div>
+          <img
+            src="/brand/depositioniq-favicon.svg"
+            alt=""
+            className="size-8 rounded-lg"
+          />
           <span className="text-sm font-medium text-white">DepositionIQ</span>
         </a>
         <nav className="hidden items-center gap-7 md:flex">

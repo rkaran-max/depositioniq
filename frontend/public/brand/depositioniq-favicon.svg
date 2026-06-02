@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">DepositionIQ favicon</title>
+  <desc id="desc">A compact citation bracket and evidence node mark.</desc>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#070A0F"/>
+  <rect x="4.5" y="4.5" width="55" height="55" rx="13.5" stroke="#FFFFFF" stroke-opacity="0.14"/>
+  <g stroke="#E5E7EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 16H13V48H19"/>
+    <path d="M45 16H51V48H45"/>
+  </g>
+  <g stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M23 24H32L41 40"/>
+    <path d="M23 40H32L41 24"/>
+    <path d="M32 24V40"/>
+    <circle cx="23" cy="24" r="3"/>
+    <circle cx="23" cy="40" r="3"/>
+    <circle cx="41" cy="24" r="3"/>
+    <circle cx="41" cy="40" r="3"/>
+  </g>
+</svg>

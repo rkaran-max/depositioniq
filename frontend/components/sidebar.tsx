@@ -5,7 +5,6 @@ import {
   BookOpenText,
   Braces,
   FileSearch,
-  Gavel,
   MessageSquareQuote,
   Network,
   ScrollText,
@@ -31,9 +30,7 @@ export function Sidebar() {
   return (
     <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-72 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/90 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:block">
       <div className="mb-7 flex items-center gap-3 px-1">
-        <div className="flex size-9 items-center justify-center rounded-lg border border-sky-300/20 bg-sky-300/10">
-          <Gavel className="size-5 text-sky-200" />
-        </div>
+        <img src="/brand/depositioniq-favicon.svg" alt="" className="size-9 rounded-lg" />
         <div>
           <div className="text-sm font-medium text-white">DepositionIQ</div>
           <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
