@@ -9,6 +9,8 @@ cross-examination planning, and report generation.
 ## Features
 
 - Paste transcript text directly into the Streamlit interface.
+- Upload one or more text-layer PDF deposition transcripts.
+- Review and edit cleaned PDF-extracted text before running analysis.
 - Click **Analyze Deposition** to run the full pipeline.
 - Load the bundled sample transcript.
 - Segment transcript lines into speaker turns.
@@ -86,6 +88,7 @@ The app runs this flow:
 ```text
 Transcript text
   -> TranscriptIngestor
+  -> Optional PDF text extraction and cleanup
   -> TranscriptSegmenter
   -> ClaimExtractor
   -> EvidenceVerifier.verify
@@ -104,6 +107,19 @@ intentional inconsistencies:
   never emailed Dana.
 
 Expected sample output is summarized in `samples/sample_output.md`.
+
+## Input Options
+
+DepositionIQ supports two transcript input modes:
+
+- **Raw text:** Paste transcript text directly into the app. This is the fastest path
+  for demos and works best when transcript turns use `Q:` and `A:` prefixes.
+- **PDF upload:** Upload one or more deposition PDFs with selectable text. The app
+  extracts page text with `pypdf`, cleans line breaks, normalizes `Q:` / `A:` turns,
+  and displays the extracted text for review before analysis.
+
+Scanned image-only PDFs are not OCR'd by this vertical slice. For scanned PDFs, run
+OCR first and upload either the OCR-enhanced PDF or the extracted text.
 
 ## Data Structures
 
@@ -178,6 +194,9 @@ streamlit run app.py
 Click **Analyze Deposition** to run the sample transcript or paste your own
 deposition excerpt using `Q:` and `A:` line prefixes.
 
+To analyze PDFs, choose **PDF upload** in the sidebar, upload one or more text-layer
+PDFs, review the extracted text, and click **Analyze Deposition**.
+
 No API key is required for the demo. The backend uses deterministic fallback logic
 so the sample transcript produces stable claims, verified contradictions, generated
 cross-examination questions, and a downloadable Markdown report.
@@ -188,6 +207,7 @@ The app validates transcript input before analysis:
 
 - Empty input produces a user-facing error.
 - Input without witness answers marked by `A:` produces a user-facing error.
+- PDFs without selectable text produce a user-facing OCR guidance message.
 - Unexpected pipeline failures are displayed in Streamlit with exception details for
   debugging.
 

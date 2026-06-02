@@ -31,7 +31,7 @@ Q: Did you approve Helix Supply?
 A: No, I did not approve Helix Supply."""
 
 
-def run_pipeline(transcript_text: str) -> dict:
+def run_pipeline(transcript_text: str, metadata: dict | None = None) -> dict:
     """Run the DepositionIQ analysis pipeline."""
     ingestor = TranscriptIngestor()
     segmenter = TranscriptSegmenter()
@@ -41,7 +41,7 @@ def run_pipeline(transcript_text: str) -> dict:
     cross_exam_generator = CrossExamGenerator()
     report_generator = ReportGenerator()
 
-    transcript = ingestor.ingest_text(transcript_text)
+    transcript = ingestor.ingest_text(transcript_text, metadata=metadata)
     segments = segmenter.segment(transcript)
     claims = claim_extractor.extract(segments)
     verified_claims = verifier.verify(claims, transcript.source_text)
@@ -183,6 +183,26 @@ def render_styles() -> None:
     )
 
 
+def extract_text_from_uploaded_pdfs(uploaded_files: list) -> tuple[str, list[dict]]:
+    """Extract cleaned text and file metadata from uploaded PDFs."""
+    ingestor = TranscriptIngestor()
+    extracted_sections: list[str] = []
+    file_summaries: list[dict] = []
+
+    for uploaded_file in uploaded_files:
+        pdf_text = ingestor.extract_pdf_text(uploaded_file.getvalue(), uploaded_file.name)
+        extracted_sections.append(f"--- {uploaded_file.name} ---\n{pdf_text}")
+        file_summaries.append(
+            {
+                "filename": uploaded_file.name,
+                "bytes": uploaded_file.size,
+                "characters_extracted": len(pdf_text),
+            }
+        )
+
+    return "\n\n".join(extracted_sections), file_summaries
+
+
 def main() -> None:
     """Launch the DepositionIQ Streamlit interface."""
     st.set_page_config(page_title="DepositionIQ", page_icon="DIQ", layout="wide")
@@ -193,24 +213,73 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Analysis Setup")
-        use_sample = st.toggle("Use bundled sample transcript", value=True)
+        input_mode = st.radio(
+            "Input type",
+            ["Raw text", "PDF upload"],
+            help="Use pasted text for quick demos or upload text-layer PDFs.",
+        )
+        use_sample = st.toggle(
+            "Use bundled sample transcript",
+            value=True,
+            disabled=input_mode == "PDF upload",
+        )
         st.caption("Transcript lines should use `Q:` and `A:` prefixes.")
 
-    initial_text = load_sample_transcript() if use_sample else ""
-    transcript_text = st.text_area(
-        "Deposition transcript",
-        value=initial_text,
-        height=300,
-        help="Paste deposition Q/A text here, then run the deterministic fallback pipeline.",
-    )
+    metadata: dict | None = None
+    transcript_text = ""
+
+    if input_mode == "Raw text":
+        initial_text = load_sample_transcript() if use_sample else ""
+        transcript_text = st.text_area(
+            "Deposition transcript",
+            value=initial_text,
+            height=300,
+            help="Paste deposition Q/A text here, then run the deterministic fallback pipeline.",
+        )
+        metadata = {"source": "text_input", "format": "plain_text"}
+    else:
+        uploaded_files = st.file_uploader(
+            "Upload deposition transcript PDFs",
+            type=["pdf"],
+            accept_multiple_files=True,
+            help="Upload PDFs with selectable text. Scanned PDFs require OCR first.",
+        )
+        if uploaded_files:
+            try:
+                transcript_text, file_summaries = extract_text_from_uploaded_pdfs(
+                    uploaded_files
+                )
+            except (RuntimeError, ValueError) as exc:
+                st.error(str(exc))
+                return
+
+            st.success(f"Extracted text from {len(uploaded_files)} PDF file(s).")
+            st.dataframe(
+                pd.DataFrame(file_summaries),
+                use_container_width=True,
+                hide_index=True,
+            )
+            transcript_text = st.text_area(
+                "Extracted and cleaned transcript text",
+                value=transcript_text,
+                height=320,
+                help="Review or edit extracted PDF text before analysis.",
+            )
+            metadata = {
+                "source": "pdf_upload",
+                "format": "pdf",
+                "files": [item["filename"] for item in file_summaries],
+            }
+        else:
+            st.info("Upload one or more text-layer deposition PDFs to begin.")
 
     analyze = st.button("Analyze Deposition", type="primary", use_container_width=True)
     if not analyze:
-        st.info("Paste a transcript or use the bundled sample, then click Analyze Deposition.")
+        st.info("Provide raw transcript text or upload PDFs, then click Analyze Deposition.")
         return
 
     try:
-        results = run_pipeline(transcript_text)
+        results = run_pipeline(transcript_text, metadata=metadata)
     except ValueError as exc:
         st.error(str(exc))
         return
