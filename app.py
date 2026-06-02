@@ -97,17 +97,28 @@ def build_report(results: dict, include_witness_profile: bool) -> str:
     )
 
 
+def display_value(value: object) -> object:
+    """Return a display-safe value for dashboard cards."""
+    if value is None:
+        return "N/A"
+    if isinstance(value, str) and not value.strip():
+        return "N/A"
+    if isinstance(value, (list, tuple, set, dict)) and not value:
+        return "N/A"
+    return value
+
+
 def render_metric_row(results: dict) -> None:
     """Render top-level case metrics."""
     verified_count = sum(
-        1 for item in results["contradictions"] if item["status"] == "verified"
+        1 for item in results.get("contradictions", []) if item.get("status") == "verified"
     )
     cols = st.columns(5)
-    cols[0].metric("Segments", len(results["segments"]))
-    cols[1].metric("Claims", len(results["claims"]))
-    cols[2].metric("Potential Issues", len(results["contradictions"]))
-    cols[3].metric("Verified", verified_count)
-    cols[4].metric("Questions", len(results["questions"]))
+    cols[0].metric("Segments", display_value(len(results.get("segments", []))))
+    cols[1].metric("Claims", display_value(len(results.get("claims", []))))
+    cols[2].metric("Potential Issues", display_value(len(results.get("contradictions", []))))
+    cols[3].metric("Verified", display_value(verified_count))
+    cols[4].metric("Questions", display_value(len(results.get("questions", []))))
 
 
 def attorney_attention_level(risk: str, contradictions: list[dict], claims: list[dict]) -> str:
@@ -123,8 +134,8 @@ def attorney_attention_level(risk: str, contradictions: list[dict], claims: list
 
 def witness_credibility_risk(results: dict) -> str:
     """Summarize credibility risk without making legal conclusions."""
-    risk = results["witness_profile"]["contradiction_risk"]
-    low_certainty = any(claim.get("certainty") == "low" for claim in results["claims"])
+    risk = results.get("witness_profile", {}).get("contradiction_risk")
+    low_certainty = any(claim.get("certainty") == "low" for claim in results.get("claims", []))
     if risk == "High":
         return "Elevated"
     if risk == "Medium" or low_certainty:
@@ -134,36 +145,37 @@ def witness_credibility_risk(results: dict) -> str:
 
 def render_intelligence_summary(results: dict) -> None:
     """Render a concise attorney-facing executive summary card."""
-    profile = results["witness_profile"]
-    contradictions = results["contradictions"]
-    claims = results["claims"]
-    risk = profile["contradiction_risk"]
+    profile = results.get("witness_profile", {})
+    contradictions = results.get("contradictions", [])
+    claims = results.get("claims", [])
+    risk = display_value(profile.get("contradiction_risk"))
     attention = attorney_attention_level(risk, contradictions, claims)
     credibility = witness_credibility_risk(results)
-    dominant_topics = ", ".join(profile["key_topics"][:3]) or "No dominant topic identified"
+    dominant_topics = display_value(", ".join(profile.get("key_topics", [])[:3]))
     verified_count = sum(1 for item in contradictions if item.get("status") == "verified")
+    witness_name = display_value(profile.get("name"))
 
     st.subheader("Deposition Intelligence Summary")
     st.markdown(
         """
-        <div style="border:1px solid #cbd5e1;border-radius:8px;padding:1rem;background:#f8fafc;margin-bottom:1rem;">
-        <div style="font-size:0.9rem;color:#475569;margin-bottom:0.5rem;">Executive readout for attorney review</div>
+        <div class="diq-card">
+        <div class="diq-muted">Executive readout for attorney review</div>
         """,
         unsafe_allow_html=True,
     )
     cols = st.columns(3)
-    cols[0].metric("Claims Extracted", len(claims))
-    cols[1].metric("Contradictions Found", len(contradictions))
-    cols[2].metric("Contradiction Risk", risk)
+    cols[0].metric("Claims Extracted", display_value(len(claims)))
+    cols[1].metric("Contradictions Found", display_value(len(contradictions)))
+    cols[2].metric("Contradiction Risk", display_value(risk))
 
     cols = st.columns(3)
-    cols[0].metric("Witness Credibility Risk", credibility)
-    cols[1].metric("Attorney Attention", attention)
-    cols[2].metric("Verified Issues", verified_count)
+    cols[0].metric("Witness Credibility Risk", display_value(credibility))
+    cols[1].metric("Attorney Attention", display_value(attention))
+    cols[2].metric("Verified Issues", display_value(verified_count))
 
     st.markdown(f"**Dominant Topics:** {dominant_topics}")
-    st.write(
-        f"{profile['name']} generated {len(claims)} extracted claims across "
+    st.markdown(
+        f"{witness_name} generated {display_value(len(claims))} extracted claims across "
         f"{dominant_topics}. The current record shows {len(contradictions)} "
         f"contradiction candidate(s), with {verified_count} verified by transcript support. "
         f"Recommended attorney attention level: **{attention}**."
@@ -208,20 +220,20 @@ def render_claims(claims: list[dict]) -> None:
 def render_case_summary(case_summary: dict) -> None:
     """Render the attorney-facing deposition summary."""
     st.subheader("Deposition Review Summary")
-    st.metric("Witness", case_summary["witness"])
+    st.metric("Witness", display_value(case_summary.get("witness")))
 
     cols = st.columns(3)
     with cols[0]:
         st.markdown("**Key Themes**")
-        for item in case_summary["key_themes"]:
+        for item in case_summary.get("key_themes") or ["N/A"]:
             st.write(f"- {item}")
     with cols[1]:
         st.markdown("**Notable Testimony**")
-        for item in case_summary["notable_testimony"]:
+        for item in case_summary.get("notable_testimony") or ["N/A"]:
             st.write(f"- {item}")
     with cols[2]:
         st.markdown("**Potential Areas for Follow-Up**")
-        for item in case_summary["follow_up_areas"]:
+        for item in case_summary.get("follow_up_areas") or ["N/A"]:
             st.write(f"- {item}")
 
 
@@ -249,8 +261,8 @@ def render_witness_profile(witness_profile: dict) -> None:
         st.markdown("**Contradiction Risk**")
         st.markdown(
             f"""
-            <div style="border:1px solid {color};border-radius:8px;padding:0.75rem;background:{color}18;">
-              <div style="font-size:0.8rem;color:#475569;">Risk Level</div>
+            <div class="diq-risk-card" style="border-color:{color};box-shadow:0 0 0 1px {color}33;">
+              <div class="diq-muted">Risk Level</div>
               <div style="font-size:1.5rem;font-weight:700;color:{color};">{label}</div>
             </div>
             """,
@@ -348,14 +360,105 @@ def render_styles() -> None:
     st.markdown(
         """
         <style>
+        :root {
+            --diq-bg: #0f172a;
+            --diq-card: #111827;
+            --diq-card-2: #1e293b;
+            --diq-border: #334155;
+            --diq-text: #f8fafc;
+            --diq-muted: #cbd5e1;
+            --diq-muted-2: #94a3b8;
+            --diq-shadow: rgba(0, 0, 0, 0.32);
+        }
         .block-container { padding-top: 2rem; max-width: 1180px; }
         div[data-testid="stMetric"] {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: linear-gradient(180deg, var(--diq-card-2), var(--diq-card));
+            border: 1px solid var(--diq-border);
             padding: 0.75rem;
             border-radius: 8px;
+            box-shadow: 0 8px 24px var(--diq-shadow);
+        }
+        div[data-testid="stMetric"] [data-testid="stMetricLabel"],
+        div[data-testid="stMetric"] [data-testid="stMetricLabel"] p {
+            color: var(--diq-muted) !important;
+            font-weight: 600;
+        }
+        div[data-testid="stMetric"] [data-testid="stMetricValue"],
+        div[data-testid="stMetric"] [data-testid="stMetricValue"] span,
+        div[data-testid="stMetric"] [data-testid="stMetricValue"] div {
+            color: var(--diq-text) !important;
+        }
+        div[data-testid="stExpander"] {
+            background: var(--diq-card);
+            border: 1px solid var(--diq-border);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px var(--diq-shadow);
+        }
+        div[data-testid="stExpander"] summary,
+        div[data-testid="stExpander"] p,
+        div[data-testid="stExpander"] li {
+            color: var(--diq-text);
+        }
+        div[data-testid="stExpander"] small,
+        div[data-testid="stCaptionContainer"],
+        div[data-testid="stCaptionContainer"] p {
+            color: var(--diq-muted-2) !important;
         }
         .stTabs [data-baseweb="tab-list"] { gap: 0.5rem; }
+        .diq-card {
+            border: 1px solid var(--diq-border);
+            border-radius: 8px;
+            padding: 1rem;
+            background: linear-gradient(180deg, var(--diq-card-2), var(--diq-card));
+            margin-bottom: 1rem;
+            color: var(--diq-text);
+            box-shadow: 0 10px 28px var(--diq-shadow);
+        }
+        .diq-card p,
+        .diq-card strong,
+        .diq-card li {
+            color: var(--diq-text) !important;
+        }
+        .diq-muted {
+            font-size: 0.9rem;
+            color: var(--diq-muted-2);
+            margin-bottom: 0.5rem;
+        }
+        .diq-risk-card {
+            border: 1px solid var(--diq-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            background: var(--diq-card);
+            box-shadow: 0 8px 24px var(--diq-shadow);
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            background: var(--diq-card);
+            border-color: var(--diq-border) !important;
+            box-shadow: 0 8px 24px var(--diq-shadow);
+        }
+        div[data-testid="stAlert"] {
+            background: #172033;
+            border: 1px solid var(--diq-border);
+            color: var(--diq-text);
+        }
+        div[data-testid="stAlert"] p {
+            color: var(--diq-text);
+        }
+        pre, code {
+            background: #020617 !important;
+            color: var(--diq-text) !important;
+            border-color: var(--diq-border) !important;
+        }
+        div[data-testid="stMarkdownContainer"] p,
+        div[data-testid="stMarkdownContainer"] li {
+            color: var(--diq-text);
+        }
+        div[data-testid="stMarkdownContainer"] h1,
+        div[data-testid="stMarkdownContainer"] h2,
+        div[data-testid="stMarkdownContainer"] h3,
+        div[data-testid="stMarkdownContainer"] strong {
+            color: var(--diq-text);
+        }
         </style>
         """,
         unsafe_allow_html=True,
