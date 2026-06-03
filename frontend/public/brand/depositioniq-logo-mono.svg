@@ -1,18 +1,19 @@
 <svg width="220" height="48" viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">DepositionIQ monochrome logo</title>
-  <desc id="desc">A monochrome evidence traceability mark with citation brackets and connected evidence nodes.</desc>
+  <desc id="desc">A monochrome magnifying glass examining a deposition page with citation brackets and linked evidence marks.</desc>
   <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M18 10H10V38H18"/>
-    <path d="M50 10H58V38H50"/>
-    <path d="M23 17H35L45 31"/>
-    <path d="M23 31H35L45 17"/>
-    <path d="M35 17V31"/>
-    <circle cx="23" cy="17" r="3"/>
-    <circle cx="23" cy="31" r="3"/>
-    <circle cx="45" cy="17" r="3"/>
-    <circle cx="45" cy="31" r="3"/>
-    <path d="M31 12H40L46 18"/>
-    <path d="M40 12V18H46"/>
+    <path d="M15 9H35L43 17V35H15V9Z"/>
+    <path d="M35 9V17H43"/>
+    <path d="M20 18H31"/>
+    <path d="M20 24H36"/>
+    <path d="M20 30H29"/>
+    <circle cx="35" cy="28" r="10"/>
+    <path d="M42.5 35.5L51 44"/>
+    <path d="M11 16H8V38H12"/>
+    <path d="M55 16H58V38H54"/>
+    <path d="M30 27H35L40 31"/>
+    <circle cx="30" cy="27" r="1.8"/>
+    <circle cx="40" cy="31" r="1.8"/>
   </g>
   <text x="76" y="31" fill="currentColor" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="500" letter-spacing="-0.02em">DepositionIQ</text>
 </svg>
