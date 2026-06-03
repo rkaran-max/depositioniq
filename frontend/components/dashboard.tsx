@@ -94,6 +94,61 @@ function ConsolePanel({
   );
 }
 
+function BackendStatusBanner({
+  sourceMode,
+  transcriptId,
+}: {
+  sourceMode: "mock" | "api";
+  transcriptId?: string;
+}) {
+  const isLive = sourceMode === "api";
+
+  return (
+    <motion.div
+      {...panelMotion}
+      className={cn(
+        "mb-4 grid gap-3 rounded-xl border bg-[#070A0F]/90 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.38)] backdrop-blur-xl md:grid-cols-[1fr_auto_auto]",
+        isLive ? "border-emerald-300/25" : "border-amber-300/20",
+      )}
+    >
+      <div className="flex items-center gap-3">
+        <span
+          className={cn(
+            "size-2 rounded-full shadow-[0_0_18px_currentColor]",
+            isLive ? "bg-emerald-300 text-emerald-300" : "bg-amber-300 text-amber-300",
+          )}
+        />
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-600">
+            analysis.source
+          </div>
+          <div className="mt-1 text-sm font-medium text-white">
+            {isLive ? "Live Backend: Connected" : "Demo Mode: Mock Analysis"}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
+          source
+        </div>
+        <div className="mt-1 font-mono text-xs text-slate-300">
+          {isLive ? "FastAPI /analyze" : "frontend/lib/mock-analysis.ts"}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
+        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
+          transcript id
+        </div>
+        <div className="mt-1 font-mono text-xs text-sky-300">
+          {isLive ? transcriptId ?? "pending" : "N/A"}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function Dashboard() {
   const [analysis, setAnalysis] = useState(createMockAnalysisState);
   const [transcriptText, setTranscriptText] = useState(analysis.sampleTranscript);
@@ -167,6 +222,8 @@ export function Dashboard() {
               trace
             </Button>
           </header>
+
+          <BackendStatusBanner sourceMode={sourceMode} transcriptId={transcriptId} />
 
           <section className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_430px]">
             <motion.div
