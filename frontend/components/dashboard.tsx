@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -25,20 +25,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  agentTrace,
-  claimRelationshipEdges,
-  claimRelationshipNodes,
-  contradictions,
-  depositionMetrics,
-  evidenceTrace,
-  lawyerWorkflow,
-  pipelineStages,
-  reportArtifacts,
-  sampleTranscript,
-  strategyCards,
-  transcriptEvidence,
-  witnessProfile,
-} from "@/lib/mock-analysis";
+  analyzeTranscript,
+  createMockAnalysisState,
+} from "@/lib/analysis-api";
 import { cn } from "@/lib/utils";
 
 const statusTone = {
@@ -106,6 +95,52 @@ function ConsolePanel({
 }
 
 export function Dashboard() {
+  const [analysis, setAnalysis] = useState(createMockAnalysisState);
+  const [transcriptText, setTranscriptText] = useState(analysis.sampleTranscript);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisNotice, setAnalysisNotice] = useState(
+    "Demo mode uses mock data until the FastAPI backend is running.",
+  );
+
+  const {
+    agentTrace,
+    claimRelationshipEdges,
+    claimRelationshipNodes,
+    claims,
+    contradictions,
+    depositionMetrics,
+    evidenceTrace,
+    lawyerWorkflow,
+    pipelineStages,
+    reportArtifacts,
+    strategyCards,
+    transcriptEvidence,
+    witnessProfile,
+    reportMarkdown,
+    sourceMode,
+    statusLabel,
+    transcriptId,
+  } = analysis;
+
+  async function handleAnalyze() {
+    setIsAnalyzing(true);
+    setAnalysisNotice("Sending transcript to DepositionIQ FastAPI backend...");
+    try {
+      const nextAnalysis = await analyzeTranscript(transcriptText);
+      setAnalysis(nextAnalysis);
+      setAnalysisNotice(`Live backend analysis complete: ${nextAnalysis.transcriptId}`);
+    } catch (error) {
+      setAnalysis(createMockAnalysisState());
+      setAnalysisNotice(
+        `Backend unavailable; showing demo fallback. ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#070A0F] text-slate-100">
       <div className="pointer-events-none absolute inset-0 noise-overlay opacity-70" />
@@ -125,7 +160,7 @@ export function Dashboard() {
               />
             </div>
             <Badge variant="slate" className="hidden font-mono uppercase tracking-[0.16em] md:inline-flex">
-              build 0.4.2
+              {statusLabel}
             </Badge>
             <Button variant="secondary" size="sm" className="font-mono text-xs">
               <Terminal className="size-3.5" />
@@ -179,8 +214,13 @@ export function Dashboard() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button size="lg" className="font-mono text-xs uppercase tracking-[0.12em]">
-                  Analyze Transcript
+                <Button
+                  size="lg"
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !transcriptText.trim()}
+                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Analyze Transcript"}
                   <ArrowRight className="size-4" />
                 </Button>
                 <Button variant="secondary" size="lg" className="font-mono text-xs uppercase tracking-[0.12em]">
@@ -190,11 +230,7 @@ export function Dashboard() {
             </motion.div>
 
             <ConsolePanel className="p-4">
-              <SectionLabel
-                eyebrow="agent trace"
-                title="Reasoning event stream"
-                action="live / deterministic fallback"
-              />
+              <SectionLabel eyebrow="agent trace" title="Reasoning event stream" action={sourceMode === "api" ? "live / backend" : "demo / fallback"} />
               <AgentTrace events={agentTrace} />
             </ConsolePanel>
           </section>
@@ -255,7 +291,7 @@ export function Dashboard() {
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
             <ConsolePanel id="live-analysis-console" className="p-4">
-              <SectionLabel eyebrow="live analysis console" title="Transcript input / PDF ingestion" action="source.mode demo" />
+              <SectionLabel eyebrow="live analysis console" title="Transcript input / PDF ingestion" action={`source.mode ${sourceMode}`} />
               <div className="grid gap-3 md:grid-cols-[0.42fr_0.58fr]">
                 <div className="rounded-lg border border-dashed border-sky-300/20 bg-[#070A0F] p-4">
                   <UploadCloud className="size-5 text-sky-300" />
@@ -270,8 +306,22 @@ export function Dashboard() {
                 </div>
                 <Textarea
                   className="min-h-52 resize-none border-white/10 bg-[#070A0F] font-mono text-xs leading-6 text-slate-300 placeholder:text-slate-700"
-                  defaultValue={sampleTranscript}
+                  value={transcriptText}
+                  onChange={(event) => setTranscriptText(event.target.value)}
                 />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !transcriptText.trim()}
+                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                >
+                  {isAnalyzing ? "Analyzing..." : "Analyze Deposition"}
+                  <ArrowRight className="size-4" />
+                </Button>
+                <div className="font-mono text-[10px] text-slate-500">
+                  {transcriptId ? `transcript_id: ${transcriptId}` : analysisNotice}
+                </div>
               </div>
             </ConsolePanel>
 
@@ -343,6 +393,36 @@ export function Dashboard() {
               action="highlight.mode phrase"
             />
             <EvidenceViewer excerpts={transcriptEvidence} />
+          </ConsolePanel>
+
+          <ConsolePanel id="claims" className="mt-4 p-4">
+            <SectionLabel eyebrow="claims review" title="Structured witness claims from backend analysis" action={`${claims.length} claims`} />
+            <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070A0F]">
+              <table className="w-full text-left text-xs">
+                <thead className="border-b border-white/10 bg-[#111827] font-mono uppercase tracking-[0.18em] text-slate-600">
+                  <tr>
+                    <th className="px-3 py-3">Claim</th>
+                    <th className="px-3 py-3">Topic</th>
+                    <th className="px-3 py-3">Certainty</th>
+                    <th className="px-3 py-3">Confidence</th>
+                    <th className="px-3 py-3">Citation</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {claims.map((claim) => (
+                    <tr key={claim.id} className="transition hover:bg-white/[0.035]">
+                      <td className="max-w-2xl px-3 py-3 leading-5 text-slate-300">{claim.claim}</td>
+                      <td className="px-3 py-3">
+                        <Badge variant="violet" className="font-mono">{claim.topic}</Badge>
+                      </td>
+                      <td className="px-3 py-3 text-slate-400">{claim.certainty}</td>
+                      <td className="px-3 py-3 font-mono text-sky-300">{claim.confidence}</td>
+                      <td className="px-3 py-3 font-mono text-slate-500">{claim.citation}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </ConsolePanel>
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
@@ -525,10 +605,17 @@ export function Dashboard() {
                 </div>
                 <div className="mt-4 text-sm text-white">No API key required</div>
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Mock-backed frontend with production-shaped artifacts ready for backend integration.
+                  {sourceMode === "api"
+                    ? "Live FastAPI backend output is ready for download."
+                    : "Mock-backed fallback remains available when the backend API is offline."}
                 </p>
-                <Button className="mt-4 w-full font-mono text-xs uppercase tracking-[0.12em]">
+                <Button asChild className="mt-4 w-full font-mono text-xs uppercase tracking-[0.12em]">
+                  <a
+                    href={`data:text/markdown;charset=utf-8,${encodeURIComponent(reportMarkdown)}`}
+                    download="depositioniq-report.md"
+                  >
                   Export Report
+                  </a>
                 </Button>
               </div>
             </div>

@@ -40,6 +40,7 @@ This repository currently contains two complementary project tracks:
 ```text
 .
 ├── app.py
+├── api.py
 ├── examples
 │   ├── clean_no_contradiction.txt
 │   ├── obvious_contradiction.txt
@@ -60,6 +61,7 @@ This repository currently contains two complementary project tracks:
 │   │   ├── witness-profile.tsx
 │   │   └── ui
 │   ├── lib
+│   │   ├── analysis-api.ts
 │   │   ├── mock-analysis.ts
 │   │   └── utils.ts
 │   ├── package.json
@@ -74,6 +76,7 @@ This repository currently contains two complementary project tracks:
 └── src
     ├── __init__.py
     ├── ingest.py
+    ├── pipeline.py
     ├── segment.py
     ├── claim_extractor.py
     ├── contradiction_detector.py
@@ -95,7 +98,9 @@ downloadable Markdown report.
 Primary files:
 
 - `app.py`: Streamlit application and UI orchestration.
+- `api.py`: FastAPI service exposing the shared pipeline at `POST /analyze`.
 - `src/`: Modular legal reasoning pipeline.
+- `src/pipeline.py`: Shared orchestration used by Streamlit and FastAPI.
 - `samples/`: Sample transcript and sample output.
 
 ### Next.js Frontend Prototype
@@ -109,12 +114,12 @@ Primary files:
 
 - `frontend/app/page.tsx`: Main dashboard and landing experience.
 - `frontend/components/`: Reusable UI components.
+- `frontend/lib/analysis-api.ts`: Client-side FastAPI adapter with mock fallback.
 - `frontend/lib/mock-analysis.ts`: Realistic sample DepositionIQ outputs used by
-  the UI before backend integration.
+  the UI when the backend API is unavailable or demo mode is needed.
 
-The frontend is intentionally mock-driven for now. Backend integration can be added
-later by replacing the mock exports in `frontend/lib/mock-analysis.ts` with API calls
-to the Python analysis pipeline.
+The frontend can call the Python FastAPI backend for live analysis. It preserves the
+mock data as a fallback so the UI remains usable if the backend is not running.
 
 ## Architecture
 
@@ -307,6 +312,34 @@ For each transcript it prints:
 Expected interpretation notes are documented in
 `examples/expected_findings.md`.
 
+### Run the FastAPI Backend API
+
+The FastAPI service wraps the same shared backend pipeline used by Streamlit.
+
+From the repository root, with Python dependencies installed:
+
+```bash
+uvicorn api:app --reload --port 8000
+```
+
+Health check:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Analyze transcript text:
+
+```bash
+curl -X POST http://localhost:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"transcript_text":"Q: What time did you arrive?\nA: I arrived at 9:00 a.m.\nQ: When did you actually arrive?\nA: I did not arrive until 10:30 a.m."}'
+```
+
+The response includes `transcript_id`, `claims`, `contradictions`,
+`cross_exam_questions`, `witness_profile`, `case_summary`, and
+`report_markdown`.
+
 ### Run the Next.js Frontend Prototype
 
 From the repository root:
@@ -319,9 +352,19 @@ npm run dev
 
 Then open `http://localhost:3000`.
 
-The frontend does not require backend services yet. It renders realistic sample
-claims, contradictions, witness intelligence, attorney attention levels, and report
-content from `frontend/lib/mock-analysis.ts`.
+For live analysis, run the FastAPI backend on `http://localhost:8000` in another
+terminal. The Next.js dashboard sends pasted transcript text to `POST /analyze` and
+updates claims, contradictions, cross-exam questions, witness profile metrics, and
+the downloadable report from the backend response.
+
+To point the frontend at a different backend URL:
+
+```bash
+NEXT_PUBLIC_DEPOSITIONIQ_API_URL=http://localhost:8000 npm run dev
+```
+
+If the backend is unavailable, the frontend automatically falls back to the
+realistic mock data in `frontend/lib/mock-analysis.ts`.
 
 ## Error Handling
 
