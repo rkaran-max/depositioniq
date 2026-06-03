@@ -1,11 +1,11 @@
-Q: Did you send email to Dana about DR DOS?
-A: I sent email to Dana about DR DOS during the product review.
+Q: Did you preserve emails relating to the product review?
+A: I preserved emails relating to the product review when legal asked me to preserve them.
 
-Q: When was the last time you sent email to Dana about DR DOS?
-A: I do not recall the specific date of any email to Dana about DR DOS.
+Q: Did you delete emails relating to the product review?
+A: I deleted emails relating to the product review after reading them.
 
-Q: Sitting here today, do you recall sending email to Dana about DR DOS?
-A: I don't recall sending email to Dana about DR DOS.
+Q: Do you recall sending emails to Dana about the product review?
+A: I sent emails to Dana about the product review during that period.
 
-Q: Where would a record of that communication appear?
-A: The record would likely appear in email logs or custodian files.
+Q: Sitting here today, do you recall those emails to Dana?
+A: I don't recall sending emails to Dana about the product review.

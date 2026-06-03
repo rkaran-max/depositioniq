@@ -113,12 +113,14 @@ class ClaimExtractor:
     def _classify_legal_topic(self, text: str, question_context: str = "") -> str:
         """Assign an attorney-facing legal topic to a witness claim."""
         lowered = f"{question_context} {text}".lower()
-        if "dr dos" in lowered:
-            return LEGAL_TOPICS["dr_dos_communications"]
+        if self._contains_arrival_time_issue(lowered):
+            return LEGAL_TOPICS["timeline"]
         if "delete" in lowered or "preserve" in lowered or "keep" in lowered or "e-mail" in lowered or "email" in lowered:
             return LEGAL_TOPICS["email_retention"]
         if "record" in lowered or "document" in lowered or "log" in lowered or "file" in lowered or "contract" in lowered:
             return LEGAL_TOPICS["document_preservation"]
+        if "dr dos" in lowered:
+            return LEGAL_TOPICS["dr_dos_communications"]
         if "remember" in lowered or "recall" in lowered or "specific" in lowered or "knowledge" in lowered:
             return LEGAL_TOPICS["personal_knowledge"]
         if "when" in lowered or "last time" in lowered or re.search(r"\b(19|20)\d{2}\b", lowered):
@@ -129,6 +131,20 @@ class ClaimExtractor:
         """Create a narrower comparison lane than the display legal topic."""
         answer = text.lower()
         combined = f"{question_context} {text}".lower()
+        if self._contains_arrival_time_issue(combined):
+            return "arrival_time"
+        if ("delete" in combined or "deleted" in combined) and (
+            "preserve" in combined or "preserved" in combined or "keep" in combined or "kept" in combined
+        ):
+            return "email_preservation_deletion"
+        if ("delete" in combined or "deleted" in combined or "preserve" in combined or "preserved" in combined) and (
+            "email" in combined or "e-mail" in combined
+        ):
+            return "email_preservation_deletion"
+        if ("send" in combined or "sent" in combined) and (
+            "email" in combined or "e-mail" in combined
+        ):
+            return "email_communication"
         if "record" in answer or "document" in answer or "log" in answer or "file" in answer:
             return "records"
         if "email" in answer or "e-mail" in answer:
@@ -155,10 +171,20 @@ class ClaimExtractor:
         """Extract a lightweight entity key from the answer and question context."""
         combined = f"{question_context} {text}"
         lowered = combined.lower()
-        if "dr dos" in lowered:
-            return "DR DOS"
+        if self._contains_arrival_time_issue(lowered):
+            return "arrival time"
+        if ("email" in lowered or "e-mail" in lowered) and "dana" in lowered:
+            return "emails to Dana"
+        if ("email" in lowered or "e-mail" in lowered) and "product review" in lowered:
+            return "product review emails"
+        if ("delete" in lowered or "preserve" in lowered or "keep" in lowered) and (
+            "email" in lowered or "e-mail" in lowered
+        ):
+            return "email retention practice"
         if "e-mail" in lowered or "email" in lowered:
             return "Email communications"
+        if "dr dos" in lowered:
+            return "DR DOS"
         if "dana" in lowered:
             return "Dana"
 
@@ -201,6 +227,13 @@ class ClaimExtractor:
     def _infer_polarity(self, text: str) -> str:
         """Infer whether the witness affirms, denies, or qualifies a proposition."""
         lowered = text.lower()
+        if (
+            "i do not remember" in lowered
+            or "i don't remember" in lowered
+            or "i do not recall" in lowered
+            or "i don't recall" in lowered
+        ):
+            return "uncertain"
         negative_markers = [
             "did not",
             "do not",
@@ -214,13 +247,6 @@ class ClaimExtractor:
         ]
         if any(marker in lowered for marker in negative_markers):
             return "negative"
-        if (
-            "i do not remember" in lowered
-            or "i don't remember" in lowered
-            or "i do not recall" in lowered
-            or "i don't recall" in lowered
-        ):
-            return "uncertain"
         return "positive"
 
     def _infer_certainty(self, text: str) -> str:
@@ -274,3 +300,13 @@ class ClaimExtractor:
         entity_bonus = 0.04 if entity not in {"Deposition testimony", "Witness recollection"} else 0
         topic_bonus = 0.03 if topic != LEGAL_TOPICS["other"] else 0
         return min(base + entity_bonus + topic_bonus, 0.96)
+
+    def _contains_arrival_time_issue(self, text: str) -> bool:
+        """Return whether text discusses arrival or presence timing."""
+        arrival_terms = ("arrive", "arrived", "arrival", "present", "meeting started")
+        has_arrival_language = any(term in text for term in arrival_terms)
+        has_time = bool(
+            re.search(r"\b\d{1,2}:\d{2}\s*(?:a\.m\.|p\.m\.|am|pm)?\b", text)
+            or re.search(r"\b\d{1,2}\s*(?:a\.m\.|p\.m\.|am|pm)\b", text)
+        )
+        return has_arrival_language and has_time

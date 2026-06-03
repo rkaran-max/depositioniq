@@ -9,7 +9,7 @@ questions on small deposition-style transcripts.
 
 Expected behavior:
 
-- Extract several structured witness claims.
+- Extract several structured witness claims about arrival, preservation, and records.
 - Detect no direct contradiction.
 - Generate a fallback foundation question because there are claims but no conflicts.
 - Preserve line citations for the extracted claims.
@@ -18,22 +18,24 @@ Expected behavior:
 
 Expected behavior:
 
-- Extract claims about DR DOS email deletion and preservation.
-- Detect a direct conflict between:
-  - the witness saying they deleted DR DOS email, and
-  - the witness later saying they did not delete DR DOS email.
+- Extract claims about arrival at a product review meeting.
+- Detect a direct arrival-time conflict between:
+  - the witness saying they arrived or were present at 9:00 a.m., and
+  - the witness later saying they did not arrive until 10:30 a.m.
 - Generate cross-examination questions that ask the witness to reconcile the two
-  answers and identify confirming documents or logs.
+  answers and identify objective records such as calendars or badge logs.
 
 ## subtle_contradiction.txt
 
 Expected behavior:
 
-- Extract claims about DR DOS communications with Dana.
-- Flag a communication/memory tension where the witness first states that email was
-  sent, then later uses low-certainty recall language about the same communication.
-- Generate cross-examination questions focused on separating lack of recollection
-  from nonexistence of a communication record.
+- Extract claims about email preservation, deletion, and communications with Dana.
+- Detect a preservation/deletion inconsistency where the witness says emails were
+  preserved but also says related emails were deleted after reading.
+- Flag a communication/memory tension where the witness first states that emails
+  were sent, then later uses low-certainty recall language about the same communication.
+- Generate cross-examination questions focused on preservation practice, deletion,
+  and separating lack of recollection from nonexistence of a communication record.
 
 ## Interpretation Notes
 

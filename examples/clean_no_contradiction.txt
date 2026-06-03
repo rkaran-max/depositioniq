@@ -1,11 +1,11 @@
-Q: Please state your role during the DR DOS communications review.
-A: I reviewed email communications relating to DR DOS when they were sent to me.
+Q: What time did you arrive for the product review meeting?
+A: I arrived at 9:00 a.m. for the product review meeting.
 
 Q: What was your general email retention practice?
 A: I preserved email messages that legal asked me to preserve.
 
-Q: Did you keep documents related to DR DOS communications?
-A: I kept the DR DOS documents that I understood were subject to a preservation request.
+Q: Did you keep documents related to the review?
+A: I kept the documents that I understood were subject to a preservation request.
 
 Q: Do you recall receiving a preservation instruction?
 A: I recall receiving an instruction to preserve records that related to the DR DOS matter.

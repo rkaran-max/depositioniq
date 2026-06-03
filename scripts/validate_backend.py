@@ -85,6 +85,16 @@ def print_validation_summary(example_path: Path, result: dict) -> None:
     print(f"Claims extracted: {len(claims)}")
     print(f"Contradictions found: {len(contradictions)}")
 
+    print("\nClaims extracted:")
+    if claims:
+        for claim in claims:
+            print(
+                f"- {claim['id']} [{claim['topic']} | {claim['certainty']} | "
+                f"{claim['polarity']} | {claim['citation']}]: {claim['claim']}"
+            )
+    else:
+        print("- None")
+
     print("\nContradiction titles:")
     if contradictions:
         for contradiction in contradictions:
@@ -94,6 +104,14 @@ def print_validation_summary(example_path: Path, result: dict) -> None:
                 f"- {contradiction['id']} [{status}, {severity}]: "
                 f"{contradiction.get('summary', 'Untitled contradiction')}"
             )
+    else:
+        print("- None")
+
+    print("\nContradiction explanations:")
+    if contradictions:
+        for contradiction in contradictions:
+            explanation = contradiction.get("description") or contradiction.get("reasoning")
+            print(f"- {contradiction['id']}: {explanation}")
     else:
         print("- None")
 

@@ -47,12 +47,21 @@ class EvidenceVerifier:
             statuses = {claim.get("verification_status") for claim in linked_claims}
             polarities = {claim.get("polarity") for claim in linked_claims}
             same_context = len({claim.get("entity") for claim in linked_claims}) == 1
+            contradiction_type = contradiction.get("type")
+            supported_pair = len(linked_claims) == 2 and statuses == {"supported"} and same_context
+            type_supported = contradiction_type in {
+                "arrival_time_conflict",
+                "preservation_deletion_conflict",
+            }
+            memory_supported = (
+                contradiction_type == "memory_recall_conflict"
+                and "low" in {claim.get("certainty") for claim in linked_claims}
+                and any(claim.get("polarity") == "positive" for claim in linked_claims)
+            )
+            polarity_supported = contradiction_type == "direct_conflict" and len(polarities) > 1
 
-            is_verified = (
-                len(linked_claims) == 2
-                and statuses == {"supported"}
-                and len(polarities) > 1
-                and same_context
+            is_verified = supported_pair and (
+                type_supported or memory_supported or polarity_supported
             )
             verified.append(
                 {
@@ -60,8 +69,8 @@ class EvidenceVerifier:
                     "status": "verified" if is_verified else "needs_review",
                     "verification_score": 0.91 if is_verified else 0.58,
                     "verification_notes": (
-                        "Both claims are transcript-supported, share the same entity, "
-                        "and express opposing polarity."
+                        "Both claims are transcript-supported, share the same factual "
+                        "context, and match a contradiction-specific verification rule."
                         if is_verified
                         else "The candidate needs attorney review because support or polarity is incomplete."
                     ),

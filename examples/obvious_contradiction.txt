@@ -1,11 +1,11 @@
-Q: Did you delete email relating to DR DOS?
-A: I deleted email relating to DR DOS after reading it.
+Q: What time did you arrive for the product review meeting?
+A: I arrived at 9:00 a.m. for the product review meeting.
 
-Q: Were those DR DOS emails preserved elsewhere?
-A: I do not know whether those DR DOS emails were preserved elsewhere.
+Q: Were you already present when the meeting started at 9:00 a.m.?
+A: I was present when the meeting started at 9:00 a.m.
 
-Q: Earlier you testified about deleting DR DOS email. Did you delete email relating to DR DOS?
-A: I did not delete email relating to DR DOS.
+Q: Later that morning, when did you actually arrive?
+A: I did not arrive until 10:30 a.m.
 
-Q: What records would show your deletion practice?
-A: The email logs would show whether DR DOS messages were deleted or preserved.
+Q: What records would show your arrival time?
+A: The calendar invitation and security badge logs would show when I arrived.
