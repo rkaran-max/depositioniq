@@ -346,6 +346,21 @@ to understand and extend. Recommended next steps:
 - Add tests for each pipeline stage.
 - Add prompt templates and schema validation for model outputs.
 
+## AI Usage Disclosure
+
+This project was developed with AI-assisted coding tools, namely OpenAI Codex and ChatGPT. 
+
+These tools were used during development for:
+- Frontend development
+- Backend scaffolding
+- Debugging
+- Refactoring
+- Documentation
+- UI iteration
+- Test generation
+
+The project concept, legal workflow design, system architecture, contradiction-detection workflow, feature selection, CourtShadow/RJA direction, evaluation design, and final product decisions were directed by the author. Any AI-generated code was reviewed, tested, modified, and integrated into the final system by the author.
+
 ## Legal Disclaimer
 
 DepositionIQ is a research and educational scaffold. It is not legal advice and
