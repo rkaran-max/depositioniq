@@ -1,0 +1,11 @@
+Q: Did you delete email relating to DR DOS?
+A: I deleted email relating to DR DOS after reading it.
+
+Q: Were those DR DOS emails preserved elsewhere?
+A: I do not know whether those DR DOS emails were preserved elsewhere.
+
+Q: Earlier you testified about deleting DR DOS email. Did you delete email relating to DR DOS?
+A: I did not delete email relating to DR DOS.
+
+Q: What records would show your deletion practice?
+A: The email logs would show whether DR DOS messages were deleted or preserved.

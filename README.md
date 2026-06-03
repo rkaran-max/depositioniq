@@ -40,6 +40,11 @@ This repository currently contains two complementary project tracks:
 ```text
 .
 ├── app.py
+├── examples
+│   ├── clean_no_contradiction.txt
+│   ├── obvious_contradiction.txt
+│   ├── subtle_contradiction.txt
+│   └── expected_findings.md
 ├── frontend
 │   ├── app
 │   │   ├── globals.css
@@ -64,6 +69,8 @@ This repository currently contains two complementary project tracks:
 ├── samples
 │   ├── sample_output.md
 │   └── sample_transcript.txt
+├── scripts
+│   └── validate_backend.py
 └── src
     ├── __init__.py
     ├── ingest.py
@@ -270,6 +277,35 @@ PDFs, review the extracted text, and click **Analyze Deposition**.
 No API key is required for the demo. The backend uses deterministic fallback logic
 so the sample transcript produces stable claims, verified contradictions, generated
 cross-examination questions, and a downloadable Markdown report.
+
+### Run Backend Validation Examples
+
+DepositionIQ includes a lightweight backend validation suite in `examples/`. This is
+not formal benchmarking; it is a quick evidence check showing that the deterministic
+pipeline works on clean, obvious, and subtle deposition-style transcripts.
+
+Run:
+
+```bash
+python scripts/validate_backend.py
+```
+
+The script runs the backend pipeline on:
+
+- `examples/clean_no_contradiction.txt`
+- `examples/obvious_contradiction.txt`
+- `examples/subtle_contradiction.txt`
+
+For each transcript it prints:
+
+- number of claims extracted,
+- number of contradictions found,
+- contradiction summaries,
+- citations used,
+- generated cross-examination questions.
+
+Expected interpretation notes are documented in
+`examples/expected_findings.md`.
 
 ### Run the Next.js Frontend Prototype
 
