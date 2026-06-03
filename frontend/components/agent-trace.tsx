@@ -15,7 +15,7 @@ export function AgentTrace({ events }: { events: AgentTraceEvent[] }) {
     <div className="space-y-2">
       {events.map((event, index) => (
         <motion.div
-          key={event.time}
+          key={`${event.time}-${event.event}-${event.status}-${index}`}
           initial={{ opacity: 0, x: 12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08 * index, duration: 0.35 }}
