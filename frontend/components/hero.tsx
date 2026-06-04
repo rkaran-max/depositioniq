@@ -4,6 +4,30 @@ import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, FileText, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const backgroundPages = [
+  {
+    citation: "Gates Dep. 589:4-15",
+    title: "Email retention testimony",
+    lines: ["Q. What is your practice with incoming e-mails?", "A. I delete most incoming e-mails after reading them.", "Q. Are those messages preserved elsewhere?"],
+    className: "left-[4%] top-24 hidden w-[320px] -rotate-6 lg:block",
+    delay: 0,
+  },
+  {
+    citation: "Gates Dep. 590:11-22",
+    title: "Preservation scope",
+    lines: ["Q. Do you preserve messages that you send?", "A. Not unless I copy myself.", "Q. Would DR DOS communications be included?"],
+    className: "right-[8%] top-28 hidden w-[340px] rotate-3 xl:block",
+    delay: 0.8,
+  },
+  {
+    citation: "Gates Dep. 591:2-12",
+    title: "Recall limitation",
+    lines: ["Q. Do you recall specific DR DOS messages?", "A. I don't recall any specific message.", "Q. Is that based on memory or records?"],
+    className: "bottom-12 left-[38%] hidden w-[300px] rotate-2 lg:block",
+    delay: 1.4,
+  },
+];
+
 const workflowSteps = [
   {
     label: "Transcript",
@@ -45,11 +69,72 @@ const evidenceRows = [
   },
 ];
 
+function DepositionSceneBackground() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.026)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.022)_1px,transparent_1px)] bg-[size:72px_72px] opacity-25" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_28%,rgba(14,165,233,0.09),transparent_30rem),radial-gradient(circle_at_78%_12%,rgba(148,163,184,0.07),transparent_28rem)]" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
+
+      {backgroundPages.map((page) => (
+        <motion.div
+          key={page.citation}
+          className={`absolute rounded-xl border border-white/10 bg-white/[0.045] p-4 shadow-[0_26px_80px_rgba(0,0,0,0.26)] backdrop-blur-sm ${page.className}`}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 0.5, y: [0, -10, 0] }}
+          transition={{
+            opacity: { duration: 0.8, delay: page.delay },
+            y: { duration: 9, repeat: Infinity, ease: "easeInOut", delay: page.delay },
+          }}
+        >
+          <div className="mb-3 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+            <div>
+              <div className="font-serif text-sm text-slate-200">{page.title}</div>
+              <div className="mt-1 font-mono text-[10px] text-sky-200/80">{page.citation}</div>
+            </div>
+            <div className="rounded border border-white/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">
+              exhibit
+            </div>
+          </div>
+          <div className="space-y-2.5">
+            {page.lines.map((line, index) => (
+              <div key={line} className="flex gap-3">
+                <span className="mt-0.5 font-mono text-[9px] text-slate-600">
+                  {String(index + 4).padStart(2, "0")}
+                </span>
+                <span
+                  className={`h-4 flex-1 rounded-sm ${
+                    index === 1 ? "bg-sky-200/18" : "bg-slate-200/8"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      ))}
+
+      <motion.div
+        className="absolute left-[58%] top-[18%] hidden size-40 rounded-full border border-sky-200/30 bg-sky-100/[0.025] shadow-[0_0_42px_rgba(56,189,248,0.10)] backdrop-blur-[1px] lg:block"
+        animate={{ x: [-18, 20, -18], y: [0, 16, 0], rotate: [-4, 3, -4] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="absolute inset-5 rounded-full border border-white/10" />
+        <div className="absolute -bottom-8 right-4 h-14 w-2 rotate-[-42deg] rounded-full bg-slate-300/18" />
+      </motion.div>
+
+      <motion.div
+        className="absolute left-[14%] top-[54%] hidden h-px w-[42rem] origin-left bg-gradient-to-r from-transparent via-sky-200/20 to-transparent lg:block"
+        animate={{ opacity: [0.12, 0.34, 0.12], scaleX: [0.86, 1, 0.86] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+  );
+}
+
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-[#070A0F] px-4 pt-24">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:56px_56px] opacity-20" />
-      <div className="absolute inset-x-0 top-0 h-96 bg-[radial-gradient(circle_at_28%_0%,rgba(56,189,248,0.08),transparent_34rem)]" />
+      <DepositionSceneBackground />
 
       <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-14 py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(480px,1fr)]">
         <motion.div
