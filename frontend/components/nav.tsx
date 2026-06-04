@@ -46,10 +46,9 @@ export function Nav() {
             </Link>
           ))}
         </nav>
-        <Button asChild size="sm" className="group min-w-40 justify-between text-xs">
+        <Button asChild size="sm" className="group text-xs">
           <Link href="/demo">
             <span>Analyze transcript</span>
-            <span className="transition-transform group-hover:translate-x-0.5">→</span>
           </Link>
         </Button>
       </div>

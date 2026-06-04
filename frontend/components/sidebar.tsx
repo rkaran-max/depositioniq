@@ -24,7 +24,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="sticky top-20 hidden h-[calc(100vh-6rem)] w-72 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:block">
+    <aside className="sticky top-20 hidden h-[calc(100vh-6rem)] w-64 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-xl xl:block 2xl:w-72">
       <div className="mb-7 flex items-center gap-3 px-1">
         <img src="/brand/depositioniq-favicon.svg" alt="" className="size-9 rounded-lg" />
         <div>

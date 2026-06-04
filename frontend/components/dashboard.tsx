@@ -286,11 +286,11 @@ export function Dashboard() {
     <main className="relative min-h-screen overflow-hidden bg-[#070A0F] pt-16 text-slate-100">
       <div className="pointer-events-none absolute inset-0 noise-overlay opacity-25" />
 
-      <div className="relative mx-auto flex w-full max-w-[1800px] gap-6 p-5 xl:p-6">
+      <div className="relative mx-auto flex w-full max-w-[1920px] gap-5 p-4 xl:gap-6 xl:p-6">
         <Sidebar />
 
         <section className="min-w-0 flex-1">
-          <header className="sticky top-20 z-30 mb-5 flex items-start gap-3 rounded-xl border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+          <header className="sticky top-20 z-30 mb-5 flex items-start gap-3 rounded-lg border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
             <div className="relative flex flex-1 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
               <Search className="size-3.5 text-slate-500" />
               <Input
@@ -301,6 +301,23 @@ export function Dashboard() {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 140)}
               />
+              {searchQuery.trim() ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={searchResults.length === 0}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    if (searchResults[0]) {
+                      scrollToSection(searchResults[0].targetId);
+                    }
+                  }}
+                  className="h-7 px-3 text-[11px]"
+                >
+                  Apply
+                </Button>
+              ) : null}
               {isSearchFocused && searchQuery.trim() ? (
                 <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 max-h-96 overflow-y-auto rounded-xl border border-white/10 bg-[#0B0F17] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.45)]">
                   {searchResults.length > 0 ? (
@@ -343,11 +360,11 @@ export function Dashboard() {
 
           <BackendStatusBanner sourceMode={sourceMode} transcriptId={transcriptId} />
 
-          <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_420px]">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px]">
             <motion.div
               {...panelMotion}
               id="overview"
-              className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F17] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.32)] md:p-8"
+              className="relative overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.32)] md:p-8"
             >
               <Badge variant="slate" className="font-mono uppercase tracking-[0.18em]">
                 Evidence-led review
@@ -387,7 +404,7 @@ export function Dashboard() {
                   className="text-sm"
                 >
                   {isAnalyzing ? "Analyzing..." : "Analyze Transcript"}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 </Button>
                 <Button
                   type="button"
@@ -418,7 +435,7 @@ export function Dashboard() {
                 <div key={stage.id} className="relative rounded-lg border border-white/10 bg-[#070A0F] p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="font-mono text-[11px] text-slate-200">{stage.label}</div>
-                    <span className={cn("rounded-full border px-2 py-0.5 font-mono text-[10px]", statusTone[stage.status])}>
+                    <span className={cn("rounded-md border px-2 py-0.5 font-mono text-[10px]", statusTone[stage.status])}>
                       {stage.status}
                     </span>
                   </div>
@@ -458,11 +475,11 @@ export function Dashboard() {
             </div>
           </ConsolePanel>
 
-          <section className="mt-5 grid scroll-mt-24 gap-5 xl:grid-cols-[minmax(360px,0.42fr)_minmax(580px,0.58fr)]" id="live-analysis-console">
+          <section className="mt-5 grid scroll-mt-24 gap-5 2xl:grid-cols-[minmax(980px,1fr)_minmax(420px,480px)]" id="live-analysis-console">
             <ConsolePanel className="p-5">
               <SectionLabel eyebrow="transcript intake" title="Transcript, PDF, or experimental audio ingestion" action={sourceMode === "api" ? "Live backend" : "Demo fallback"} />
-              <div className="grid gap-3 2xl:grid-cols-[minmax(320px,0.36fr)_minmax(620px,0.64fr)]">
-                <div className="space-y-3">
+              <div className="grid gap-4 xl:grid-cols-[minmax(300px,340px)_minmax(520px,1fr)] 2xl:grid-cols-[minmax(330px,380px)_minmax(640px,1fr)]">
+                <div className="grid gap-3 md:grid-cols-2 xl:block xl:space-y-3">
                   <div className="rounded-lg border border-amber-300/15 bg-amber-300/[0.035] p-4">
                     <div className="flex items-center gap-2">
                       <Mic2 className="size-4 text-amber-200" />
@@ -481,6 +498,7 @@ export function Dashboard() {
                     <Button
                       type="button"
                       variant="secondary"
+                      size="default"
                       onClick={handleAudioTranscribeAnalyze}
                       disabled={!audioFile || isTranscribingAudio || isAnalyzing}
                       className="mt-3 w-full text-xs"
@@ -505,7 +523,7 @@ export function Dashboard() {
                   </div>
                 </div>
                 <Textarea
-                  className="min-h-52 resize-none border-white/10 bg-[#070A0F] font-mono text-xs leading-6 text-slate-300 placeholder:text-slate-700"
+                  className="min-h-[420px] resize-y border-white/10 bg-[#070A0F] font-mono text-[13px] leading-6 text-slate-300 placeholder:text-slate-700 xl:min-h-[500px]"
                   value={transcriptText}
                   onChange={(event) => setTranscriptText(event.target.value)}
                 />
@@ -517,7 +535,7 @@ export function Dashboard() {
                   className="text-sm"
                 >
                   {isAnalyzing ? "Analyzing..." : "Analyze Deposition"}
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 </Button>
                 <div className="font-mono text-[10px] text-slate-500">
                   {transcriptId ? `transcript_id: ${transcriptId}` : analysisNotice}
@@ -568,8 +586,8 @@ export function Dashboard() {
 
           <ConsolePanel id="claims" className="mt-4 p-4">
             <SectionLabel eyebrow="claims" title="Structured witness claims from backend analysis" action={`${claims.length} claims`} />
-            <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070A0F]">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto rounded-lg border border-white/10 bg-[#070A0F]">
+              <table className="w-full min-w-[900px] text-left text-xs">
                 <thead className="border-b border-white/10 bg-[#111827] font-mono uppercase tracking-[0.18em] text-slate-600">
                   <tr>
                     <th className="px-3 py-3">Claim</th>
@@ -596,7 +614,7 @@ export function Dashboard() {
             </div>
           </ConsolePanel>
 
-          <section className="mt-4 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
+          <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(420px,0.76fr)]">
             <ConsolePanel id="contradiction-review" className="p-4">
               <SectionLabel eyebrow="contradiction review" title="Verified conflicts and unresolved testimony gaps" action={`${contradictions.length} issues`} />
               <div className="space-y-3">
@@ -664,7 +682,7 @@ export function Dashboard() {
                         {String(index + 1).padStart(2, "0")}
                       </div>
                       <div className="text-sm font-medium text-white">{card.objective}</div>
-                      <span className={cn("ml-auto rounded-full border px-2 py-1 font-mono text-[10px]", riskBadgeTone[card.risk])}>
+                      <span className={cn("ml-auto rounded-md border px-2 py-1 font-mono text-[10px]", riskBadgeTone[card.risk])}>
                         {card.risk}
                       </span>
                     </div>
@@ -698,7 +716,7 @@ export function Dashboard() {
             </ConsolePanel>
           </section>
 
-          <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+          <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(380px,0.72fr)_minmax(0,1fr)]">
             <ConsolePanel id="courtshadow" className="p-4">
               <SectionLabel eyebrow="discourse review" title="Record context and examination posture" action="review module" />
               <div className="rounded-lg border border-violet-300/15 bg-[#070A0F] p-4">
