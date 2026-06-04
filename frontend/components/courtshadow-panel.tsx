@@ -8,8 +8,8 @@ export function CourtShadowPanel() {
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <CardTitle>CourtShadow</CardTitle>
-            <CardDescription>Adversarial posture and record-shadow analysis</CardDescription>
+            <CardTitle>Evidence Review</CardTitle>
+            <CardDescription>Record context and follow-up analysis</CardDescription>
           </div>
           <Badge variant="violet">
             <ScanLine className="mr-1 size-3" />
@@ -19,17 +19,16 @@ export function CourtShadowPanel() {
       </CardHeader>
       <CardContent>
         <div className="relative rounded-xl border border-white/10 bg-slate-950/80 p-5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(56,189,248,0.12),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(168,85,247,0.12),transparent_35%)]" />
           <div className="relative flex items-start gap-4">
             <div className="rounded-xl border border-violet-300/20 bg-violet-300/10 p-3">
               <Network className="size-5 text-violet-200" />
             </div>
             <div>
-              <div className="font-medium text-white">Record-shadow detected around DR DOS communications.</div>
+              <div className="font-medium text-white">Preservation issue identified around DR DOS communications.</div>
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 The witness acknowledges broad email deletion behavior while disclaiming
-                recall of specific DR DOS messages. CourtShadow marks the preservation
-                trail as a high-value follow-up vector, not a legal conclusion.
+                recall of specific DR DOS messages. The review marks the preservation
+                trail as a high-value follow-up area, not a legal conclusion.
               </p>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {["Retention policy", "Custodian timeline", "Missing-message scope"].map((item) => (

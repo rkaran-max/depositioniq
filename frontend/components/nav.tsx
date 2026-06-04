@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 const links = [
   { label: "Product", href: "#product" },
   { label: "Security", href: "#security" },
-  { label: "CourtShadow", href: "#courtshadow-product" },
+  { label: "Evidence Review", href: "#contradiction-review" },
   { label: "Demo", href: "#dashboard" },
 ];
 
 export function Nav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-[#070707]/78 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-[#070A0F]/88 backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
         <a href="#" className="flex items-center gap-3">
           <img
@@ -26,10 +26,10 @@ export function Nav() {
             <a
               key={link.href}
               href={link.href}
-              className="group relative py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-500 transition hover:text-cyan-200"
+              className="group relative py-2 text-xs font-medium text-slate-500 transition hover:text-slate-200"
             >
               {link.label}
-              <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-cyan-300/70 transition-transform duration-300 group-hover:scale-x-100" />
+              <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-slate-300/70 transition-transform duration-300 group-hover:scale-x-100" />
             </a>
           ))}
         </nav>

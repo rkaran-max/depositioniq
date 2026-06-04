@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Code2,
   FileText,
-  GitBranch,
   Link2,
   Lock,
   Network,
@@ -84,11 +83,10 @@ function ConsolePanel({
       {...panelMotion}
       id={id}
       className={cn(
-        "relative overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17]/90 shadow-[0_24px_90px_rgba(0,0,0,0.45)]",
+        "relative overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17]/95 shadow-[0_16px_48px_rgba(0,0,0,0.28)]",
         className,
       )}
     >
-      <div className="pointer-events-none absolute inset-0 scanline-overlay opacity-[0.025]" />
       {children}
     </motion.section>
   );
@@ -107,14 +105,14 @@ function BackendStatusBanner({
     <motion.div
       {...panelMotion}
       className={cn(
-        "mb-4 grid gap-3 rounded-xl border bg-[#070A0F]/90 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.38)] backdrop-blur-xl md:grid-cols-[1fr_auto_auto]",
+        "mb-6 grid gap-3 rounded-xl border bg-[#0B0F17] p-4 shadow-[0_14px_44px_rgba(0,0,0,0.24)] md:grid-cols-[1fr_auto_auto]",
         isLive ? "border-emerald-300/25" : "border-amber-300/20",
       )}
     >
       <div className="flex items-center gap-3">
         <span
           className={cn(
-            "size-2 rounded-full shadow-[0_0_18px_currentColor]",
+            "size-2 rounded-full",
             isLive ? "bg-emerald-300 text-emerald-300" : "bg-amber-300 text-amber-300",
           )}
         />
@@ -159,8 +157,6 @@ export function Dashboard() {
 
   const {
     agentTrace,
-    claimRelationshipEdges,
-    claimRelationshipNodes,
     claims,
     contradictions,
     depositionMetrics,
@@ -208,15 +204,13 @@ export function Dashboard() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#070A0F] text-slate-100">
-      <div className="pointer-events-none absolute inset-0 noise-overlay opacity-70" />
-      <div className="pointer-events-none absolute left-1/2 top-[-20rem] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-sky-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-24 h-[28rem] w-[28rem] rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 noise-overlay opacity-25" />
 
-      <div className="relative mx-auto flex w-full max-w-[1540px] gap-4 p-4">
+      <div className="relative mx-auto flex w-full max-w-[1480px] gap-5 p-5">
         <Sidebar />
 
         <section className="min-w-0 flex-1">
-          <header className="sticky top-4 z-30 mb-4 flex items-center gap-3 rounded-xl border border-white/10 bg-[#070A0F]/85 p-2.5 shadow-[0_18px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <header className="sticky top-4 z-30 mb-5 flex items-center gap-3 rounded-xl border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
             <div className="flex flex-1 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
               <Search className="size-3.5 text-slate-500" />
               <Input
@@ -235,28 +229,19 @@ export function Dashboard() {
 
           <BackendStatusBanner sourceMode={sourceMode} transcriptId={transcriptId} />
 
-          <section className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_430px]">
+          <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_420px]">
             <motion.div
               {...panelMotion}
               id="overview"
-              className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F17]/90 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.55)] md:p-8"
+              className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0B0F17] p-6 shadow-[0_18px_70px_rgba(0,0,0,0.32)] md:p-8"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/60 to-transparent" />
-              <div className="absolute right-8 top-8 hidden rounded-lg border border-white/10 bg-[#070A0F]/80 px-3 py-2 font-mono text-[10px] text-slate-500 lg:block">
-                case.kernel / microsoft-drdos-retention
-              </div>
-              <Badge variant="green" className="font-mono uppercase tracking-[0.18em]">
-                <motion.span
-                  className="mr-2 size-1.5 rounded-full bg-emerald-300"
-                  animate={{ opacity: [0.35, 1, 0.35] }}
-                  transition={{ repeat: Infinity, duration: 1.8 }}
-                />
-                Legal reasoning agent / active
+              <Badge variant="slate" className="font-mono uppercase tracking-[0.18em]">
+                Evidence-led review
               </Badge>
 
               <div className="mt-10 max-w-3xl">
-                <h1 className="text-balance text-4xl font-medium tracking-tight text-white md:text-6xl">
-                  Deposition intelligence for litigation teams
+                <h1 className="text-balance text-4xl font-medium tracking-tight text-white md:text-5xl">
+                  Review testimony, contradictions, and source evidence in one workspace
                 </h1>
                 <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-400 md:text-base">
                   Extract structured witness claims, verify contradictions against the
@@ -303,23 +288,20 @@ export function Dashboard() {
             </motion.div>
 
             <ConsolePanel className="p-4">
-              <SectionLabel eyebrow="agent trace" title="Reasoning event stream" action={sourceMode === "api" ? "live / backend" : "demo / fallback"} />
+              <SectionLabel eyebrow="activity" title="Analysis status" action={sourceMode === "api" ? "live backend" : "demo fallback"} />
               <AgentTrace events={agentTrace} />
             </ConsolePanel>
           </section>
 
-          <ConsolePanel id="agent-pipeline" className="mt-4 p-4">
+          <ConsolePanel id="agent-pipeline" className="mt-5 p-5">
             <SectionLabel
-              eyebrow="agent pipeline"
-              title="ingest.transcript -> segment.testimony -> extract.claims -> verify.conflicts -> generate.cross_exam"
-              action="pipeline.latency 1.8s"
+              eyebrow="processing summary"
+              title="Transcript analysis stages"
+              action="deterministic pipeline"
             />
             <div className="grid gap-2 lg:grid-cols-5">
               {pipelineStages.map((stage, index) => (
                 <div key={stage.id} className="relative rounded-lg border border-white/10 bg-[#070A0F] p-3">
-                  {index < pipelineStages.length - 1 ? (
-                    <div className="absolute -right-3 top-1/2 hidden h-px w-5 bg-sky-300/30 lg:block" />
-                  ) : null}
                   <div className="flex items-center justify-between gap-3">
                     <div className="font-mono text-[11px] text-slate-200">{stage.label}</div>
                     <span className={cn("rounded-full border px-2 py-0.5 font-mono text-[10px]", statusTone[stage.status])}>
@@ -335,7 +317,7 @@ export function Dashboard() {
             </div>
           </ConsolePanel>
 
-          <ConsolePanel id="lawyer-workflow" className="mt-4 p-4">
+          <ConsolePanel id="lawyer-workflow" className="mt-5 p-5">
             <SectionLabel
               eyebrow="lawyer workflow"
               title="Review evidence -> Test contradiction -> Draft cross-exam -> Export report"
@@ -362,8 +344,8 @@ export function Dashboard() {
             </div>
           </ConsolePanel>
 
-          <section className="mt-4 grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
-            <ConsolePanel id="live-analysis-console" className="p-4">
+          <section className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+            <ConsolePanel id="live-analysis-console" className="p-5">
               <SectionLabel eyebrow="live analysis console" title="Transcript input / PDF ingestion" action={`source.mode ${sourceMode}`} />
               <div className="grid gap-3 md:grid-cols-[0.42fr_0.58fr]">
                 <div className="rounded-lg border border-dashed border-sky-300/20 bg-[#070A0F] p-4">
@@ -398,68 +380,39 @@ export function Dashboard() {
               </div>
             </ConsolePanel>
 
-            <ConsolePanel id="claims-graph" className="p-4">
-              <SectionLabel eyebrow="claim relationship map" title="Legal topics, risk, and citation-linked relationships" action="map.mode evidence" />
-              <div className="grid gap-3 lg:grid-cols-[0.55fr_0.45fr]">
-                <div className="space-y-2">
-                  {claimRelationshipNodes.map((node) => (
-                    <div key={node.id} className="rounded-lg border border-white/10 bg-[#070A0F] p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
-                            topic.node
-                          </div>
-                          <div className="mt-1 text-sm font-medium text-white">{node.topic}</div>
-                        </div>
-                        <span className={cn("rounded-full border px-2 py-1 font-mono text-[10px]", riskBadgeTone[node.risk])}>
-                          {node.risk} risk
-                        </span>
+            <ConsolePanel id="claims-graph" className="p-5">
+              <SectionLabel eyebrow="review priorities" title="Contradictions and evidence requiring attorney attention" action={`${contradictions.length} issues`} />
+              <div className="space-y-3">
+                {contradictions.slice(0, 3).map((contradiction) => (
+                  <div key={contradiction.title} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-medium text-white">{contradiction.title}</div>
+                        <p className="mt-2 text-xs leading-5 text-slate-500">{contradiction.summary}</p>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 gap-2">
-                        <div className="rounded border border-white/10 bg-[#111827] px-2 py-1.5">
-                          <div className="font-mono text-[10px] text-slate-600">claims</div>
-                          <div className="text-sm text-slate-200">{node.claimCount}</div>
-                        </div>
-                        <div className="rounded border border-white/10 bg-[#111827] px-2 py-1.5">
-                          <div className="font-mono text-[10px] text-slate-600">contradictions</div>
-                          <div className="text-sm text-slate-200">{node.linkedContradictions}</div>
-                        </div>
-                      </div>
-                      <p className="mt-3 text-xs leading-5 text-slate-500">{node.attorneyUse}</p>
+                      <Badge variant={contradiction.severity === "High" ? "red" : contradiction.severity === "Medium" ? "amber" : "slate"} className="font-mono">
+                        {contradiction.severity}
+                      </Badge>
                     </div>
-                  ))}
-                </div>
-                <div className="rounded-lg border border-white/10 bg-[#070A0F] p-3">
-                  <div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
-                    <GitBranch className="size-3.5" />
-                    relationship.edges
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {contradiction.citations.map((citation) => (
+                        <span key={citation} className="rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] text-slate-400">
+                          {citation}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {claimRelationshipEdges.map((edge) => (
-                      <div key={`${edge.from}-${edge.to}`} className="rounded-lg border border-white/10 bg-[#111827] p-3">
-                        <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <span className="text-slate-200">{edge.from}</span>
-                          <span className="rounded border border-sky-300/20 bg-sky-300/10 px-2 py-0.5 font-mono text-[10px] text-sky-200">
-                            {edge.relationship}
-                          </span>
-                          <span className="text-slate-200">{edge.to}</span>
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {edge.citations.map((citation) => (
-                            <span key={citation} className="rounded border border-white/10 bg-[#070A0F] px-2 py-1 font-mono text-[10px] text-slate-400">
-                              {citation}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                ))}
+                {contradictions.length === 0 ? (
+                  <div className="rounded-lg border border-white/10 bg-[#070A0F] p-4 text-sm text-slate-400">
+                    No contradiction candidates are currently displayed.
                   </div>
-                </div>
+                ) : null}
               </div>
             </ConsolePanel>
           </section>
 
-          <ConsolePanel id="transcript-evidence-viewer" className="mt-4 p-4">
+          <ConsolePanel id="transcript-evidence-viewer" className="mt-5 p-5">
             <SectionLabel
               eyebrow="transcript evidence viewer"
               title="Citation-linked excerpts, extracted claims, and examination relevance"
@@ -602,7 +555,7 @@ export function Dashboard() {
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
             <ConsolePanel id="courtshadow" className="p-4">
-              <SectionLabel eyebrow="courtshadow discourse layer" title="Record-shadow and adversarial posture analysis" action="preview.module" />
+              <SectionLabel eyebrow="discourse review" title="Record context and examination posture" action="review module" />
               <div className="rounded-lg border border-violet-300/15 bg-[#070A0F] p-4">
                 <div className="flex items-start gap-3">
                   <Network className="mt-0.5 size-4 text-violet-300" />

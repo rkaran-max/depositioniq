@@ -33,8 +33,7 @@
     @apply min-h-screen bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     background:
-      radial-gradient(circle at 58% -10%, rgba(56, 189, 248, 0.16), transparent 34rem),
-      radial-gradient(circle at 86% 14%, rgba(124, 58, 237, 0.1), transparent 24rem),
+      radial-gradient(circle at 48% -10%, rgba(56, 189, 248, 0.07), transparent 32rem),
       linear-gradient(180deg, #070a0f 0%, #05070b 55%, #070a0f 100%);
   }
 }
@@ -46,9 +45,9 @@
 
   .noise-overlay {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 36px 36px;
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 56px 56px;
     mask-image: radial-gradient(circle at center, black, transparent 82%);
   }
 

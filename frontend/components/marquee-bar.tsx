@@ -19,7 +19,7 @@ const items = [
   "Witness Testimony",
   "Cross-Examination",
   "Litigation Reports",
-  "CourtShadow",
+  "Witness Review",
 ];
 
 const icons = [FileText, ScanText, FileArchive, Gavel, FileSearch, ScrollText];
@@ -36,9 +36,9 @@ export function MarqueeBar() {
             return (
               <div
                 key={`${item}-${index}`}
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0B0F17] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-slate-300"
+                className="flex items-center gap-2 rounded-md border border-white/10 bg-[#0B0F17] px-4 py-2 text-xs text-slate-300"
               >
-                <Icon className="size-3.5 text-cyan-300" />
+                <Icon className="size-3.5 text-slate-400" />
                 {item}
               </div>
             );

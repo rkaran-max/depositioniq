@@ -58,7 +58,7 @@ export function FounderContact() {
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">Product</div>
             <div className="mt-3 space-y-2 text-slate-500">
               <div>Features</div>
-              <div>CourtShadow</div>
+              <div>Evidence Review</div>
               <div>Demo</div>
             </div>
           </div>

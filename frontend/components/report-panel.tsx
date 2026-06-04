@@ -24,8 +24,8 @@ export function ReportPanel() {
             <div>
               <div className="font-medium text-white">DepositionIQ Report</div>
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Includes claims, contradiction candidates, witness profile, CourtShadow
-                analysis, cross-examination targets, and supporting citations.
+                Includes claims, contradiction candidates, witness profile,
+                evidence review, cross-examination targets, and supporting citations.
               </p>
             </div>
           </div>

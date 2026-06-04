@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileSearch, MousePointer2 } from "lucide-react";
+import { FileSearch } from "lucide-react";
 
 const features = [
   {
@@ -16,8 +16,8 @@ const features = [
   },
   {
     number: "03",
-    title: "CourtShadow Layer",
-    body: "Analyze discourse patterns, pressure language, framing, and credibility markers.",
+    title: "Witness Context",
+    body: "Summarize recollection gaps, preservation issues, and follow-up areas without legal conclusions.",
   },
 ];
 
@@ -26,8 +26,8 @@ export function WorkflowSection() {
     <section id="courtshadow-product" className="border-b border-white/10 bg-[#070707] px-4 py-28">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.78fr_1.22fr]">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">
-            Universal connectivity
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+            Matter workflow
           </div>
           <h2 className="mt-4 font-serif text-4xl font-normal tracking-tight text-white md:text-5xl">
             Universal Litigation Workflow
@@ -35,7 +35,7 @@ export function WorkflowSection() {
           <div className="mt-8 space-y-4">
             {features.map((feature) => (
               <div key={feature.number} className="border-l border-white/10 pl-5">
-                <div className="font-mono text-[10px] text-cyan-300">{feature.number}</div>
+                <div className="font-mono text-[10px] text-slate-500">{feature.number}</div>
                 <div className="mt-2 text-lg text-white">{feature.title}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{feature.body}</p>
               </div>
@@ -49,18 +49,18 @@ export function WorkflowSection() {
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
-            className="absolute left-0 top-0 w-[86%] rounded-2xl border border-white/10 bg-[#0B0F17] p-4 shadow-[0_28px_90px_rgba(0,0,0,0.48)]"
+            className="absolute left-0 top-0 w-[86%] rounded-2xl border border-white/10 bg-[#0B0F17] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
           >
             <div className="mb-4 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-              <FileSearch className="size-4 text-cyan-300" />
-              deposition.parser
+              <FileSearch className="size-4 text-slate-400" />
+              transcript intake
             </div>
             {[
-              "$ parse /uploads/gates_deposition.pdf",
-              "ocr.layer: ready",
-              "q_a_turns: 94",
-              "citations: retained",
-              "status: normalized",
+              "PDF transcript uploaded",
+              "OCR layer available",
+              "94 question-answer turns",
+              "Citations retained",
+              "Ready for review",
             ].map((line) => (
               <div key={line} className="border-t border-white/10 py-3 font-mono text-xs text-slate-400">
                 {line}
@@ -73,20 +73,13 @@ export function WorkflowSection() {
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.15, duration: 0.55 }}
-            className="absolute bottom-0 right-0 w-[82%] rounded-2xl border border-cyan-300/15 bg-[#0A0D12] p-4 shadow-[0_28px_90px_rgba(0,0,0,0.52)]"
+            className="absolute bottom-0 right-0 w-[82%] rounded-2xl border border-white/10 bg-[#0A0D12] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
           >
             <div className="mb-4 flex items-center justify-between">
               <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                attorney.review.console
+                attorney review
               </div>
-              <motion.div
-                animate={{ x: [0, 8, 0], y: [0, 6, 0] }}
-                transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
-                className="flex items-center gap-1 font-mono text-[10px] text-cyan-300"
-              >
-                <MousePointer2 className="size-3.5" />
-                selecting citation
-              </motion.div>
+              <div className="font-mono text-[10px] text-slate-500">citation selected</div>
             </div>
             {[
               ["Claim", "Deletes most incoming emails"],

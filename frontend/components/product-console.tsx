@@ -1,15 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Terminal } from "lucide-react";
+import { CheckCircle2, FileText } from "lucide-react";
 
 const consoleRows = [
-  ["upload.transcript", "scanned_pdf.accepted"],
-  ["ocr.status", "ready"],
-  ["extract.claims", "18 claims"],
-  ["scan.contradictions", "3 candidates"],
-  ["link.evidence", "4 citations"],
-  ["export.report", "markdown.ready"],
+  ["Transcript intake", "PDF and text transcripts"],
+  ["Evidence extraction", "Citation-backed claims"],
+  ["Contradiction review", "Attorney review queue"],
+  ["Report export", "Markdown case summary"],
 ];
 
 const features = [
@@ -21,7 +19,7 @@ const features = [
   {
     number: "02",
     title: "Verified Contradiction Review",
-    body: "The agent distinguishes memory gaps, factual tension, and follow-up needs.",
+    body: "The system distinguishes memory gaps, factual tension, and follow-up needs.",
   },
   {
     number: "03",
@@ -39,15 +37,15 @@ export function ProductConsole() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="rounded-2xl border border-white/10 bg-[#0B0F17] p-4 shadow-[0_24px_90px_rgba(0,0,0,0.45)]"
+          className="rounded-2xl border border-white/10 bg-[#0B0F17] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
         >
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-              <Terminal className="size-4 text-cyan-300" />
-              live.analysis.console
+              <FileText className="size-4 text-slate-400" />
+              analysis workspace
             </div>
-            <div className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 font-mono text-[10px] text-emerald-200">
-              deterministic evidence review
+            <div className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-slate-400">
+              evidence review
             </div>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -60,7 +58,7 @@ export function ProductConsole() {
                 transition={{ delay: index * 0.05, duration: 0.35 }}
                 className="rounded-lg border border-white/10 bg-[#070707] p-4"
               >
-                <div className="font-mono text-xs text-cyan-200">{label}</div>
+                <div className="text-sm font-medium text-white">{label}</div>
                 <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
                   <CheckCircle2 className="size-4 text-emerald-300" />
                   {value}
@@ -71,8 +69,8 @@ export function ProductConsole() {
         </motion.div>
 
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-cyan-300">
-            Reliability and performance
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+            Review workflow
           </div>
           <h2 className="mt-4 font-serif text-4xl font-normal tracking-tight text-white md:text-5xl">
             Deterministic Evidence Review
@@ -80,7 +78,7 @@ export function ProductConsole() {
           <div className="mt-8 space-y-4">
             {features.map((feature) => (
               <div key={feature.number} className="rounded-xl border border-white/10 bg-[#0A0D12] p-5">
-                <div className="font-mono text-[10px] text-cyan-300">{feature.number}</div>
+                <div className="font-mono text-[10px] text-slate-500">{feature.number}</div>
                 <div className="mt-2 text-lg text-white">{feature.title}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{feature.body}</p>
               </div>
