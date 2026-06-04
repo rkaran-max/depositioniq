@@ -46,7 +46,7 @@ class EvidenceVerifier:
             ]
             statuses = {claim.get("verification_status") for claim in linked_claims}
             polarities = {claim.get("polarity") for claim in linked_claims}
-            same_context = len({claim.get("entity") for claim in linked_claims}) == 1
+            same_context = self._same_factual_context(linked_claims)
             contradiction_type = contradiction.get("type")
             supported_pair = len(linked_claims) == 2 and statuses == {"supported"} and same_context
             type_supported = contradiction_type in {
@@ -78,3 +78,17 @@ class EvidenceVerifier:
             )
 
         return verified
+
+    def _same_factual_context(self, linked_claims: list[dict]) -> bool:
+        """Return whether linked claims are close enough for contradiction verification."""
+        if len({claim.get("entity") for claim in linked_claims}) == 1:
+            return True
+
+        scopes = {claim.get("contradiction_scope") for claim in linked_claims}
+        entities = [str(claim.get("entity", "")).lower() for claim in linked_claims]
+        if scopes == {"email_preservation_deletion"} and all(
+            "email" in entity for entity in entities
+        ):
+            return True
+
+        return False

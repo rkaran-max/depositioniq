@@ -32,6 +32,7 @@ class ReportGenerator:
             for question in questions
         )
         verified_count = sum(1 for item in contradictions if item.get("status") == "verified")
+        needs_review_count = len(contradictions) - verified_count
         case_summary = case_summary or {
             "witness": "Unknown witness",
             "key_themes": [],
@@ -56,8 +57,9 @@ class ReportGenerator:
 
 ## Executive Summary
 - Claims extracted: `{len(claims)}`
-- Potential contradictions: `{len(contradictions)}`
-- Verified contradictions: `{verified_count}`
+- Contradiction issues found: `{len(contradictions)}`
+- Verified contradiction issues: `{verified_count}`
+- Issues needing attorney review: `{needs_review_count}`
 - Cross-examination questions: `{len(questions)}`
 
 ## Deposition Review Summary
