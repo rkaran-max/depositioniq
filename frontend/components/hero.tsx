@@ -79,7 +79,7 @@ function EvidenceSurface() {
 
           <rect width="1440" height="620" fill="url(#documentTexture)" opacity="0.32" />
 
-          {[0, 1, 2, 3, 4].map((offset) => (
+          {[0, 1, 2].map((offset) => (
             <motion.path
               key={offset}
               d={`M-80 ${235 + offset * 42} C 210 ${130 + offset * 18}, 405 ${365 - offset * 22}, 680 ${245 + offset * 28} S 1100 ${150 + offset * 42}, 1520 ${255 + offset * 24}`}
@@ -108,8 +108,6 @@ function EvidenceSurface() {
             [285, 398, "589:4"],
             [640, 348, "590:11"],
             [1000, 316, "591:2"],
-            [780, 222, "claim"],
-            [920, 420, "cross"],
           ].map(([cx, cy, label], index) => (
             <g key={`${cx}-${cy}-${label}`}>
               <motion.circle
@@ -120,7 +118,7 @@ function EvidenceSurface() {
                 animate={{ r: index === 1 ? [8, 13, 8] : [5, 8, 5], opacity: [0.55, 1, 0.55] }}
                 transition={{ duration: 4.5 + index * 0.35, repeat: Infinity, ease: "easeInOut" }}
               />
-              <text x={Number(cx) + 16} y={Number(cy) + 4} fill="rgba(203,213,225,0.42)" fontSize="12" fontFamily="ui-monospace, SFMono-Regular">
+              <text x={Number(cx) + 16} y={Number(cy) + 4} fill="rgba(203,213,225,0.34)" fontSize="12" fontFamily="ui-monospace, SFMono-Regular">
                 {label}
               </text>
             </g>

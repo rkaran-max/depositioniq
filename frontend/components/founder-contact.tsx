@@ -43,7 +43,7 @@ export function FounderContact() {
                 <div className="mt-1 text-white">{email}</div>
               </div>
             </div>
-            <Button onClick={copyEmail} className="mt-5 w-full font-mono text-xs uppercase tracking-[0.14em]">
+            <Button onClick={copyEmail} className="mt-5 w-full text-sm">
               <Copy className="size-4" />
               {copied ? "Copied" : "Copy email"}
             </Button>

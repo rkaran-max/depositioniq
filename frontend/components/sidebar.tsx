@@ -15,7 +15,7 @@ const navItems = [
   { label: "Overview", icon: BarChart3, id: "overview" },
   { label: "Contradiction Review", icon: ShieldAlert, id: "contradiction-review" },
   { label: "Evidence Viewer", icon: BookOpenText, id: "transcript-evidence-viewer" },
-  { label: "Review Priorities", icon: FileSearch, id: "claims-graph" },
+  { label: "Review Priorities", icon: FileSearch, id: "demo-results" },
   { label: "Workflow", icon: FileSearch, id: "lawyer-workflow" },
   { label: "Cross-Exam Strategy", icon: MessageSquareQuote, id: "cross-examination" },
   { label: "Witness Profile", icon: UserRound, id: "courtshadow" },
@@ -24,7 +24,7 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-72 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:block">
+    <aside className="sticky top-20 hidden h-[calc(100vh-6rem)] w-72 shrink-0 rounded-xl border border-white/10 bg-[#070A0F]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:block">
       <div className="mb-7 flex items-center gap-3 px-1">
         <img src="/brand/depositioniq-favicon.svg" alt="" className="size-9 rounded-lg" />
         <div>

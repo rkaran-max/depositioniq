@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -47,6 +47,17 @@ const panelMotion = {
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.55, ease: "easeOut" },
 };
+
+type SearchResult = {
+  id: string;
+  category: string;
+  title: string;
+  snippet: string;
+  citation?: string;
+  targetId: string;
+};
+
+const RESULTS_SECTION_ID = "demo-results";
 
 function SectionLabel({
   eyebrow,
@@ -154,6 +165,8 @@ export function Dashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isTranscribingAudio, setIsTranscribingAudio] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [analysisNotice, setAnalysisNotice] = useState(
     "Demo mode uses mock data until the FastAPI backend is running.",
   );
@@ -176,6 +189,45 @@ export function Dashboard() {
     transcriptId,
   } = analysis;
 
+  const searchResults = useMemo(
+    () =>
+      buildSearchResults({
+        query: searchQuery,
+        transcriptText,
+        claims,
+        contradictions,
+        transcriptEvidence,
+        evidenceTrace,
+        strategyCards,
+        reportMarkdown,
+      }),
+    [
+      searchQuery,
+      transcriptText,
+      claims,
+      contradictions,
+      transcriptEvidence,
+      evidenceTrace,
+      strategyCards,
+      reportMarkdown,
+    ],
+  );
+
+  function scrollToResults() {
+    window.setTimeout(() => {
+      document
+        .getElementById(RESULTS_SECTION_ID)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }
+
+  function scrollToSection(targetId: string) {
+    setIsSearchFocused(false);
+    document
+      .getElementById(targetId)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function handleAnalyze() {
     setIsAnalyzing(true);
     setAnalysisNotice("Sending transcript to DepositionIQ FastAPI backend...");
@@ -183,6 +235,7 @@ export function Dashboard() {
       const nextAnalysis = await analyzeTranscript(transcriptText);
       setAnalysis(nextAnalysis);
       setAnalysisNotice(`Live backend analysis complete: ${nextAnalysis.transcriptId}`);
+      scrollToResults();
     } catch (error) {
       setAnalysis(createMockAnalysisState());
       setAnalysisNotice(
@@ -209,6 +262,7 @@ export function Dashboard() {
       setTranscriptText(result.transcriptText);
       setAnalysis(result.analysis);
       setAnalysisNotice(`Live audio analysis complete: ${result.analysis.transcriptId}`);
+      scrollToResults();
     } catch (error) {
       setAnalysisNotice(
         error instanceof Error
@@ -225,26 +279,58 @@ export function Dashboard() {
     setAnalysis(sampleAnalysis);
     setTranscriptText(sampleAnalysis.sampleTranscript);
     setAnalysisNotice("Loaded sample case in demo mode.");
-    document
-      .getElementById("live-analysis-console")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToResults();
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#070A0F] text-slate-100">
+    <main className="relative min-h-screen overflow-hidden bg-[#070A0F] pt-16 text-slate-100">
       <div className="pointer-events-none absolute inset-0 noise-overlay opacity-25" />
 
-      <div className="relative mx-auto flex w-full max-w-[1480px] gap-5 p-5">
+      <div className="relative mx-auto flex w-full max-w-[1800px] gap-6 p-5 xl:p-6">
         <Sidebar />
 
         <section className="min-w-0 flex-1">
-          <header className="sticky top-4 z-30 mb-5 flex items-center gap-3 rounded-xl border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
-            <div className="flex flex-1 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
+          <header className="sticky top-20 z-30 mb-5 flex items-start gap-3 rounded-xl border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+            <div className="relative flex flex-1 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
               <Search className="size-3.5 text-slate-500" />
               <Input
                 className="h-6 border-0 bg-transparent p-0 font-mono text-xs text-slate-300 placeholder:text-slate-600 focus-visible:ring-0"
                 placeholder="Search testimony, citations, contradictions, and witness claims"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 140)}
               />
+              {isSearchFocused && searchQuery.trim() ? (
+                <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-40 max-h-96 overflow-y-auto rounded-xl border border-white/10 bg-[#0B0F17] p-2 shadow-[0_24px_70px_rgba(0,0,0,0.45)]">
+                  {searchResults.length > 0 ? (
+                    <div className="space-y-1">
+                      {searchResults.map((result) => (
+                        <button
+                          key={result.id}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => scrollToSection(result.targetId)}
+                          className="w-full rounded-lg border border-transparent px-3 py-2 text-left transition hover:border-white/10 hover:bg-white/[0.04]"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-slate-400">
+                              {result.category}
+                            </span>
+                            {result.citation ? (
+                              <span className="font-mono text-[10px] text-sky-300">{result.citation}</span>
+                            ) : null}
+                          </div>
+                          <div className="mt-1 text-xs font-medium text-slate-100">{result.title}</div>
+                          <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-slate-500">{result.snippet}</div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-3 py-4 text-sm text-slate-500">No results found.</div>
+                  )}
+                </div>
+              ) : null}
             </div>
             <Badge variant="slate" className="hidden font-mono uppercase tracking-[0.16em] md:inline-flex">
               {statusLabel}
@@ -298,7 +384,7 @@ export function Dashboard() {
                   size="lg"
                   onClick={handleAnalyze}
                   disabled={isAnalyzing || !transcriptText.trim()}
-                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                  className="text-sm"
                 >
                   {isAnalyzing ? "Analyzing..." : "Analyze Transcript"}
                   <ArrowRight className="size-4" />
@@ -308,7 +394,7 @@ export function Dashboard() {
                   variant="secondary"
                   size="lg"
                   onClick={handleViewSampleCase}
-                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                  className="text-sm"
                 >
                   View Sample Case
                 </Button>
@@ -372,10 +458,10 @@ export function Dashboard() {
             </div>
           </ConsolePanel>
 
-          <section className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-            <ConsolePanel id="live-analysis-console" className="p-5">
+          <section className="mt-5 grid scroll-mt-24 gap-5 xl:grid-cols-[minmax(360px,0.42fr)_minmax(580px,0.58fr)]" id="live-analysis-console">
+            <ConsolePanel className="p-5">
               <SectionLabel eyebrow="transcript intake" title="Transcript, PDF, or experimental audio ingestion" action={sourceMode === "api" ? "Live backend" : "Demo fallback"} />
-              <div className="grid gap-3 md:grid-cols-[0.42fr_0.58fr]">
+              <div className="grid gap-3 2xl:grid-cols-[minmax(320px,0.36fr)_minmax(620px,0.64fr)]">
                 <div className="space-y-3">
                   <div className="rounded-lg border border-amber-300/15 bg-amber-300/[0.035] p-4">
                     <div className="flex items-center gap-2">
@@ -428,7 +514,7 @@ export function Dashboard() {
                 <Button
                   onClick={handleAnalyze}
                   disabled={isAnalyzing || !transcriptText.trim()}
-                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                  className="text-sm"
                 >
                   {isAnalyzing ? "Analyzing..." : "Analyze Deposition"}
                   <ArrowRight className="size-4" />
@@ -439,11 +525,11 @@ export function Dashboard() {
               </div>
             </ConsolePanel>
 
-            <ConsolePanel id="claims-graph" className="p-5">
+            <ConsolePanel id={RESULTS_SECTION_ID} className="scroll-mt-24 p-5">
               <SectionLabel eyebrow="review priorities" title="Contradictions and evidence requiring attorney attention" action={`${contradictions.length} issues`} />
               <div className="space-y-3">
-                {contradictions.slice(0, 3).map((contradiction) => (
-                  <div key={contradiction.title} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
+                {contradictions.slice(0, 3).map((contradiction, index) => (
+                  <div key={`${contradiction.title}-${index}`} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-medium text-white">{contradiction.title}</div>
@@ -454,8 +540,8 @@ export function Dashboard() {
                       </Badge>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {contradiction.citations.map((citation) => (
-                        <span key={citation} className="rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] text-slate-400">
+                      {contradiction.citations.map((citation, citationIndex) => (
+                        <span key={`${citation}-${citationIndex}`} className="rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] text-slate-400">
                           {citation}
                         </span>
                       ))}
@@ -514,8 +600,8 @@ export function Dashboard() {
             <ConsolePanel id="contradiction-review" className="p-4">
               <SectionLabel eyebrow="contradiction review" title="Verified conflicts and unresolved testimony gaps" action={`${contradictions.length} issues`} />
               <div className="space-y-3">
-                {contradictions.map((contradiction) => (
-                  <div key={contradiction.title} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
+                {contradictions.map((contradiction, index) => (
+                  <div key={`${contradiction.title}-${index}`} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <ShieldAlert className="size-4 text-violet-300" />
@@ -549,16 +635,16 @@ export function Dashboard() {
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {contradiction.linkedEvidence.map((evidenceId) => (
-                        <span key={evidenceId} className="inline-flex items-center gap-1 rounded border border-violet-300/15 bg-violet-300/10 px-2 py-1 font-mono text-[10px] text-violet-200">
+                      {contradiction.linkedEvidence.map((evidenceId, evidenceIndex) => (
+                        <span key={`${evidenceId}-${evidenceIndex}`} className="inline-flex items-center gap-1 rounded border border-violet-300/15 bg-violet-300/10 px-2 py-1 font-mono text-[10px] text-violet-200">
                           <Link2 className="size-3" />
                           {evidenceId}
                         </span>
                       ))}
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {contradiction.citations.map((citation) => (
-                        <span key={citation} className="rounded border border-white/10 bg-[#111827] px-2 py-1 font-mono text-[10px] text-slate-400">
+                      {contradiction.citations.map((citation, citationIndex) => (
+                        <span key={`${citation}-${citationIndex}`} className="rounded border border-white/10 bg-[#111827] px-2 py-1 font-mono text-[10px] text-slate-400">
                           {citation}
                         </span>
                       ))}
@@ -572,7 +658,7 @@ export function Dashboard() {
               <SectionLabel eyebrow="cross-exam strategy" title="Attorney prompt synthesis" action={`${strategyCards.length} targets`} />
               <div className="space-y-3">
                 {strategyCards.map((card, index) => (
-                  <div key={card.objective} className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-300/25 hover:bg-[#0B0F17]">
+                  <div key={`${card.objective}-${index}`} className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-300/25 hover:bg-[#0B0F17]">
                     <div className="flex items-center gap-3">
                       <div className="flex size-7 items-center justify-center rounded border border-sky-300/20 bg-sky-300/10 font-mono text-[10px] text-sky-200">
                         {String(index + 1).padStart(2, "0")}
@@ -694,7 +780,7 @@ export function Dashboard() {
                     ? "Live FastAPI backend output is ready for download."
                     : "Mock-backed fallback remains available when the backend API is offline."}
                 </p>
-                <Button asChild className="mt-4 w-full font-mono text-xs uppercase tracking-[0.12em]">
+                <Button asChild className="mt-4 w-full text-sm">
                   <a
                     href={`data:text/markdown;charset=utf-8,${encodeURIComponent(reportMarkdown)}`}
                     download="depositioniq-report.md"
@@ -709,4 +795,130 @@ export function Dashboard() {
       </div>
     </main>
   );
+}
+
+function buildSearchResults({
+  query,
+  transcriptText,
+  claims,
+  contradictions,
+  transcriptEvidence,
+  evidenceTrace,
+  strategyCards,
+  reportMarkdown,
+}: {
+  query: string;
+  transcriptText: string;
+  claims: Array<{ id: string; claim: string; topic: string; citation: string }>;
+  contradictions: Array<{ title: string; summary: string; citations: string[] }>;
+  transcriptEvidence: Array<{
+    id: string;
+    citation: string;
+    text: string;
+    extractedClaim: string;
+    relatedContradiction?: string;
+  }>;
+  evidenceTrace: Array<{ id: string; source: string; signal: string; excerpt: string }>;
+  strategyCards: Array<{
+    objective: string;
+    primaryQuestion: string;
+    followUpQuestion: string;
+    citation: string;
+    attorneyNote: string;
+  }>;
+  reportMarkdown: string;
+}): SearchResult[] {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    return [];
+  }
+
+  const candidates: SearchResult[] = [
+    {
+      id: "transcript-current",
+      category: "Transcript",
+      title: "Current transcript text",
+      snippet: transcriptText,
+      targetId: "live-analysis-console",
+    },
+    ...claims.map((claim) => ({
+      id: `claim-${claim.id}`,
+      category: "Claim",
+      title: claim.claim,
+      snippet: claim.topic,
+      citation: claim.citation,
+      targetId: "claims",
+    })),
+    ...contradictions.map((contradiction, index) => ({
+      id: `contradiction-${index}-${contradiction.title}`,
+      category: "Contradiction",
+      title: contradiction.title,
+      snippet: contradiction.summary,
+      citation: contradiction.citations.join(", "),
+      targetId: "contradiction-review",
+    })),
+    ...transcriptEvidence.map((evidence) => ({
+      id: `transcript-evidence-${evidence.id}`,
+      category: "Evidence",
+      title: evidence.extractedClaim,
+      snippet: [evidence.text, evidence.relatedContradiction].filter(Boolean).join(" "),
+      citation: evidence.citation,
+      targetId: "transcript-evidence-viewer",
+    })),
+    ...evidenceTrace.map((evidence) => ({
+      id: `evidence-trace-${evidence.id}`,
+      category: "Evidence Trace",
+      title: evidence.signal,
+      snippet: evidence.excerpt,
+      citation: evidence.source,
+      targetId: "evidence-trace",
+    })),
+    ...strategyCards.map((card, index) => ({
+      id: `cross-exam-${index}-${card.objective}`,
+      category: "Cross-Exam",
+      title: card.objective,
+      snippet: `${card.primaryQuestion} ${card.followUpQuestion} ${card.attorneyNote}`,
+      citation: card.citation,
+      targetId: "cross-examination",
+    })),
+    {
+      id: "report-markdown",
+      category: "Report",
+      title: "Exported report markdown",
+      snippet: reportMarkdown,
+      targetId: "report",
+    },
+  ];
+
+  return candidates
+    .filter((candidate) =>
+      [
+        candidate.category,
+        candidate.title,
+        candidate.snippet,
+        candidate.citation ?? "",
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery),
+    )
+    .slice(0, 8)
+    .map((candidate) => ({
+      ...candidate,
+      snippet: compactSnippet(candidate.snippet, normalizedQuery),
+    }));
+}
+
+function compactSnippet(text: string, query: string): string {
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (cleaned.length <= 180) {
+    return cleaned || "No additional context.";
+  }
+
+  const index = cleaned.toLowerCase().indexOf(query);
+  const start = Math.max(0, index > -1 ? index - 70 : 0);
+  const end = Math.min(cleaned.length, start + 180);
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < cleaned.length ? "..." : "";
+  return `${prefix}${cleaned.slice(start, end)}${suffix}`;
 }
