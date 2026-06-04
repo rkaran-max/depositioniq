@@ -5,12 +5,14 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   CheckCircle2,
+  FileArchive,
   FileCheck2,
   FileText,
   Link2,
   MessageSquareQuote,
   SearchCheck,
   ShieldAlert,
+  UploadCloud,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -55,81 +57,62 @@ const evidenceRows = [
   },
 ];
 
-const ribbonItems = [
-  { label: "Transcript", icon: FileText, color: "text-slate-300" },
-  { label: "Claims", icon: SearchCheck, color: "text-sky-300" },
-  { label: "Evidence", icon: Link2, color: "text-cyan-300" },
-  { label: "Contradictions", icon: ShieldAlert, color: "text-amber-300" },
-  { label: "Cross-Exam", icon: MessageSquareQuote, color: "text-violet-300" },
-  { label: "Report", icon: FileCheck2, color: "text-emerald-300" },
-];
-
 const backgroundTiles = [
-  { label: "Extract claims", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.055]" },
-  { label: "Analyze depositions", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
-  { label: "Link citations", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.05]" },
-  { label: "Detect contradictions", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055]" },
-  { label: "Build cross-exam", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.05]" },
-  { label: "Review testimony", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
-  { label: "Export report", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
-  { label: "Preserve evidence", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.05]" },
-  { label: "Flag recall gaps", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05]" },
-  { label: "Verify conflicts", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
-  { label: "Map timeline", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
-  { label: "Prepare memo", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
+  { label: "Transcript intake", icon: FileText, accent: "bg-slate-300", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
+  { label: "Audio upload", icon: UploadCloud, accent: "bg-blue-300", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.045]" },
+  { label: "PDF ingestion", icon: FileArchive, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
+  { label: "Claim extraction", icon: SearchCheck, accent: "bg-sky-300", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.05]" },
+  { label: "Citation linking", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.05]" },
+  { label: "Contradiction review", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055]" },
+  { label: "Recall gaps", icon: MessageSquareQuote, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.045]" },
+  { label: "Cross-exam strategy", icon: MessageSquareQuote, accent: "bg-violet-300", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.05]" },
+  { label: "Evidence trace", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
+  { label: "Report export", icon: FileCheck2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
+  { label: "Attorney review", icon: CheckCircle2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.045]" },
+  { label: "Preservation issues", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05]" },
 ];
-
-function WorkflowRibbon() {
-  const doubled = [...ribbonItems, ...ribbonItems];
-
-  return (
-    <div className="pointer-events-none absolute inset-x-4 bottom-8 z-10 mx-auto hidden max-w-7xl overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17]/72 p-2 shadow-[0_18px_70px_rgba(0,0,0,0.34)] backdrop-blur-md lg:block">
-      <div className="marquee-track flex w-max gap-2">
-        {doubled.map((item, index) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={`${item.label}-${index}`}
-              className="flex items-center gap-2 rounded-md border border-white/10 bg-[#070A0F]/86 px-4 py-2 text-xs text-slate-300"
-            >
-              <Icon className={`size-3.5 ${item.color}`} />
-              {item.label}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function EvidenceSurface() {
   return (
-    <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.14),transparent_28rem),radial-gradient(circle_at_84%_58%,rgba(245,158,11,0.08),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.16),transparent_28rem),radial-gradient(circle_at_86%_58%,rgba(245,158,11,0.09),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
 
-      <div className="absolute inset-x-[-8%] top-[8%] h-[680px] rotate-[-3deg] opacity-70 blur-[0.2px]">
-        <div className="grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
+      <motion.div
+        className="pointer-events-auto absolute inset-x-[-6%] top-[9%] h-[690px] opacity-78"
+        animate={{ x: [-8, 8, -8] }}
+        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="grid rotate-[-2deg] grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
           {backgroundTiles.map((tile, index) => (
             <motion.div
               key={tile.label}
-              className={`h-24 rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm ${tile.tone}`}
-              initial={{ opacity: 0.34, y: 8 }}
+              whileHover={{
+                opacity: 0.92,
+                y: -4,
+                transition: { duration: 0.18 },
+              }}
+              className={`group/tile relative h-24 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/[0.07] ${tile.tone}`}
+              initial={{ opacity: 0.36, y: 8 }}
               animate={{
-                opacity: index % 4 === 0 ? [0.34, 0.72, 0.34] : [0.26, 0.42, 0.26],
+                opacity: index % 4 === 0 ? [0.38, 0.68, 0.38] : [0.28, 0.44, 0.28],
                 y: index % 3 === 0 ? [8, 0, 8] : [0, -5, 0],
               }}
               transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.22 }}
             >
-              <div className="font-mono text-[10px] text-current opacity-60">
-                {String(index + 1).padStart(2, "0")}
+              <div className={`absolute inset-x-0 top-0 h-0.5 opacity-35 transition-opacity group-hover/tile:opacity-90 ${tile.accent}`} />
+              <div className="flex items-center justify-between">
+                <tile.icon className="size-3.5 opacity-70 transition-opacity group-hover/tile:opacity-100" />
+                <span className="font-mono text-[10px] text-current opacity-45">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               </div>
               <div className="mt-5 font-medium text-current">{tile.label}</div>
             </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="absolute inset-x-[-10%] top-[31%] h-[360px] opacity-55">
+      <div className="pointer-events-none absolute inset-x-[-10%] top-[31%] h-[360px] opacity-50">
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 1440 360"
@@ -169,8 +152,8 @@ function EvidenceSurface() {
         </svg>
       </div>
 
-      <div className="absolute inset-y-0 left-0 w-[58%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.97)_42%,rgba(7,10,15,0.72)_74%,transparent_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[60%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.98)_44%,rgba(7,10,15,0.78)_74%,transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
 }
@@ -179,9 +162,8 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-[#070A0F] px-4 pt-24">
       <EvidenceSurface />
-      <WorkflowRibbon />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 pb-32 pt-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 py-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
