@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -58,18 +59,18 @@ const evidenceRows = [
 ];
 
 const backgroundTiles = [
-  { label: "Transcript intake", icon: FileText, accent: "bg-slate-300", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
-  { label: "Audio upload", icon: UploadCloud, accent: "bg-blue-300", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.045]" },
-  { label: "PDF ingestion", icon: FileArchive, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
-  { label: "Claim extraction", icon: SearchCheck, accent: "bg-sky-300", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.05]" },
-  { label: "Citation linking", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.05]" },
-  { label: "Contradiction review", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055]" },
-  { label: "Recall gaps", icon: MessageSquareQuote, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.045]" },
-  { label: "Cross-exam strategy", icon: MessageSquareQuote, accent: "bg-violet-300", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.05]" },
-  { label: "Evidence trace", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
-  { label: "Report export", icon: FileCheck2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
-  { label: "Attorney review", icon: CheckCircle2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.045]" },
-  { label: "Preservation issues", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05]" },
+  { label: "Transcript Intake", icon: FileText, accent: "bg-slate-300", tone: "text-slate-200 border-white/10 bg-white/[0.04] hover:border-slate-200/25", x: "44%", y: "10%", width: "170px" },
+  { label: "Audio Upload", icon: UploadCloud, accent: "bg-blue-300", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.045] hover:border-blue-300/35", x: "68%", y: "8%", width: "154px" },
+  { label: "PDF Ingestion", icon: FileArchive, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045] hover:border-cyan-300/35", x: "82%", y: "16%", width: "150px" },
+  { label: "Claim Extraction", icon: SearchCheck, accent: "bg-sky-300", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.055] hover:border-sky-300/35", x: "57%", y: "26%", width: "172px" },
+  { label: "Citation Linking", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.055] hover:border-cyan-300/35", x: "75%", y: "31%", width: "164px" },
+  { label: "Evidence Trace", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045] hover:border-cyan-300/35", x: "47%", y: "48%", width: "158px" },
+  { label: "Contradiction Review", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055] hover:border-amber-300/40", x: "65%", y: "52%", width: "190px" },
+  { label: "Recall Gaps", icon: MessageSquareQuote, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.045] hover:border-amber-300/40", x: "84%", y: "48%", width: "148px" },
+  { label: "Preservation Issues", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05] hover:border-amber-300/40", x: "52%", y: "68%", width: "184px" },
+  { label: "Cross-Exam Strategy", icon: MessageSquareQuote, accent: "bg-violet-300", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.055] hover:border-violet-300/35", x: "74%", y: "70%", width: "190px" },
+  { label: "Attorney Review", icon: CheckCircle2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05] hover:border-emerald-300/35", x: "88%", y: "66%", width: "166px" },
+  { label: "Report Export", icon: FileCheck2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05] hover:border-emerald-300/35", x: "69%", y: "86%", width: "156px" },
 ];
 
 const ribbonItems = [
@@ -110,84 +111,109 @@ function WorkflowRibbon() {
 }
 
 function EvidenceSurface() {
+  const [activeTile, setActiveTile] = useState<string | null>(null);
+  const isActive = Boolean(activeTile);
+
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.16),transparent_28rem),radial-gradient(circle_at_86%_58%,rgba(245,158,11,0.09),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
 
-      <motion.div
-        className="pointer-events-auto absolute inset-x-[-4%] top-[8%] h-[720px] opacity-90"
-        animate={{ x: [-8, 8, -8] }}
-        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="grid rotate-[-1.5deg] grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
-          {backgroundTiles.map((tile, index) => (
-            <motion.div
-              key={tile.label}
-              whileHover={{
-                opacity: 0.92,
-                y: -4,
-                transition: { duration: 0.18 },
-              }}
-              className={`group/tile relative h-28 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.24)] backdrop-blur-sm transition-colors hover:border-white/25 hover:bg-white/[0.085] ${tile.tone}`}
-              initial={{ opacity: 0.42, y: 8 }}
-              animate={{
-                opacity: index % 4 === 0 ? [0.46, 0.78, 0.46] : [0.34, 0.56, 0.34],
-                y: index % 3 === 0 ? [8, 0, 8] : [0, -5, 0],
-              }}
-              transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.22 }}
-            >
-              <div className={`absolute inset-x-0 top-0 h-0.5 opacity-35 transition-opacity group-hover/tile:opacity-90 ${tile.accent}`} />
-              <div className="flex items-center justify-between">
-                <tile.icon className="size-3.5 opacity-70 transition-opacity group-hover/tile:opacity-100" />
-                <span className="font-mono text-[10px] text-current opacity-45">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <div className="mt-7 font-medium text-current">{tile.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      <div className="pointer-events-none absolute inset-x-[-10%] top-[31%] h-[360px] opacity-50">
+      <div className="pointer-events-none absolute right-[-5%] top-[5%] h-[760px] w-[68%]">
         <svg
           className="absolute inset-0 h-full w-full"
-          viewBox="0 0 1440 360"
+          viewBox="0 0 900 760"
           preserveAspectRatio="none"
           role="img"
         >
           <defs>
             <linearGradient id="evidenceLink" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(56,189,248,0)" />
-              <stop offset="52%" stopColor="rgba(56,189,248,0.34)" />
+              <stop offset="52%" stopColor="rgba(56,189,248,0.42)" />
               <stop offset="100%" stopColor="rgba(56,189,248,0)" />
             </linearGradient>
             <linearGradient id="contradictionStroke" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(251,191,36,0)" />
-              <stop offset="50%" stopColor="rgba(251,191,36,0.42)" />
+              <stop offset="50%" stopColor="rgba(251,191,36,0.50)" />
               <stop offset="100%" stopColor="rgba(251,191,36,0)" />
+            </linearGradient>
+            <linearGradient id="reviewStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(167,139,250,0)" />
+              <stop offset="48%" stopColor="rgba(167,139,250,0.42)" />
+              <stop offset="100%" stopColor="rgba(52,211,153,0.12)" />
             </linearGradient>
           </defs>
           <motion.path
-            d="M-80 210 C 215 76, 442 310, 690 178 S 1080 56, 1520 206"
+            d="M116 120 C 220 190, 288 214, 356 276 S 490 368, 590 358"
             fill="none"
             stroke="url(#evidenceLink)"
-            strokeWidth="2.3"
+            strokeWidth="1.8"
             initial={{ pathLength: 0.2, pathOffset: 0 }}
-            animate={{ pathLength: [0.26, 0.62, 0.26], pathOffset: [0, 0.08, 0] }}
-            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ pathLength: [0.24, 0.78, 0.24], pathOffset: [0, 0.06, 0], opacity: isActive ? 0.72 : 0.42 }}
+            transition={{ duration: 10.5, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.path
-            d="M-40 248 C 240 190, 432 232, 606 250 S 984 312, 1500 162"
+            d="M358 278 C 430 356, 482 405, 535 500 S 650 598, 706 612"
             fill="none"
             stroke="url(#contradictionStroke)"
-            strokeWidth="2.1"
+            strokeWidth="1.9"
             strokeDasharray="10 14"
-            animate={{ pathLength: [0.18, 0.7, 0.18], opacity: [0.18, 0.5, 0.18] }}
+            animate={{ pathLength: [0.18, 0.72, 0.18], opacity: isActive ? [0.4, 0.72, 0.4] : [0.22, 0.52, 0.22] }}
             transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.path
+            d="M202 54 C 152 112, 120 164, 130 220 S 272 352, 286 476"
+            fill="none"
+            stroke="url(#evidenceLink)"
+            strokeWidth="1.35"
+            animate={{ pathLength: [0.18, 0.66, 0.18], opacity: isActive ? [0.32, 0.62, 0.32] : [0.14, 0.34, 0.14] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.path
+            d="M280 602 C 376 628, 510 658, 620 620 S 730 570, 795 525"
+            fill="none"
+            stroke="url(#reviewStroke)"
+            strokeWidth="1.6"
+            animate={{ pathLength: [0.2, 0.82, 0.2], opacity: isActive ? [0.34, 0.68, 0.34] : [0.16, 0.42, 0.16] }}
+            transition={{ duration: 9.5, repeat: Infinity, ease: "easeInOut" }}
           />
         </svg>
       </div>
+
+      <motion.div
+        className="pointer-events-auto absolute inset-0"
+        animate={{ x: [-5, 5, -5] }}
+        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {backgroundTiles.map((tile, index) => (
+          <motion.div
+            key={tile.label}
+            onHoverStart={() => setActiveTile(tile.label)}
+            onHoverEnd={() => setActiveTile(null)}
+            whileHover={{
+              opacity: 0.96,
+              y: -4,
+              transition: { duration: 0.18 },
+            }}
+            className={`group/tile absolute hidden h-28 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.24)] backdrop-blur-sm transition-colors md:block ${tile.tone}`}
+            style={{ left: tile.x, top: tile.y, width: tile.width }}
+            initial={{ opacity: 0.42, y: 8 }}
+            animate={{
+              opacity: activeTile === tile.label ? 0.96 : index % 4 === 0 ? [0.48, 0.74, 0.48] : [0.34, 0.54, 0.34],
+              y: activeTile === tile.label ? -4 : index % 3 === 0 ? [8, 0, 8] : [0, -4, 0],
+            }}
+            transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.18 }}
+          >
+            <div className={`absolute inset-x-0 top-0 h-0.5 opacity-40 transition-opacity group-hover/tile:opacity-95 ${tile.accent}`} />
+            <div className="flex items-center justify-between">
+              <tile.icon className="size-3.5 opacity-70 transition-opacity group-hover/tile:opacity-100" />
+              <span className="font-mono text-[10px] text-current opacity-45">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="mt-7 font-medium text-current">{tile.label}</div>
+          </motion.div>
+        ))}
+      </motion.div>
 
       <div className="pointer-events-none absolute inset-y-0 left-0 w-[62%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.985)_46%,rgba(7,10,15,0.80)_76%,transparent_100%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
