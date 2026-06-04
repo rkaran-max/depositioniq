@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import re
 import tempfile
 from pathlib import Path
 
@@ -15,6 +17,8 @@ from src.audio_transcriber import (
     transcribe_audio,
 )
 from src.pipeline import run_pipeline, serialize_pipeline_result
+
+logger = logging.getLogger("depositioniq.api")
 
 
 class AnalyzeRequest(BaseModel):
@@ -82,22 +86,120 @@ async def transcribe_analyze(audio_file: UploadFile = File(...)) -> dict:
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=extension) as temp_file:
             temp_path = Path(temp_file.name)
+            bytes_written = 0
             while chunk := await audio_file.read(1024 * 1024):
+                bytes_written += len(chunk)
                 temp_file.write(chunk)
 
+        if not bytes_written:
+            raise AudioTranscriptionError("Uploaded audio file was empty.")
+
+        logger.info(
+            "Saved uploaded audio filename=%s temp_path=%s bytes=%s",
+            filename,
+            temp_path,
+            bytes_written,
+        )
         transcript_text = transcribe_audio(str(temp_path))
+        logger.info("Audio transcription succeeded characters=%s", len(transcript_text))
+        pipeline_transcript_text = _transcript_for_pipeline(transcript_text)
         results = run_pipeline(
-            transcript_text,
-            metadata={"source": "audio-upload", "interface": "fastapi"},
+            pipeline_transcript_text,
+            metadata={
+                "source": "audio-upload",
+                "interface": "fastapi",
+                "original_filename": filename,
+                "transcription_mode": "audio",
+            },
         )
         payload = serialize_pipeline_result(results)
         payload["transcript_text"] = transcript_text
         return payload
     except AudioTranscriptionError as exc:
+        logger.info("Audio transcription unavailable or invalid: %s", exc)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
+        logger.exception("Audio transcription analysis failed")
         raise HTTPException(status_code=500, detail=f"Audio analysis failed: {exc}") from exc
     finally:
         await audio_file.close()
         if temp_path and temp_path.exists():
             temp_path.unlink(missing_ok=True)
+
+
+def _transcript_for_pipeline(transcript_text: str) -> str:
+    """Ensure plain audio transcription can enter the deposition pipeline.
+
+    Whisper generally returns prose without `Q:`/`A:` deposition markers. The
+    deterministic pipeline requires at least one witness answer, so plain audio
+    is treated as a witness answer while the raw transcript is still returned to
+    clients for editing/review.
+    """
+
+    lines = [line.strip() for line in transcript_text.splitlines() if line.strip()]
+    if any(line.lower().startswith("a:") for line in lines):
+        return "\n".join(lines)
+
+    reconstructed = _reconstruct_qa_from_audio_text(" ".join(lines) if lines else transcript_text)
+    if reconstructed:
+        return reconstructed
+    return f"A: {' '.join(lines) if lines else transcript_text.strip()}"
+
+
+def _reconstruct_qa_from_audio_text(transcript_text: str) -> str:
+    """Infer simple Q:/A: turns from Whisper-style prose.
+
+    This is intentionally conservative and deterministic. It handles short demo
+    recordings where counsel questions are followed by witness answers such as
+    "Yes, ..." or "No.".
+    """
+
+    sentences = re.findall(r"[^.!?]+[.!?]?", transcript_text)
+    turns: list[str] = []
+    pending_question = ""
+    pending_answer: list[str] = []
+
+    def flush_answer() -> None:
+        nonlocal pending_question, pending_answer
+        if pending_question and pending_answer:
+            turns.append(f"A: {' '.join(pending_answer).strip()}")
+            pending_answer = []
+
+    for raw_sentence in sentences:
+        sentence = raw_sentence.strip()
+        if not sentence:
+            continue
+
+        if _looks_like_audio_question(sentence):
+            flush_answer()
+            turns.append(f"Q: {sentence.rstrip()}")
+            pending_question = sentence
+            continue
+
+        if pending_question:
+            pending_answer.append(sentence)
+
+    flush_answer()
+    return "\n".join(turns) if any(line.startswith("A:") for line in turns) else ""
+
+
+def _looks_like_audio_question(sentence: str) -> bool:
+    """Return True when a transcribed sentence likely belongs to counsel."""
+
+    lowered = sentence.lower().strip()
+    if lowered.endswith("?"):
+        return True
+    question_starts = (
+        "did you",
+        "do you",
+        "have you",
+        "were you",
+        "are you",
+        "when did",
+        "what did",
+        "what time",
+        "earlier, you testified",
+        "you testified",
+        "previously, you testified",
+    )
+    return lowered.startswith(question_starts)

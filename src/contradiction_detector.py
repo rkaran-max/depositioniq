@@ -69,6 +69,15 @@ class ContradictionDetector:
         if same_scope and same_entity:
             return True
 
+        shared_preservation_lane = (
+            same_scope
+            and left.get("contradiction_scope") == "email_preservation_deletion"
+            and "email" in left.get("entity", "").lower()
+            and "email" in right.get("entity", "").lower()
+        )
+        if shared_preservation_lane:
+            return True
+
         memory_pair = "low" in {left.get("certainty"), right.get("certainty")}
         shared_email_lane = (
             {left.get("contradiction_scope"), right.get("contradiction_scope")}
