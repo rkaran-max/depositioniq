@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import * as THREE from "three";
 import {
   ArrowRight,
   CheckCircle2,
@@ -58,19 +59,65 @@ const evidenceRows = [
   },
 ];
 
-const backgroundTiles = [
-  { label: "Transcript Intake", icon: FileText, accent: "bg-slate-300", tone: "text-slate-200 border-white/10 bg-white/[0.04] hover:border-slate-200/25", x: "44%", y: "10%", width: "170px" },
-  { label: "Audio Upload", icon: UploadCloud, accent: "bg-blue-300", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.045] hover:border-blue-300/35", x: "68%", y: "8%", width: "154px" },
-  { label: "PDF Ingestion", icon: FileArchive, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045] hover:border-cyan-300/35", x: "82%", y: "16%", width: "150px" },
-  { label: "Claim Extraction", icon: SearchCheck, accent: "bg-sky-300", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.055] hover:border-sky-300/35", x: "57%", y: "26%", width: "172px" },
-  { label: "Citation Linking", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.055] hover:border-cyan-300/35", x: "75%", y: "31%", width: "164px" },
-  { label: "Evidence Trace", icon: Link2, accent: "bg-cyan-300", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045] hover:border-cyan-300/35", x: "47%", y: "48%", width: "158px" },
-  { label: "Contradiction Review", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055] hover:border-amber-300/40", x: "65%", y: "52%", width: "190px" },
-  { label: "Recall Gaps", icon: MessageSquareQuote, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.045] hover:border-amber-300/40", x: "84%", y: "48%", width: "148px" },
-  { label: "Preservation Issues", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05] hover:border-amber-300/40", x: "52%", y: "68%", width: "184px" },
-  { label: "Cross-Exam Strategy", icon: MessageSquareQuote, accent: "bg-violet-300", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.055] hover:border-violet-300/35", x: "74%", y: "70%", width: "190px" },
-  { label: "Attorney Review", icon: CheckCircle2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05] hover:border-emerald-300/35", x: "88%", y: "66%", width: "166px" },
-  { label: "Report Export", icon: FileCheck2, accent: "bg-emerald-300", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05] hover:border-emerald-300/35", x: "69%", y: "86%", width: "156px" },
+type NetworkTone = "evidence" | "risk" | "verified" | "workflow";
+
+type NetworkNode = {
+  label: string;
+  tone: NetworkTone;
+  position: [number, number, number];
+};
+
+const networkColors: Record<NetworkTone, number> = {
+  evidence: 0x5eead4,
+  risk: 0xfbbf24,
+  verified: 0x86efac,
+  workflow: 0xa78bfa,
+};
+
+const networkNodes: NetworkNode[] = [
+  { label: "Transcript", tone: "evidence", position: [-2.8, 1.25, 0.1] },
+  { label: "Audio", tone: "workflow", position: [-3.5, 2.25, -0.2] },
+  { label: "PDF", tone: "evidence", position: [-3.6, 0.25, -0.1] },
+  { label: "Claims", tone: "verified", position: [-1.35, 1.05, 0.15] },
+  { label: "Claim A", tone: "verified", position: [-0.95, 2.0, -0.1] },
+  { label: "Claim B", tone: "verified", position: [-0.45, 0.15, 0.05] },
+  { label: "Citations", tone: "evidence", position: [0.25, 1.25, 0.18] },
+  { label: "Evidence Trace", tone: "evidence", position: [1.25, 0.55, -0.12] },
+  { label: "Preservation Issues", tone: "risk", position: [0.85, -0.7, 0.08] },
+  { label: "Contradictions", tone: "risk", position: [2.25, 1.3, 0.15] },
+  { label: "Recall Gaps", tone: "risk", position: [2.95, 0.05, -0.1] },
+  { label: "Verified Claims", tone: "verified", position: [2.0, 2.25, -0.18] },
+  { label: "Cross-Exam Strategy", tone: "workflow", position: [3.65, 1.15, 0.05] },
+  { label: "Follow-Up Questions", tone: "workflow", position: [4.15, -0.15, -0.12] },
+  { label: "Attorney Review", tone: "verified", position: [3.25, -1.15, 0.12] },
+  { label: "Report Export", tone: "verified", position: [1.55, -1.65, -0.08] },
+  { label: "Risk Memo", tone: "risk", position: [0.0, -1.65, 0.04] },
+  { label: "Citation Bundle", tone: "evidence", position: [-1.55, -1.05, -0.16] },
+];
+
+const networkEdges: Array<[number, number]> = [
+  [1, 0],
+  [2, 0],
+  [0, 3],
+  [3, 4],
+  [3, 5],
+  [3, 6],
+  [6, 7],
+  [7, 8],
+  [5, 8],
+  [6, 9],
+  [8, 9],
+  [9, 10],
+  [4, 11],
+  [9, 12],
+  [10, 12],
+  [12, 13],
+  [13, 14],
+  [14, 15],
+  [8, 16],
+  [16, 15],
+  [7, 17],
+  [17, 15],
 ];
 
 const ribbonItems = [
@@ -110,112 +157,243 @@ function WorkflowRibbon() {
   );
 }
 
-function EvidenceSurface() {
-  const [activeTile, setActiveTile] = useState<string | null>(null);
-  const isActive = Boolean(activeTile);
+function createLabelTexture(label: string, color: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 384;
+  canvas.height = 96;
+  const context = canvas.getContext("2d");
 
+  if (!context) {
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.font = "500 28px Inter, ui-sans-serif, system-ui, sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillStyle = "rgba(7,10,15,0.58)";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = color;
+  context.globalAlpha = 0.34;
+  context.strokeRect(12, 18, canvas.width - 24, canvas.height - 36);
+  context.globalAlpha = 1;
+  context.fillStyle = "rgba(226,232,240,0.82)";
+  context.fillText(label, canvas.width / 2, canvas.height / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function ThreeEvidenceNetwork() {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+
+    if (!mount) {
+      return;
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0.9, 0.2, 8.4);
+    camera.lookAt(0.7, 0.2, 0);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    mount.appendChild(renderer.domElement);
+
+    const networkGroup = new THREE.Group();
+    networkGroup.position.set(0.9, -0.05, 0);
+    scene.add(networkGroup);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    const pointLight = new THREE.PointLight(0x60a5fa, 2.2, 14);
+    pointLight.position.set(1.6, 1.8, 3.4);
+    scene.add(pointLight);
+
+    const nodeGeometry = new THREE.SphereGeometry(0.075, 32, 32);
+    const haloGeometry = new THREE.SphereGeometry(0.18, 32, 32);
+    const nodes: THREE.Mesh[] = [];
+    const halos: THREE.Mesh[] = [];
+    const labelSprites: THREE.Sprite[] = [];
+
+    networkNodes.forEach((node) => {
+      const color = networkColors[node.tone];
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95 });
+      const haloMaterial = new THREE.MeshBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.13,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
+      const mesh = new THREE.Mesh(nodeGeometry, material);
+      const halo = new THREE.Mesh(haloGeometry, haloMaterial);
+      mesh.position.set(...node.position);
+      halo.position.copy(mesh.position);
+      networkGroup.add(mesh, halo);
+      nodes.push(mesh);
+      halos.push(halo);
+
+      const labelMaterial = new THREE.SpriteMaterial({
+        map: createLabelTexture(node.label, `#${color.toString(16).padStart(6, "0")}`),
+        transparent: true,
+        opacity: 0.62,
+        depthWrite: false,
+      });
+      const label = new THREE.Sprite(labelMaterial);
+      label.position.set(node.position[0], node.position[1] - 0.27, node.position[2]);
+      label.scale.set(0.86, 0.22, 1);
+      networkGroup.add(label);
+      labelSprites.push(label);
+    });
+
+    const lineMaterials: THREE.LineBasicMaterial[] = [];
+    networkEdges.forEach(([from, to]) => {
+      const start = new THREE.Vector3(...networkNodes[from].position);
+      const end = new THREE.Vector3(...networkNodes[to].position);
+      const color =
+        networkNodes[from].tone === "risk" || networkNodes[to].tone === "risk"
+          ? networkColors.risk
+          : networkNodes[from].tone === "verified" || networkNodes[to].tone === "verified"
+            ? networkColors.verified
+            : networkColors.evidence;
+
+      const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+      const material = new THREE.LineBasicMaterial({
+        color,
+        transparent: true,
+        opacity: 0.18,
+        blending: THREE.AdditiveBlending,
+      });
+      networkGroup.add(new THREE.Line(geometry, material));
+      lineMaterials.push(material);
+    });
+
+    const pulseGeometry = new THREE.SphereGeometry(0.045, 18, 18);
+    const pulses = networkEdges.slice(0, 10).map(([from, to], index) => {
+      const tone =
+        networkNodes[from].tone === "risk" || networkNodes[to].tone === "risk"
+          ? "risk"
+          : networkNodes[from].tone === "verified" || networkNodes[to].tone === "verified"
+            ? "verified"
+            : "evidence";
+      const material = new THREE.MeshBasicMaterial({
+        color: networkColors[tone],
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const pulse = new THREE.Mesh(pulseGeometry, material);
+      networkGroup.add(pulse);
+      return {
+        pulse,
+        from: new THREE.Vector3(...networkNodes[from].position),
+        to: new THREE.Vector3(...networkNodes[to].position),
+        offset: index / 10,
+      };
+    });
+
+    const resize = () => {
+      const width = mount.clientWidth;
+      const height = mount.clientHeight;
+      renderer.setSize(width, height, false);
+      camera.aspect = width / Math.max(height, 1);
+      camera.updateProjectionMatrix();
+    };
+
+    resize();
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(mount);
+
+    let frameId = 0;
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      const elapsed = clock.getElapsedTime();
+      networkGroup.rotation.y = Math.sin(elapsed * 0.13) * 0.08 - 0.14;
+      networkGroup.rotation.x = Math.sin(elapsed * 0.1) * 0.035;
+
+      nodes.forEach((node, index) => {
+        node.scale.setScalar(1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.18);
+      });
+
+      halos.forEach((halo, index) => {
+        halo.scale.setScalar(1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.24);
+        (halo.material as THREE.MeshBasicMaterial).opacity = 0.1 + Math.sin(elapsed * 0.75 + index) * 0.035;
+      });
+
+      lineMaterials.forEach((material, index) => {
+        material.opacity = 0.14 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.055;
+      });
+
+      labelSprites.forEach((label, index) => {
+        label.material.opacity = 0.52 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.08;
+      });
+
+      pulses.forEach(({ pulse, from, to, offset }, index) => {
+        const t = (elapsed * 0.105 + offset) % 1;
+        pulse.position.lerpVectors(from, to, t);
+        (pulse.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * Math.PI) * (index % 3 === 0 ? 0.95 : 0.68);
+      });
+
+      renderer.render(scene, camera);
+      frameId = window.requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      resizeObserver.disconnect();
+      mount.removeChild(renderer.domElement);
+      nodeGeometry.dispose();
+      haloGeometry.dispose();
+      pulseGeometry.dispose();
+      scene.traverse((object) => {
+        if (object instanceof THREE.Line) {
+          object.geometry.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach((material) => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+        if (object instanceof THREE.Mesh) {
+          object.geometry.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach((material) => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+        if (object instanceof THREE.Sprite) {
+          object.material.map?.dispose();
+          object.material.dispose();
+        }
+      });
+      renderer.dispose();
+    };
+  }, []);
+
+  return <div ref={mountRef} className="absolute inset-0" />;
+}
+
+function EvidenceSurface() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.16),transparent_28rem),radial-gradient(circle_at_86%_58%,rgba(245,158,11,0.09),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
-
-      <div className="pointer-events-none absolute right-[-5%] top-[5%] h-[760px] w-[68%]">
-        <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 900 760"
-          preserveAspectRatio="none"
-          role="img"
-        >
-          <defs>
-            <linearGradient id="evidenceLink" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(56,189,248,0)" />
-              <stop offset="52%" stopColor="rgba(56,189,248,0.42)" />
-              <stop offset="100%" stopColor="rgba(56,189,248,0)" />
-            </linearGradient>
-            <linearGradient id="contradictionStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(251,191,36,0)" />
-              <stop offset="50%" stopColor="rgba(251,191,36,0.50)" />
-              <stop offset="100%" stopColor="rgba(251,191,36,0)" />
-            </linearGradient>
-            <linearGradient id="reviewStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(167,139,250,0)" />
-              <stop offset="48%" stopColor="rgba(167,139,250,0.42)" />
-              <stop offset="100%" stopColor="rgba(52,211,153,0.12)" />
-            </linearGradient>
-          </defs>
-          <motion.path
-            d="M116 120 C 220 190, 288 214, 356 276 S 490 368, 590 358"
-            fill="none"
-            stroke="url(#evidenceLink)"
-            strokeWidth="1.8"
-            initial={{ pathLength: 0.2, pathOffset: 0 }}
-            animate={{ pathLength: [0.24, 0.78, 0.24], pathOffset: [0, 0.06, 0], opacity: isActive ? 0.72 : 0.42 }}
-            transition={{ duration: 10.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.path
-            d="M358 278 C 430 356, 482 405, 535 500 S 650 598, 706 612"
-            fill="none"
-            stroke="url(#contradictionStroke)"
-            strokeWidth="1.9"
-            strokeDasharray="10 14"
-            animate={{ pathLength: [0.18, 0.72, 0.18], opacity: isActive ? [0.4, 0.72, 0.4] : [0.22, 0.52, 0.22] }}
-            transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.path
-            d="M202 54 C 152 112, 120 164, 130 220 S 272 352, 286 476"
-            fill="none"
-            stroke="url(#evidenceLink)"
-            strokeWidth="1.35"
-            animate={{ pathLength: [0.18, 0.66, 0.18], opacity: isActive ? [0.32, 0.62, 0.32] : [0.14, 0.34, 0.14] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.path
-            d="M280 602 C 376 628, 510 658, 620 620 S 730 570, 795 525"
-            fill="none"
-            stroke="url(#reviewStroke)"
-            strokeWidth="1.6"
-            animate={{ pathLength: [0.2, 0.82, 0.2], opacity: isActive ? [0.34, 0.68, 0.34] : [0.16, 0.42, 0.16] }}
-            transition={{ duration: 9.5, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </svg>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_73%_16%,rgba(56,189,248,0.18),transparent_29rem),radial-gradient(circle_at_82%_61%,rgba(251,191,36,0.10),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_78%,#070A0F_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 right-[-8%] w-[78%] opacity-95">
+        <ThreeEvidenceNetwork />
       </div>
-
-      <motion.div
-        className="pointer-events-auto absolute inset-0"
-        animate={{ x: [-5, 5, -5] }}
-        transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-      >
-        {backgroundTiles.map((tile, index) => (
-          <motion.div
-            key={tile.label}
-            onHoverStart={() => setActiveTile(tile.label)}
-            onHoverEnd={() => setActiveTile(null)}
-            whileHover={{
-              opacity: 0.96,
-              y: -4,
-              transition: { duration: 0.18 },
-            }}
-            className={`group/tile absolute hidden h-28 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.24)] backdrop-blur-sm transition-colors md:block ${tile.tone}`}
-            style={{ left: tile.x, top: tile.y, width: tile.width }}
-            initial={{ opacity: 0.42, y: 8 }}
-            animate={{
-              opacity: activeTile === tile.label ? 0.96 : index % 4 === 0 ? [0.48, 0.74, 0.48] : [0.34, 0.54, 0.34],
-              y: activeTile === tile.label ? -4 : index % 3 === 0 ? [8, 0, 8] : [0, -4, 0],
-            }}
-            transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.18 }}
-          >
-            <div className={`absolute inset-x-0 top-0 h-0.5 opacity-40 transition-opacity group-hover/tile:opacity-95 ${tile.accent}`} />
-            <div className="flex items-center justify-between">
-              <tile.icon className="size-3.5 opacity-70 transition-opacity group-hover/tile:opacity-100" />
-              <span className="font-mono text-[10px] text-current opacity-45">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-            </div>
-            <div className="mt-7 font-medium text-current">{tile.label}</div>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[62%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.985)_46%,rgba(7,10,15,0.80)_76%,transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[68%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.99)_45%,rgba(7,10,15,0.88)_70%,rgba(7,10,15,0.35)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_36%,rgba(0,0,0,0.58),transparent_31rem)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
