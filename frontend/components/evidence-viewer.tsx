@@ -45,17 +45,20 @@ export function EvidenceViewer({ excerpts }: { excerpts: TranscriptEvidence[] })
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {excerpts.map((excerpt) => (
-        <div key={excerpt.id} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
+        <div
+          key={excerpt.id}
+          className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-200/25 hover:bg-[#0D131D]"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <BookOpenText className="size-4 text-sky-300" />
-              <div className="font-mono text-[11px] text-sky-300">{excerpt.citation}</div>
+              <BookOpenText className="size-4 text-sky-300/80 transition group-hover:text-sky-200" />
+              <div className="font-mono text-[11px] text-sky-300 transition group-hover:text-sky-200">{excerpt.citation}</div>
             </div>
             <span className={cn("rounded-full border px-2 py-1 font-mono text-[10px]", riskBadgeTone[excerpt.crossExamRelevance])}>
               {excerpt.crossExamRelevance} exam relevance
             </span>
           </div>
-          <div className="mt-4 rounded-lg border border-white/10 bg-[#111827] p-3">
+          <div className="mt-4 rounded-lg border border-white/10 bg-[#111827] p-3 transition group-hover:border-sky-200/20">
             <HighlightedTranscript text={excerpt.text} highlights={excerpt.highlights} />
           </div>
           <div className="mt-3 grid gap-2 md:grid-cols-2">

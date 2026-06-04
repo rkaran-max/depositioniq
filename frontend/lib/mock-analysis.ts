@@ -512,7 +512,7 @@ export const reportArtifacts = [
 export const witnessProfile = {
   name: "Bill Gates",
   overview:
-    "The witness testified about email deletion practices, limited preservation of sent messages, and recollection gaps concerning DR DOS-related communications. The profile flags record-retention and timeline follow-up vectors without drawing legal conclusions.",
+    "The witness testified about email deletion practices, limited preservation of sent messages, and recollection gaps concerning DR DOS-related communications. The profile flags record-retention and timeline follow-up areas without drawing legal conclusions.",
   topics: [
     "Email deletion practices",
     "Document retention",

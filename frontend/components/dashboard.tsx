@@ -13,7 +13,6 @@ import {
   Search,
   ShieldAlert,
   Target,
-  Terminal,
   UploadCloud,
 } from "lucide-react";
 import { AgentTrace } from "@/components/agent-trace";
@@ -59,7 +58,7 @@ function SectionLabel({
   return (
     <div className="mb-3 flex items-end justify-between gap-4">
       <div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-slate-500">
+        <div className="text-[11px] font-medium text-slate-500">
           {eyebrow}
         </div>
         <h2 className="mt-1 text-sm font-medium text-slate-100">{title}</h2>
@@ -117,8 +116,8 @@ function BackendStatusBanner({
           )}
         />
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-600">
-            analysis.source
+          <div className="text-[11px] font-medium text-slate-500">
+            Analysis source
           </div>
           <div className="mt-1 text-sm font-medium text-white">
             {isLive ? "Live Backend: Connected" : "Demo Mode: Mock Analysis"}
@@ -127,8 +126,8 @@ function BackendStatusBanner({
       </div>
 
       <div className="rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
-          source
+        <div className="text-[11px] font-medium text-slate-500">
+          Source
         </div>
         <div className="mt-1 font-mono text-xs text-slate-300">
           {isLive ? "FastAPI /analyze" : "frontend/lib/mock-analysis.ts"}
@@ -136,8 +135,8 @@ function BackendStatusBanner({
       </div>
 
       <div className="rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
-        <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
-          transcript id
+        <div className="text-[11px] font-medium text-slate-500">
+          Transcript ID
         </div>
         <div className="mt-1 font-mono text-xs text-sky-300">
           {isLive ? transcriptId ?? "pending" : "N/A"}
@@ -215,15 +214,15 @@ export function Dashboard() {
               <Search className="size-3.5 text-slate-500" />
               <Input
                 className="h-6 border-0 bg-transparent p-0 font-mono text-xs text-slate-300 placeholder:text-slate-600 focus-visible:ring-0"
-                placeholder="cmd+k / search testimony, citations, contradictions, vectors"
+                placeholder="Search testimony, citations, contradictions, and witness claims"
               />
             </div>
             <Badge variant="slate" className="hidden font-mono uppercase tracking-[0.16em] md:inline-flex">
               {statusLabel}
             </Badge>
-            <Button variant="secondary" size="sm" className="font-mono text-xs">
-              <Terminal className="size-3.5" />
-              trace
+            <Button variant="secondary" size="sm" className="text-xs">
+              <FileText className="size-3.5" />
+              Status
             </Button>
           </header>
 
@@ -297,7 +296,7 @@ export function Dashboard() {
             <SectionLabel
               eyebrow="processing summary"
               title="Transcript analysis stages"
-              action="deterministic pipeline"
+              action="backend pipeline"
             />
             <div className="grid gap-2 lg:grid-cols-5">
               {pipelineStages.map((stage, index) => (
@@ -321,7 +320,7 @@ export function Dashboard() {
             <SectionLabel
               eyebrow="lawyer workflow"
               title="Review evidence -> Test contradiction -> Draft cross-exam -> Export report"
-              action="attorney.path guided"
+              action="guided review"
             />
             <div className="grid gap-3 md:grid-cols-4">
               {lawyerWorkflow.map((step, index) => (
@@ -346,17 +345,17 @@ export function Dashboard() {
 
           <section className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
             <ConsolePanel id="live-analysis-console" className="p-5">
-              <SectionLabel eyebrow="live analysis console" title="Transcript input / PDF ingestion" action={`source.mode ${sourceMode}`} />
+              <SectionLabel eyebrow="transcript intake" title="Transcript input / PDF ingestion" action={sourceMode === "api" ? "Live backend" : "Demo fallback"} />
               <div className="grid gap-3 md:grid-cols-[0.42fr_0.58fr]">
                 <div className="rounded-lg border border-dashed border-sky-300/20 bg-[#070A0F] p-4">
                   <UploadCloud className="size-5 text-sky-300" />
-                  <div className="mt-4 font-mono text-xs text-slate-200">upload.transcript_pdf</div>
+                  <div className="mt-4 text-xs font-medium text-slate-200">PDF transcript upload</div>
                   <p className="mt-2 text-xs leading-5 text-slate-500">
                     OCR fallback, Q/A cleanup, page-line preservation, and citation-aware text extraction.
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-500">
-                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">ocr.ready</span>
-                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">citations.on</span>
+                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">OCR ready</span>
+                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">Citations on</span>
                   </div>
                 </div>
                 <Textarea
@@ -414,15 +413,15 @@ export function Dashboard() {
 
           <ConsolePanel id="transcript-evidence-viewer" className="mt-5 p-5">
             <SectionLabel
-              eyebrow="transcript evidence viewer"
+              eyebrow="evidence viewer"
               title="Citation-linked excerpts, extracted claims, and examination relevance"
-              action="highlight.mode phrase"
+              action="phrase highlights"
             />
             <EvidenceViewer excerpts={transcriptEvidence} />
           </ConsolePanel>
 
           <ConsolePanel id="claims" className="mt-4 p-4">
-            <SectionLabel eyebrow="claims review" title="Structured witness claims from backend analysis" action={`${claims.length} claims`} />
+            <SectionLabel eyebrow="claims" title="Structured witness claims from backend analysis" action={`${claims.length} claims`} />
             <div className="overflow-hidden rounded-lg border border-white/10 bg-[#070A0F]">
               <table className="w-full text-left text-xs">
                 <thead className="border-b border-white/10 bg-[#111827] font-mono uppercase tracking-[0.18em] text-slate-600">
@@ -453,7 +452,7 @@ export function Dashboard() {
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
             <ConsolePanel id="contradiction-review" className="p-4">
-              <SectionLabel eyebrow="contradiction review" title="Verified conflicts and unresolved testimony gaps" action="review.queue 3" />
+              <SectionLabel eyebrow="contradiction review" title="Verified conflicts and unresolved testimony gaps" action={`${contradictions.length} issues`} />
               <div className="space-y-3">
                 {contradictions.map((contradiction) => (
                   <div key={contradiction.title} className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
@@ -510,7 +509,7 @@ export function Dashboard() {
             </ConsolePanel>
 
             <ConsolePanel id="cross-examination" className="p-4">
-              <SectionLabel eyebrow="cross-exam strategy" title="Attorney prompt synthesis" action="targets 7" />
+              <SectionLabel eyebrow="cross-exam strategy" title="Attorney prompt synthesis" action={`${strategyCards.length} targets`} />
               <div className="space-y-3">
                 {strategyCards.map((card, index) => (
                   <div key={card.objective} className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-300/25 hover:bg-[#0B0F17]">
@@ -586,7 +585,7 @@ export function Dashboard() {
             </ConsolePanel>
 
             <ConsolePanel id="evidence-trace" className="p-4">
-              <SectionLabel eyebrow="evidence trace" title="Citation-grounded support spans" action="support.coverage 94%" />
+              <SectionLabel eyebrow="evidence trace" title="Citation-grounded support spans" action="linked support" />
               <div className="space-y-2">
                 {evidenceTrace.map((evidence) => (
                   <div key={evidence.id} className="grid gap-3 rounded-lg border border-white/10 bg-[#070A0F] p-3 md:grid-cols-[160px_1fr_70px]">
@@ -608,7 +607,7 @@ export function Dashboard() {
           </section>
 
           <ConsolePanel id="report" className="mt-4 p-4">
-            <SectionLabel eyebrow="report export" title="Attorney-ready Markdown artifacts" action="export.status ready" />
+            <SectionLabel eyebrow="report export" title="Attorney-ready Markdown artifacts" action="ready" />
             <div className="grid gap-4 lg:grid-cols-[0.72fr_0.28fr]">
               <div className="rounded-lg border border-white/10 bg-[#070A0F] p-4">
                 <div className="flex items-center gap-2 font-mono text-xs text-slate-300">

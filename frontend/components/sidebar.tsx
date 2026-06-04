@@ -72,7 +72,7 @@ export function Sidebar() {
         </div>
         <div className="mt-2 text-sm font-medium text-white">microsoft / drdos</div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Retention vectors, custodian uncertainty, testimony conflicts, and
+          Retention issues, custodian uncertainty, testimony conflicts, and
           cross-examination target synthesis.
         </p>
       </div>

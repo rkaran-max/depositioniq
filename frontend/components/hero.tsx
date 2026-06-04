@@ -8,24 +8,46 @@ const backgroundPages = [
   {
     citation: "Gates Dep. 589:4-15",
     title: "Email retention testimony",
-    lines: ["Q. What is your practice with incoming e-mails?", "A. I delete most incoming e-mails after reading them.", "Q. Are those messages preserved elsewhere?"],
+    lines: [
+      "2  A. I preserved the important ones.",
+      "4  A. I deleted most incoming emails.",
+      "6  A. I exchanged emails with the team.",
+      "8  A. I do not recall those emails.",
+    ],
     className: "left-[4%] top-24 hidden w-[320px] -rotate-6 lg:block",
     delay: 0,
   },
   {
     citation: "Gates Dep. 590:11-22",
     title: "Preservation scope",
-    lines: ["Q. Do you preserve messages that you send?", "A. Not unless I copy myself.", "Q. Would DR DOS communications be included?"],
+    lines: [
+      "claim: preservation assertion",
+      "evidence: citation span linked",
+      "conflict: deletion practice tension",
+      "target: memory foundation",
+    ],
     className: "right-[8%] top-28 hidden w-[340px] rotate-3 xl:block",
     delay: 0.8,
   },
   {
     citation: "Gates Dep. 591:2-12",
     title: "Recall limitation",
-    lines: ["Q. Do you recall specific DR DOS messages?", "A. I don't recall any specific message.", "Q. Is that based on memory or records?"],
+    lines: [
+      "review note: separate absence of recall",
+      "from absence of document evidence",
+      "follow-up: identify custodian sources",
+      "export: cross-exam sequence",
+    ],
     className: "bottom-12 left-[38%] hidden w-[300px] rotate-2 lg:block",
     delay: 1.4,
   },
+];
+
+const evidenceLinks = [
+  { from: "Line 2", to: "Claim", label: "preservation assertion", tone: "sky" },
+  { from: "Line 4", to: "Contradiction", label: "deletion tension", tone: "amber" },
+  { from: "Line 6", to: "Cross-exam", label: "follow-up target", tone: "violet" },
+  { from: "Line 8", to: "Memory gap", label: "recall limitation", tone: "slate" },
 ];
 
 const workflowSteps = [
@@ -98,15 +120,23 @@ function DepositionSceneBackground() {
           </div>
           <div className="space-y-2.5">
             {page.lines.map((line, index) => (
-              <div key={line} className="flex gap-3">
-                <span className="mt-0.5 font-mono text-[9px] text-slate-600">
-                  {String(index + 4).padStart(2, "0")}
+              <div key={line} className="group flex gap-3">
+                <span
+                  className={`mt-0.5 w-8 shrink-0 font-mono text-[9px] text-slate-600 transition-colors group-hover:text-slate-300 ${
+                    index === 1 ? "text-sky-200/70" : ""
+                  }`}
+                >
+                  {line.match(/^\d+/)?.[0] ?? String(index + 1).padStart(2, "0")}
                 </span>
                 <span
-                  className={`h-4 flex-1 rounded-sm ${
-                    index === 1 ? "bg-sky-200/18" : "bg-slate-200/8"
+                  className={`flex-1 truncate rounded-sm px-2 py-0.5 font-mono text-[10px] transition-colors ${
+                    index === 1
+                      ? "bg-sky-200/12 text-sky-100/70 group-hover:bg-sky-200/18 group-hover:text-sky-50/90"
+                      : "bg-slate-200/5 text-slate-400/55 group-hover:bg-slate-200/8 group-hover:text-slate-300/75"
                   }`}
-                />
+                >
+                  {line.replace(/^\d+\s+/, "")}
+                </span>
               </div>
             ))}
           </div>
@@ -127,6 +157,40 @@ function DepositionSceneBackground() {
         animate={{ opacity: [0.12, 0.34, 0.12], scaleX: [0.86, 1, 0.86] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
       />
+
+      <motion.div
+        className="absolute left-[8%] top-[36%] hidden w-[360px] rounded-xl border border-white/10 bg-[#0B0F17]/55 p-3 backdrop-blur-sm lg:block"
+        initial={{ opacity: 0, x: -18 }}
+        animate={{ opacity: 0.48, x: 0 }}
+        transition={{ duration: 0.9, delay: 0.5 }}
+      >
+        <div className="space-y-2">
+          {evidenceLinks.map((link, index) => (
+            <motion.div
+              key={`${link.from}-${link.to}`}
+              className="grid grid-cols-[48px_1fr_92px] items-center gap-2 text-[10px]"
+              animate={{ opacity: [0.52, 0.9, 0.52] }}
+              transition={{ duration: 4.5, repeat: Infinity, delay: index * 0.55 }}
+            >
+              <div className="font-mono text-slate-500">{link.from}</div>
+              <div className="relative h-px bg-white/10">
+                <span
+                  className={`absolute left-0 top-0 h-px ${
+                    link.tone === "amber"
+                      ? "w-2/3 bg-amber-200/45"
+                      : link.tone === "violet"
+                        ? "w-3/4 bg-violet-200/35"
+                        : link.tone === "sky"
+                          ? "w-3/4 bg-sky-200/45"
+                          : "w-1/2 bg-slate-200/25"
+                  }`}
+                />
+              </div>
+              <div className="font-mono text-slate-300">{link.to}</div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 }
@@ -147,11 +211,11 @@ export function Hero() {
             Deposition review workspace
           </div>
           <h1 className="mt-7 text-balance text-left font-serif text-5xl font-normal leading-[1.02] tracking-tight text-white md:text-7xl">
-            Litigation analysis with evidence at the center
+            Find contradictions before opposing counsel does.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
-            DepositionIQ turns transcript testimony into traceable claims,
-            contradiction review, and cross-examination preparation for legal teams.
+            DepositionIQ turns transcript testimony into citation-backed claims,
+            contradiction review, and cross-examination strategy.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="group min-w-52 justify-between font-mono text-xs uppercase tracking-[0.12em]">
@@ -191,10 +255,10 @@ export function Hero() {
 
           <div className="grid gap-3 sm:grid-cols-4">
             {workflowSteps.map((step, index) => (
-              <div key={step.label} className="rounded-lg border border-white/10 bg-[#070A0F] p-3">
+              <div key={step.label} className="group rounded-lg border border-white/10 bg-[#070A0F] p-3 transition hover:border-sky-200/25 hover:bg-[#0D131D]">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-slate-500">{String(index + 1).padStart(2, "0")}</span>
-                  <CheckCircle2 className="size-3.5 text-emerald-300" />
+                  <CheckCircle2 className="size-3.5 text-emerald-300/80 transition group-hover:text-emerald-200" />
                 </div>
                 <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
                   {step.label}
@@ -212,10 +276,10 @@ export function Hero() {
             </div>
             <div className="space-y-3">
               {evidenceRows.map((row) => (
-                <div key={row.citation} className="grid gap-3 rounded-lg border border-white/10 bg-[#0B0F17] p-3 md:grid-cols-[132px_1fr_150px]">
+                <div key={row.citation} className="group grid gap-3 rounded-lg border border-white/10 bg-[#0B0F17] p-3 transition hover:border-sky-200/25 hover:bg-[#101722] md:grid-cols-[132px_1fr_150px]">
                   <div className="font-mono text-[10px] text-sky-300">{row.citation}</div>
                   <div className="text-xs leading-5 text-slate-300">{row.text}</div>
-                  <div className="rounded-md border border-white/10 bg-white/[0.025] px-2 py-1 font-mono text-[10px] text-slate-400">
+                  <div className="rounded-md border border-white/10 bg-white/[0.025] px-2 py-1 font-mono text-[10px] text-slate-400 transition group-hover:border-sky-200/20 group-hover:text-slate-200">
                     {row.result}
                   </div>
                 </div>

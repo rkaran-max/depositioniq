@@ -411,9 +411,10 @@ class ClaimExtractor:
         question_object = self._question_object(question_context)
         if not question_object:
             return claim
+        object_without_article = re.sub(r"^(?:the|a|an)\s+", "", question_object)
         return re.sub(
             r"\bthe important ones\b",
-            f"important {question_object}",
+            f"important {object_without_article}",
             claim,
             flags=re.IGNORECASE,
         )
