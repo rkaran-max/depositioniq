@@ -196,6 +196,16 @@ export function Dashboard() {
     }
   }
 
+  function handleViewSampleCase() {
+    const sampleAnalysis = createMockAnalysisState();
+    setAnalysis(sampleAnalysis);
+    setTranscriptText(sampleAnalysis.sampleTranscript);
+    setAnalysisNotice("Loaded sample case in demo mode.");
+    document
+      .getElementById("live-analysis-console")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#070A0F] text-slate-100">
       <div className="pointer-events-none absolute inset-0 noise-overlay opacity-70" />
@@ -280,7 +290,13 @@ export function Dashboard() {
                   {isAnalyzing ? "Analyzing..." : "Analyze Transcript"}
                   <ArrowRight className="size-4" />
                 </Button>
-                <Button variant="secondary" size="lg" className="font-mono text-xs uppercase tracking-[0.12em]">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  onClick={handleViewSampleCase}
+                  className="font-mono text-xs uppercase tracking-[0.12em]"
+                >
                   View Sample Case
                 </Button>
               </div>
