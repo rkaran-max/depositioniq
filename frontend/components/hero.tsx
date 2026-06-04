@@ -72,17 +72,54 @@ const backgroundTiles = [
   { label: "Preservation issues", icon: ShieldAlert, accent: "bg-amber-300", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05]" },
 ];
 
+const ribbonItems = [
+  { label: "Transcript", icon: FileText, color: "text-slate-300" },
+  { label: "Audio", icon: UploadCloud, color: "text-blue-300" },
+  { label: "PDF", icon: FileArchive, color: "text-cyan-300" },
+  { label: "Claims", icon: SearchCheck, color: "text-sky-300" },
+  { label: "Evidence", icon: Link2, color: "text-cyan-300" },
+  { label: "Citations", icon: Link2, color: "text-cyan-300" },
+  { label: "Contradictions", icon: ShieldAlert, color: "text-amber-300" },
+  { label: "Recall Gaps", icon: MessageSquareQuote, color: "text-amber-300" },
+  { label: "Cross-Exam", icon: MessageSquareQuote, color: "text-violet-300" },
+  { label: "Report", icon: FileCheck2, color: "text-emerald-300" },
+  { label: "Attorney Review", icon: CheckCircle2, color: "text-emerald-300" },
+];
+
+function WorkflowRibbon() {
+  const doubled = [...ribbonItems, ...ribbonItems];
+
+  return (
+    <div className="relative z-10 mx-auto -mt-14 mb-16 hidden max-w-7xl overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17]/82 p-2 shadow-[0_18px_70px_rgba(0,0,0,0.30)] backdrop-blur-md lg:block">
+      <div className="marquee-track flex w-max gap-2">
+        {doubled.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={`${item.label}-${index}`}
+              className="flex items-center gap-2 rounded-md border border-white/10 bg-[#070A0F]/88 px-4 py-2 text-xs text-slate-300"
+            >
+              <Icon className={`size-3.5 ${item.color}`} />
+              {item.label}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function EvidenceSurface() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.16),transparent_28rem),radial-gradient(circle_at_86%_58%,rgba(245,158,11,0.09),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
 
       <motion.div
-        className="pointer-events-auto absolute inset-x-[-6%] top-[9%] h-[690px] opacity-78"
+        className="pointer-events-auto absolute inset-x-[-4%] top-[8%] h-[720px] opacity-90"
         animate={{ x: [-8, 8, -8] }}
         transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
       >
-        <div className="grid rotate-[-2deg] grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className="grid rotate-[-1.5deg] grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
           {backgroundTiles.map((tile, index) => (
             <motion.div
               key={tile.label}
@@ -91,10 +128,10 @@ function EvidenceSurface() {
                 y: -4,
                 transition: { duration: 0.18 },
               }}
-              className={`group/tile relative h-24 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-colors hover:border-white/20 hover:bg-white/[0.07] ${tile.tone}`}
-              initial={{ opacity: 0.36, y: 8 }}
+              className={`group/tile relative h-28 overflow-hidden rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.24)] backdrop-blur-sm transition-colors hover:border-white/25 hover:bg-white/[0.085] ${tile.tone}`}
+              initial={{ opacity: 0.42, y: 8 }}
               animate={{
-                opacity: index % 4 === 0 ? [0.38, 0.68, 0.38] : [0.28, 0.44, 0.28],
+                opacity: index % 4 === 0 ? [0.46, 0.78, 0.46] : [0.34, 0.56, 0.34],
                 y: index % 3 === 0 ? [8, 0, 8] : [0, -5, 0],
               }}
               transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.22 }}
@@ -106,7 +143,7 @@ function EvidenceSurface() {
                   {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
-              <div className="mt-5 font-medium text-current">{tile.label}</div>
+              <div className="mt-7 font-medium text-current">{tile.label}</div>
             </motion.div>
           ))}
         </div>
@@ -152,7 +189,7 @@ function EvidenceSurface() {
         </svg>
       </div>
 
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[60%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.98)_44%,rgba(7,10,15,0.78)_74%,transparent_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[62%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.985)_46%,rgba(7,10,15,0.80)_76%,transparent_100%)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
@@ -163,7 +200,7 @@ export function Hero() {
     <section className="relative overflow-hidden border-b border-white/10 bg-[#070A0F] px-4 pt-24">
       <EvidenceSurface />
 
-      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 py-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 pb-24 pt-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
@@ -262,6 +299,7 @@ export function Hero() {
           </div>
         </motion.div>
       </div>
+      <WorkflowRibbon />
     </section>
   );
 }

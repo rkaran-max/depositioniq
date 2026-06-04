@@ -30,14 +30,14 @@ const features = [
 
 export function ProductConsole() {
   return (
-    <section id="product" className="border-b border-white/10 bg-[#070707] px-4 py-28">
-      <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+    <section id="product" className="border-b border-white/10 bg-[#070707] px-4 py-20">
+      <div className="mx-auto grid max-w-7xl items-start gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <motion.div
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="rounded-2xl border border-white/10 bg-[#0B0F17] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
+          className="h-fit rounded-xl border border-white/10 bg-[#0B0F17] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
         >
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
@@ -56,7 +56,7 @@ export function ProductConsole() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05, duration: 0.35 }}
-                className="rounded-lg border border-white/10 bg-[#070707] p-4"
+                className="rounded-lg border border-white/10 bg-[#070707] p-3.5"
               >
                 <div className="text-sm font-medium text-white">{label}</div>
                 <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
@@ -75,9 +75,9 @@ export function ProductConsole() {
           <h2 className="mt-4 font-serif text-4xl font-normal tracking-tight text-white md:text-5xl">
             Deterministic Evidence Review
           </h2>
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 space-y-3">
             {features.map((feature) => (
-              <div key={feature.number} className="rounded-xl border border-white/10 bg-[#0A0D12] p-5">
+              <div key={feature.number} className="rounded-xl border border-white/10 bg-[#0A0D12] p-4">
                 <div className="font-mono text-[10px] text-slate-500">{feature.number}</div>
                 <div className="mt-2 text-lg text-white">{feature.title}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{feature.body}</p>
