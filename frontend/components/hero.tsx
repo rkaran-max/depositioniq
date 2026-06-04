@@ -65,34 +65,35 @@ type NetworkNode = {
   label: string;
   tone: NetworkTone;
   position: [number, number, number];
+  showLabel?: boolean;
 };
 
 const networkColors: Record<NetworkTone, number> = {
-  evidence: 0x5eead4,
-  risk: 0xfbbf24,
-  verified: 0x86efac,
-  workflow: 0xa78bfa,
+  evidence: 0x67e8f9,
+  risk: 0xf0a3b8,
+  verified: 0xc4b5fd,
+  workflow: 0x93c5fd,
 };
 
 const networkNodes: NetworkNode[] = [
-  { label: "Transcript", tone: "evidence", position: [-2.8, 1.25, 0.1] },
-  { label: "Audio", tone: "workflow", position: [-3.5, 2.25, -0.2] },
-  { label: "PDF", tone: "evidence", position: [-3.6, 0.25, -0.1] },
-  { label: "Claims", tone: "verified", position: [-1.35, 1.05, 0.15] },
-  { label: "Claim A", tone: "verified", position: [-0.95, 2.0, -0.1] },
-  { label: "Claim B", tone: "verified", position: [-0.45, 0.15, 0.05] },
-  { label: "Citations", tone: "evidence", position: [0.25, 1.25, 0.18] },
-  { label: "Evidence Trace", tone: "evidence", position: [1.25, 0.55, -0.12] },
-  { label: "Preservation Issues", tone: "risk", position: [0.85, -0.7, 0.08] },
-  { label: "Contradictions", tone: "risk", position: [2.25, 1.3, 0.15] },
-  { label: "Recall Gaps", tone: "risk", position: [2.95, 0.05, -0.1] },
-  { label: "Verified Claims", tone: "verified", position: [2.0, 2.25, -0.18] },
-  { label: "Cross-Exam Strategy", tone: "workflow", position: [3.65, 1.15, 0.05] },
-  { label: "Follow-Up Questions", tone: "workflow", position: [4.15, -0.15, -0.12] },
-  { label: "Attorney Review", tone: "verified", position: [3.25, -1.15, 0.12] },
-  { label: "Report Export", tone: "verified", position: [1.55, -1.65, -0.08] },
-  { label: "Risk Memo", tone: "risk", position: [0.0, -1.65, 0.04] },
-  { label: "Citation Bundle", tone: "evidence", position: [-1.55, -1.05, -0.16] },
+  { label: "Transcript", tone: "evidence", position: [-4.45, 1.1, 0.08], showLabel: true },
+  { label: "Audio", tone: "workflow", position: [-4.8, 2.15, -0.18] },
+  { label: "PDF", tone: "evidence", position: [-4.75, 0.0, -0.1] },
+  { label: "Claims", tone: "verified", position: [-3.05, 0.75, 0.14], showLabel: true },
+  { label: "Claim A", tone: "verified", position: [-2.55, 1.85, -0.1] },
+  { label: "Claim B", tone: "verified", position: [-2.2, -0.25, 0.04] },
+  { label: "Evidence", tone: "evidence", position: [-1.45, 0.3, 0.18], showLabel: true },
+  { label: "Citation Bundle", tone: "evidence", position: [-1.45, -1.15, -0.16] },
+  { label: "Preservation Issues", tone: "risk", position: [-0.15, -0.65, 0.08] },
+  { label: "Contradictions", tone: "risk", position: [0.2, 0.85, 0.15], showLabel: true },
+  { label: "Recall Gaps", tone: "risk", position: [1.15, -0.05, -0.1], showLabel: true },
+  { label: "Verified Claims", tone: "verified", position: [0.95, 2.0, -0.18] },
+  { label: "Cross-Exam", tone: "workflow", position: [1.95, 0.9, 0.05], showLabel: true },
+  { label: "Follow-Up Questions", tone: "workflow", position: [2.55, -0.35, -0.12] },
+  { label: "Attorney Review", tone: "verified", position: [3.25, 0.35, 0.12], showLabel: true },
+  { label: "Report", tone: "verified", position: [4.35, -0.25, -0.08], showLabel: true },
+  { label: "Risk Memo", tone: "risk", position: [1.0, -1.55, 0.04] },
+  { label: "Citation Index", tone: "evidence", position: [-0.25, 1.65, -0.16] },
 ];
 
 const networkEdges: Array<[number, number]> = [
@@ -102,6 +103,7 @@ const networkEdges: Array<[number, number]> = [
   [3, 4],
   [3, 5],
   [3, 6],
+  [6, 17],
   [6, 7],
   [7, 8],
   [5, 8],
@@ -197,10 +199,10 @@ function createLabelTexture(label: string, color: string) {
   context.fillRect(x + 18, y + 22, 4, height - 44);
   context.globalAlpha = 1;
 
-  context.font = "600 25px Inter, ui-sans-serif, system-ui, sans-serif";
+  context.font = "600 23px Inter, ui-sans-serif, system-ui, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "rgba(241,245,249,0.86)";
+  context.fillStyle = "rgba(241,245,249,0.78)";
   context.fillText(label, canvas.width / 2 + 8, canvas.height / 2);
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -219,19 +221,19 @@ function createNodeTexture(color: string) {
   }
 
   const center = canvas.width / 2;
-  const gradient = context.createRadialGradient(center, center, 4, center, center, 74);
-  gradient.addColorStop(0, "rgba(255,255,255,0.94)");
-  gradient.addColorStop(0.16, color);
-  gradient.addColorStop(0.32, color.replace("1)", "0.58)"));
-  gradient.addColorStop(0.62, color.replace("1)", "0.18)"));
+  const gradient = context.createRadialGradient(center, center, 4, center, center, 58);
+  gradient.addColorStop(0, "rgba(255,255,255,0.78)");
+  gradient.addColorStop(0.2, color.replace("1)", "0.78)"));
+  gradient.addColorStop(0.42, color.replace("1)", "0.36)"));
+  gradient.addColorStop(0.72, color.replace("1)", "0.10)"));
   gradient.addColorStop(1, "rgba(0,0,0,0)");
 
   context.fillStyle = gradient;
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = "rgba(255,255,255,0.36)";
-  context.lineWidth = 2;
+  context.strokeStyle = "rgba(255,255,255,0.24)";
+  context.lineWidth = 1.5;
   context.beginPath();
-  context.arc(center, center, 23, 0, Math.PI * 2);
+  context.arc(center, center, 17, 0, Math.PI * 2);
   context.stroke();
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -256,8 +258,8 @@ function ThreeEvidenceNetwork() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(0.9, 0.2, 8.4);
-    camera.lookAt(0.7, 0.2, 0);
+    camera.position.set(0.0, 0.08, 9.25);
+    camera.lookAt(0.0, 0.15, 0);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -265,7 +267,7 @@ function ThreeEvidenceNetwork() {
     mount.appendChild(renderer.domElement);
 
     const networkGroup = new THREE.Group();
-    networkGroup.position.set(0.9, -0.05, 0);
+    networkGroup.position.set(0.15, -0.04, 0);
     scene.add(networkGroup);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -298,23 +300,25 @@ function ThreeEvidenceNetwork() {
       const halo = new THREE.Sprite(haloMaterial);
       nodeSprite.position.set(...node.position);
       halo.position.copy(nodeSprite.position);
-      nodeSprite.scale.set(0.34, 0.34, 1);
-      halo.scale.set(0.74, 0.74, 1);
+      nodeSprite.scale.set(0.18, 0.18, 1);
+      halo.scale.set(0.36, 0.36, 1);
       networkGroup.add(halo, nodeSprite);
       nodes.push(nodeSprite);
       halos.push(halo);
 
-      const labelMaterial = new THREE.SpriteMaterial({
-        map: createLabelTexture(node.label, rgba),
-        transparent: true,
-        opacity: 0.62,
-        depthWrite: false,
-      });
-      const label = new THREE.Sprite(labelMaterial);
-      label.position.set(node.position[0], node.position[1] - 0.34, node.position[2]);
-      label.scale.set(0.98, 0.24, 1);
-      networkGroup.add(label);
-      labelSprites.push(label);
+      if (node.showLabel) {
+        const labelMaterial = new THREE.SpriteMaterial({
+          map: createLabelTexture(node.label, rgba),
+          transparent: true,
+          opacity: 0.48,
+          depthWrite: false,
+        });
+        const label = new THREE.Sprite(labelMaterial);
+        label.position.set(node.position[0], node.position[1] - 0.25, node.position[2]);
+        label.scale.set(0.76, 0.18, 1);
+        networkGroup.add(label);
+        labelSprites.push(label);
+      }
     });
 
     const lineMaterials: THREE.LineBasicMaterial[] = [];
@@ -332,15 +336,15 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.LineBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.18,
+        opacity: 0.26,
         blending: THREE.AdditiveBlending,
       });
       networkGroup.add(new THREE.Line(geometry, material));
       lineMaterials.push(material);
     });
 
-    const pulseGeometry = new THREE.SphereGeometry(0.038, 18, 18);
-    const pulses = networkEdges.slice(0, 10).map(([from, to], index) => {
+    const pulseGeometry = new THREE.SphereGeometry(0.026, 18, 18);
+    const pulses = networkEdges.slice(0, 13).map(([from, to], index) => {
       const tone =
         networkNodes[from].tone === "risk" || networkNodes[to].tone === "risk"
           ? "risk"
@@ -385,20 +389,20 @@ function ThreeEvidenceNetwork() {
       networkGroup.rotation.x = Math.sin(elapsed * 0.1) * 0.035;
 
       nodes.forEach((node, index) => {
-        node.scale.setScalar(1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.18);
+        node.scale.setScalar(0.18 * (1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.14));
       });
 
       halos.forEach((halo, index) => {
-        halo.scale.setScalar(1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.24);
-        (halo.material as THREE.SpriteMaterial).opacity = 0.12 + Math.sin(elapsed * 0.75 + index) * 0.035;
+        halo.scale.setScalar(0.36 * (1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.18));
+        (halo.material as THREE.SpriteMaterial).opacity = 0.08 + Math.sin(elapsed * 0.75 + index) * 0.022;
       });
 
       lineMaterials.forEach((material, index) => {
-        material.opacity = 0.14 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.055;
+        material.opacity = 0.22 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.06;
       });
 
       labelSprites.forEach((label, index) => {
-        label.material.opacity = 0.52 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.08;
+        label.material.opacity = 0.42 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.06;
       });
 
       pulses.forEach(({ pulse, from, to, offset }, index) => {
@@ -452,11 +456,11 @@ function EvidenceSurface() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_73%_16%,rgba(56,189,248,0.18),transparent_29rem),radial-gradient(circle_at_82%_61%,rgba(251,191,36,0.10),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_78%,#070A0F_100%)]" />
-      <div className="pointer-events-none absolute inset-y-0 right-[-8%] w-[78%] opacity-95">
+      <div className="pointer-events-none absolute inset-y-0 left-[-8%] right-[-8%] opacity-88">
         <ThreeEvidenceNetwork />
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[68%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.99)_45%,rgba(7,10,15,0.88)_70%,rgba(7,10,15,0.35)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_36%,rgba(0,0,0,0.58),transparent_31rem)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[66%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.992)_46%,rgba(7,10,15,0.90)_70%,rgba(7,10,15,0.38)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_36%,rgba(0,0,0,0.66),transparent_32rem)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
