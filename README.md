@@ -11,14 +11,17 @@ This repository currently contains two complementary project tracks:
 2. **Next.js polished frontend prototype** in `frontend/`
    This is a YC-demo-ready interface concept built with Next.js, TypeScript,
    Tailwind CSS, shadcn-style components, lucide-react icons, and framer-motion.
-   It currently displays realistic DepositionIQ mock outputs from
-   `frontend/lib/mock-analysis.ts` and is not yet wired to the Python backend.
+   It can call the FastAPI backend for live analysis and preserves realistic mock
+   outputs from `frontend/lib/mock-analysis.ts` as a fallback when the backend is
+   unavailable.
 
 ## Features
 
 - Paste transcript text directly into the Streamlit interface.
 - Upload one or more text-layer PDF deposition transcripts.
 - Review and edit cleaned PDF-extracted text before running analysis.
+- Optionally upload deposition audio for experimental local/server-side
+  transcription, then analyze the transcript through the same pipeline.
 - Click **Analyze Deposition** to run the full pipeline.
 - Load the bundled sample transcript.
 - Segment transcript lines into speaker turns.
@@ -50,7 +53,11 @@ This repository currently contains two complementary project tracks:
 │   ├── app
 │   │   ├── globals.css
 │   │   ├── layout.tsx
-│   │   └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── demo/page.tsx
+│   │   ├── evidence-review/page.tsx
+│   │   ├── product/page.tsx
+│   │   └── security/page.tsx
 │   ├── components
 │   │   ├── claim-table.tsx
 │   │   ├── contradiction-card.tsx
@@ -75,6 +82,7 @@ This repository currently contains two complementary project tracks:
 │   └── validate_backend.py
 └── src
     ├── __init__.py
+    ├── audio_transcriber.py
     ├── ingest.py
     ├── pipeline.py
     ├── segment.py
@@ -98,21 +106,29 @@ downloadable Markdown report.
 Primary files:
 
 - `app.py`: Streamlit application and UI orchestration.
-- `api.py`: FastAPI service exposing the shared pipeline at `POST /analyze`.
+- `api.py`: FastAPI service exposing the shared pipeline at `POST /analyze` and
+  experimental audio upload at `POST /transcribe-analyze`.
 - `src/`: Modular legal reasoning pipeline.
+- `src/audio_transcriber.py`: Optional local audio transcription helper.
 - `src/pipeline.py`: Shared orchestration used by Streamlit and FastAPI.
 - `samples/`: Sample transcript and sample output.
 
 ### Next.js Frontend Prototype
 
 The frontend prototype is a polished product interface for DepositionIQ. It includes
-a dark AI-startup dashboard, sidebar navigation, upload panel, metrics, claims table,
-contradiction cards, cross-examination strategy cards, witness profile panel,
-CourtShadow panel, and report panel.
+separate routes for the landing page, product explanation, evidence review,
+security posture, and the functional demo workspace. The `/demo` route contains
+the working dashboard with transcript input, optional audio upload, metrics,
+claims, contradictions, evidence viewer, cross-examination strategy, witness
+profile, and report export.
 
 Primary files:
 
-- `frontend/app/page.tsx`: Main dashboard and landing experience.
+- `frontend/app/page.tsx`: Landing page.
+- `frontend/app/demo/page.tsx`: Functional product workspace for the CS153 demo.
+- `frontend/app/product/page.tsx`: Product/workflow explanation.
+- `frontend/app/evidence-review/page.tsx`: Evidence and contradiction review page.
+- `frontend/app/security/page.tsx`: Security and demo-safety posture page.
 - `frontend/components/`: Reusable UI components.
 - `frontend/lib/analysis-api.ts`: Client-side FastAPI adapter with mock fallback.
 - `frontend/lib/mock-analysis.ts`: Realistic sample DepositionIQ outputs used by
@@ -340,6 +356,65 @@ The response includes `transcript_id`, `claims`, `contradictions`,
 `cross_exam_questions`, `witness_profile`, `case_summary`, and
 `report_markdown`.
 
+### Experimental Audio Transcription
+
+DepositionIQ includes an optional audio-to-transcript path for demo exploration.
+The primary and recommended CS153 demo path remains pasted transcript text because
+it is deterministic and stable. Audio upload is experimental.
+
+Supported upload types:
+
+- `.mp3`
+- `.wav`
+- `.m4a`
+- `.mp4` audio, when the local transcription backend can decode it
+
+The FastAPI endpoint is:
+
+```text
+POST /transcribe-analyze
+```
+
+It accepts a multipart field named `audio_file`, transcribes the audio locally or
+server-side, then sends the transcript through the same `run_pipeline(...)` flow as
+`POST /analyze`. The response includes `transcript_text` plus the normal analysis
+fields: `transcript_id`, `claims`, `contradictions`, `cross_exam_questions`,
+`witness_profile`, `case_summary`, and `report_markdown`.
+
+Install one optional local transcription dependency to enable the feature:
+
+```bash
+pip install faster-whisper
+```
+
+or:
+
+```bash
+pip install openai-whisper
+```
+
+The implementation uses CPU-friendly defaults and does not require a GPU or cloud
+API key. If neither optional dependency is installed, `/transcribe-analyze` returns
+a clear error:
+
+```text
+Audio transcription is not installed. Install optional audio dependencies or use pasted transcript text.
+```
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8000/transcribe-analyze \
+  -F "audio_file=@/path/to/deposition_audio.wav"
+```
+
+Limitations:
+
+- Transcription quality depends on recording clarity and speaker overlap.
+- Large files may take time on CPU.
+- The audio path is hidden behind an experimental upload section in the Next.js
+  `/demo` workspace so the main pasted transcript demo remains reliable.
+
 ### Run the Next.js Frontend Prototype
 
 From the repository root:
@@ -366,6 +441,12 @@ NEXT_PUBLIC_DEPOSITIONIQ_API_URL=http://localhost:8000 npm run dev
 If the backend is unavailable, the frontend automatically falls back to the
 realistic mock data in `frontend/lib/mock-analysis.ts`.
 
+The `/demo` workspace also includes an **Experimental audio upload** panel. After
+uploading audio, the frontend calls `POST /transcribe-analyze`, fills the editable
+transcript box with the returned `transcript_text`, and renders the same live
+claims, contradictions, evidence, cross-exam strategy, and report output used by
+pasted transcripts.
+
 ## Error Handling
 
 The app validates transcript input before analysis:
@@ -374,8 +455,44 @@ The app validates transcript input before analysis:
 - Input without witness answers marked by `A:` produces a user-facing error.
 - PDFs without selectable text use macOS Vision OCR when available, otherwise they
   produce a user-facing OCR guidance message.
+- Audio uploads return a user-facing message if the file type is unsupported or
+  optional transcription dependencies are not installed.
 - Unexpected pipeline failures are displayed in Streamlit with exception details for
   debugging.
+
+## Validation Checklist
+
+Before demos or submissions, verify:
+
+```bash
+curl http://localhost:8000/health
+```
+
+```bash
+curl -X POST http://localhost:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"transcript_text":"Q: What time did you arrive?\nA: I arrived at 9:00 a.m.\nQ: When did you actually arrive?\nA: I did not arrive until 10:30 a.m."}'
+```
+
+For audio dependency fallback behavior, start FastAPI without installing
+`faster-whisper` or `openai-whisper`, then call:
+
+```bash
+curl -X POST http://localhost:8000/transcribe-analyze \
+  -F "audio_file=@/path/to/sample.wav"
+```
+
+Expected result: a clear message explaining that optional audio dependencies are
+not installed.
+
+Also run:
+
+```bash
+python scripts/validate_backend.py
+cd frontend
+npm run typecheck
+npm run build
+```
 
 ## Development Notes
 

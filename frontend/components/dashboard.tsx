@@ -9,6 +9,7 @@ import {
   FileText,
   Link2,
   Lock,
+  Mic2,
   Network,
   Search,
   ShieldAlert,
@@ -25,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   analyzeTranscript,
   createMockAnalysisState,
+  transcribeAndAnalyzeAudio,
 } from "@/lib/analysis-api";
 import { cn } from "@/lib/utils";
 
@@ -150,6 +152,8 @@ export function Dashboard() {
   const [analysis, setAnalysis] = useState(createMockAnalysisState);
   const [transcriptText, setTranscriptText] = useState(analysis.sampleTranscript);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isTranscribingAudio, setIsTranscribingAudio] = useState(false);
   const [analysisNotice, setAnalysisNotice] = useState(
     "Demo mode uses mock data until the FastAPI backend is running.",
   );
@@ -188,6 +192,31 @@ export function Dashboard() {
       );
     } finally {
       setIsAnalyzing(false);
+    }
+  }
+
+  async function handleAudioTranscribeAnalyze() {
+    if (!audioFile) {
+      setAnalysisNotice("Choose an audio file before starting transcription.");
+      return;
+    }
+
+    setIsTranscribingAudio(true);
+    setAnalysisNotice("Transcribing audio...");
+    try {
+      const result = await transcribeAndAnalyzeAudio(audioFile);
+      setAnalysisNotice("Analyzing transcript...");
+      setTranscriptText(result.transcriptText);
+      setAnalysis(result.analysis);
+      setAnalysisNotice(`Live audio analysis complete: ${result.analysis.transcriptId}`);
+    } catch (error) {
+      setAnalysisNotice(
+        error instanceof Error
+          ? error.message
+          : "Audio transcription is not installed. Install optional audio dependencies or use pasted transcript text.",
+      );
+    } finally {
+      setIsTranscribingAudio(false);
     }
   }
 
@@ -345,17 +374,48 @@ export function Dashboard() {
 
           <section className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
             <ConsolePanel id="live-analysis-console" className="p-5">
-              <SectionLabel eyebrow="transcript intake" title="Transcript input / PDF ingestion" action={sourceMode === "api" ? "Live backend" : "Demo fallback"} />
+              <SectionLabel eyebrow="transcript intake" title="Transcript, PDF, or experimental audio ingestion" action={sourceMode === "api" ? "Live backend" : "Demo fallback"} />
               <div className="grid gap-3 md:grid-cols-[0.42fr_0.58fr]">
-                <div className="rounded-lg border border-dashed border-sky-300/20 bg-[#070A0F] p-4">
-                  <UploadCloud className="size-5 text-sky-300" />
-                  <div className="mt-4 text-xs font-medium text-slate-200">PDF transcript upload</div>
-                  <p className="mt-2 text-xs leading-5 text-slate-500">
-                    OCR fallback, Q/A cleanup, page-line preservation, and citation-aware text extraction.
-                  </p>
-                  <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-500">
-                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">OCR ready</span>
-                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">Citations on</span>
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-amber-300/15 bg-amber-300/[0.035] p-4">
+                    <div className="flex items-center gap-2">
+                      <Mic2 className="size-4 text-amber-200" />
+                      <div className="text-xs font-medium text-slate-100">Experimental audio upload</div>
+                    </div>
+                    <div className="mt-3 text-sm font-medium text-white">Upload deposition audio</div>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      Experimental: audio is transcribed locally/server-side, then analyzed through the same DepositionIQ pipeline.
+                    </p>
+                    <Input
+                      type="file"
+                      accept=".mp3,.wav,.m4a,.mp4,audio/mpeg,audio/wav,audio/mp4"
+                      className="mt-3 h-auto cursor-pointer bg-[#070A0F] py-2 text-xs file:mr-3 file:rounded-md file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-950"
+                      onChange={(event) => setAudioFile(event.target.files?.[0] ?? null)}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleAudioTranscribeAnalyze}
+                      disabled={!audioFile || isTranscribingAudio || isAnalyzing}
+                      className="mt-3 w-full text-xs"
+                    >
+                      {isTranscribingAudio ? "Transcribing audio..." : "Transcribe + Analyze Audio"}
+                    </Button>
+                    <div className="mt-2 text-[11px] leading-5 text-slate-500">
+                      Supported: .mp3, .wav, .m4a, .mp4 audio. Pasted transcript remains the primary demo path.
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-dashed border-sky-300/20 bg-[#070A0F] p-4">
+                    <UploadCloud className="size-5 text-sky-300" />
+                    <div className="mt-4 text-xs font-medium text-slate-200">PDF transcript upload</div>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      OCR fallback, Q/A cleanup, page-line preservation, and citation-aware text extraction.
+                    </p>
+                    <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-500">
+                      <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">OCR ready</span>
+                      <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">Citations on</span>
+                    </div>
                   </div>
                 </div>
                 <Textarea

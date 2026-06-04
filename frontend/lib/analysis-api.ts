@@ -57,6 +57,7 @@ type BackendWitnessProfile = {
 };
 
 type BackendAnalysisResponse = {
+  transcript_text?: string;
   transcript_id: string;
   claims: BackendClaim[];
   contradictions: BackendContradiction[];
@@ -144,6 +145,30 @@ export async function analyzeTranscript(transcriptText: string): Promise<Dashboa
 
   const payload = (await response.json()) as BackendAnalysisResponse;
   return normalizeBackendAnalysis(payload, transcriptText);
+}
+
+export async function transcribeAndAnalyzeAudio(
+  audioFile: File,
+): Promise<{ analysis: DashboardAnalysisState; transcriptText: string }> {
+  const formData = new FormData();
+  formData.append("audio_file", audioFile);
+
+  const response = await fetch(`${API_URL}/transcribe-analyze`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(extractErrorMessage(message) || `Audio analysis request failed with ${response.status}`);
+  }
+
+  const payload = (await response.json()) as BackendAnalysisResponse;
+  const transcriptText = payload.transcript_text ?? "";
+  return {
+    analysis: normalizeBackendAnalysis(payload, transcriptText),
+    transcriptText,
+  };
 }
 
 function normalizeBackendAnalysis(
@@ -362,4 +387,13 @@ function countBy(values: string[]): Record<string, number> {
 
 function signalFromTopic(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
+}
+
+function extractErrorMessage(message: string): string {
+  try {
+    const parsed = JSON.parse(message) as { detail?: string };
+    return parsed.detail ?? message;
+  } catch {
+    return message;
+  }
 }
