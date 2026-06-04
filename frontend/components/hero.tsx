@@ -159,8 +159,8 @@ function WorkflowRibbon() {
 
 function createLabelTexture(label: string, color: string) {
   const canvas = document.createElement("canvas");
-  canvas.width = 384;
-  canvas.height = 96;
+  canvas.width = 512;
+  canvas.height = 128;
   const context = canvas.getContext("2d");
 
   if (!context) {
@@ -168,21 +168,80 @@ function createLabelTexture(label: string, color: string) {
   }
 
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = "500 28px Inter, ui-sans-serif, system-ui, sans-serif";
+  const radius = 26;
+  const x = 28;
+  const y = 26;
+  const width = canvas.width - 56;
+  const height = canvas.height - 52;
+
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
+
+  context.fillStyle = "rgba(7,10,15,0.66)";
+  context.fill();
+  context.strokeStyle = "rgba(226,232,240,0.10)";
+  context.lineWidth = 2;
+  context.stroke();
+
+  context.fillStyle = color;
+  context.globalAlpha = 0.82;
+  context.fillRect(x + 18, y + 22, 4, height - 44);
+  context.globalAlpha = 1;
+
+  context.font = "600 25px Inter, ui-sans-serif, system-ui, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "rgba(7,10,15,0.58)";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = color;
-  context.globalAlpha = 0.34;
-  context.strokeRect(12, 18, canvas.width - 24, canvas.height - 36);
-  context.globalAlpha = 1;
-  context.fillStyle = "rgba(226,232,240,0.82)";
-  context.fillText(label, canvas.width / 2, canvas.height / 2);
+  context.fillStyle = "rgba(241,245,249,0.86)";
+  context.fillText(label, canvas.width / 2 + 8, canvas.height / 2);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
+}
+
+function createNodeTexture(color: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 160;
+  canvas.height = 160;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return new THREE.CanvasTexture(canvas);
+  }
+
+  const center = canvas.width / 2;
+  const gradient = context.createRadialGradient(center, center, 4, center, center, 74);
+  gradient.addColorStop(0, "rgba(255,255,255,0.94)");
+  gradient.addColorStop(0.16, color);
+  gradient.addColorStop(0.32, color.replace("1)", "0.58)"));
+  gradient.addColorStop(0.62, color.replace("1)", "0.18)"));
+  gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgba(255,255,255,0.36)";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(center, center, 23, 0, Math.PI * 2);
+  context.stroke();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function colorToRgba(color: number, alpha = 1) {
+  const threeColor = new THREE.Color(color);
+  return `rgba(${Math.round(threeColor.r * 255)},${Math.round(threeColor.g * 255)},${Math.round(threeColor.b * 255)},${alpha})`;
 }
 
 function ThreeEvidenceNetwork() {
@@ -215,40 +274,45 @@ function ThreeEvidenceNetwork() {
     pointLight.position.set(1.6, 1.8, 3.4);
     scene.add(pointLight);
 
-    const nodeGeometry = new THREE.SphereGeometry(0.075, 32, 32);
-    const haloGeometry = new THREE.SphereGeometry(0.18, 32, 32);
-    const nodes: THREE.Mesh[] = [];
-    const halos: THREE.Mesh[] = [];
+    const nodes: THREE.Sprite[] = [];
+    const halos: THREE.Sprite[] = [];
     const labelSprites: THREE.Sprite[] = [];
+    const nodeTextures: THREE.Texture[] = [];
 
     networkNodes.forEach((node) => {
       const color = networkColors[node.tone];
-      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95 });
-      const haloMaterial = new THREE.MeshBasicMaterial({
-        color,
+      const rgba = colorToRgba(color);
+      const nodeTexture = createNodeTexture(rgba);
+      nodeTextures.push(nodeTexture);
+      const material = new THREE.SpriteMaterial({
+        map: nodeTexture,
         transparent: true,
-        opacity: 0.13,
+        opacity: 0.82,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
+      const haloMaterial = material.clone();
+      haloMaterial.opacity = 0.22;
 
-      const mesh = new THREE.Mesh(nodeGeometry, material);
-      const halo = new THREE.Mesh(haloGeometry, haloMaterial);
-      mesh.position.set(...node.position);
-      halo.position.copy(mesh.position);
-      networkGroup.add(mesh, halo);
-      nodes.push(mesh);
+      const nodeSprite = new THREE.Sprite(material);
+      const halo = new THREE.Sprite(haloMaterial);
+      nodeSprite.position.set(...node.position);
+      halo.position.copy(nodeSprite.position);
+      nodeSprite.scale.set(0.34, 0.34, 1);
+      halo.scale.set(0.74, 0.74, 1);
+      networkGroup.add(halo, nodeSprite);
+      nodes.push(nodeSprite);
       halos.push(halo);
 
       const labelMaterial = new THREE.SpriteMaterial({
-        map: createLabelTexture(node.label, `#${color.toString(16).padStart(6, "0")}`),
+        map: createLabelTexture(node.label, rgba),
         transparent: true,
         opacity: 0.62,
         depthWrite: false,
       });
       const label = new THREE.Sprite(labelMaterial);
-      label.position.set(node.position[0], node.position[1] - 0.27, node.position[2]);
-      label.scale.set(0.86, 0.22, 1);
+      label.position.set(node.position[0], node.position[1] - 0.34, node.position[2]);
+      label.scale.set(0.98, 0.24, 1);
       networkGroup.add(label);
       labelSprites.push(label);
     });
@@ -275,7 +339,7 @@ function ThreeEvidenceNetwork() {
       lineMaterials.push(material);
     });
 
-    const pulseGeometry = new THREE.SphereGeometry(0.045, 18, 18);
+    const pulseGeometry = new THREE.SphereGeometry(0.038, 18, 18);
     const pulses = networkEdges.slice(0, 10).map(([from, to], index) => {
       const tone =
         networkNodes[from].tone === "risk" || networkNodes[to].tone === "risk"
@@ -326,7 +390,7 @@ function ThreeEvidenceNetwork() {
 
       halos.forEach((halo, index) => {
         halo.scale.setScalar(1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.24);
-        (halo.material as THREE.MeshBasicMaterial).opacity = 0.1 + Math.sin(elapsed * 0.75 + index) * 0.035;
+        (halo.material as THREE.SpriteMaterial).opacity = 0.12 + Math.sin(elapsed * 0.75 + index) * 0.035;
       });
 
       lineMaterials.forEach((material, index) => {
@@ -353,9 +417,8 @@ function ThreeEvidenceNetwork() {
       window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       mount.removeChild(renderer.domElement);
-      nodeGeometry.dispose();
-      haloGeometry.dispose();
       pulseGeometry.dispose();
+      nodeTextures.forEach((texture) => texture.dispose());
       scene.traverse((object) => {
         if (object instanceof THREE.Line) {
           object.geometry.dispose();
