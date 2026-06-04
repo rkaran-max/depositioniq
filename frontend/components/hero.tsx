@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, FileText, ShieldAlert } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  FileCheck2,
+  FileText,
+  Link2,
+  MessageSquareQuote,
+  SearchCheck,
+  ShieldAlert,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const workflowSteps = [
@@ -46,106 +55,122 @@ const evidenceRows = [
   },
 ];
 
+const ribbonItems = [
+  { label: "Transcript", icon: FileText, color: "text-slate-300" },
+  { label: "Claims", icon: SearchCheck, color: "text-sky-300" },
+  { label: "Evidence", icon: Link2, color: "text-cyan-300" },
+  { label: "Contradictions", icon: ShieldAlert, color: "text-amber-300" },
+  { label: "Cross-Exam", icon: MessageSquareQuote, color: "text-violet-300" },
+  { label: "Report", icon: FileCheck2, color: "text-emerald-300" },
+];
+
+const backgroundTiles = [
+  { label: "Extract claims", tone: "text-sky-200 border-sky-300/15 bg-sky-300/[0.055]" },
+  { label: "Analyze depositions", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
+  { label: "Link citations", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.05]" },
+  { label: "Detect contradictions", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.055]" },
+  { label: "Build cross-exam", tone: "text-violet-200 border-violet-300/15 bg-violet-300/[0.05]" },
+  { label: "Review testimony", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
+  { label: "Export report", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
+  { label: "Preserve evidence", tone: "text-blue-200 border-blue-300/15 bg-blue-300/[0.05]" },
+  { label: "Flag recall gaps", tone: "text-amber-200 border-amber-300/18 bg-amber-300/[0.05]" },
+  { label: "Verify conflicts", tone: "text-emerald-200 border-emerald-300/15 bg-emerald-300/[0.05]" },
+  { label: "Map timeline", tone: "text-cyan-200 border-cyan-300/15 bg-cyan-300/[0.045]" },
+  { label: "Prepare memo", tone: "text-slate-200 border-white/10 bg-white/[0.035]" },
+];
+
+function WorkflowRibbon() {
+  const doubled = [...ribbonItems, ...ribbonItems];
+
+  return (
+    <div className="pointer-events-none absolute inset-x-4 bottom-8 z-10 mx-auto hidden max-w-7xl overflow-hidden rounded-xl border border-white/10 bg-[#0B0F17]/72 p-2 shadow-[0_18px_70px_rgba(0,0,0,0.34)] backdrop-blur-md lg:block">
+      <div className="marquee-track flex w-max gap-2">
+        {doubled.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={`${item.label}-${index}`}
+              className="flex items-center gap-2 rounded-md border border-white/10 bg-[#070A0F]/86 px-4 py-2 text-xs text-slate-300"
+            >
+              <Icon className={`size-3.5 ${item.color}`} />
+              {item.label}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function EvidenceSurface() {
   return (
     <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_24%,rgba(56,189,248,0.10),transparent_30rem),linear-gradient(180deg,rgba(7,10,15,0.04),#070A0F_82%)]" />
-      <div className="absolute inset-x-[-6%] top-[10%] h-[660px] opacity-95">
-        <div className="absolute inset-0 rounded-[3rem] border border-white/[0.055] bg-[#0B0F17]/50 shadow-[0_60px_180px_rgba(0,0,0,0.52)]" />
-        <div className="deposition-record-layer absolute inset-0 rounded-[3rem] opacity-30" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_18%,rgba(59,130,246,0.14),transparent_28rem),radial-gradient(circle_at_84%_58%,rgba(245,158,11,0.08),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_76%,#070A0F_100%)]" />
+
+      <div className="absolute inset-x-[-8%] top-[8%] h-[680px] rotate-[-3deg] opacity-70 blur-[0.2px]">
+        <div className="grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6">
+          {backgroundTiles.map((tile, index) => (
+            <motion.div
+              key={tile.label}
+              className={`h-24 rounded-lg border px-4 py-3 text-xs shadow-[0_18px_70px_rgba(0,0,0,0.22)] backdrop-blur-sm ${tile.tone}`}
+              initial={{ opacity: 0.34, y: 8 }}
+              animate={{
+                opacity: index % 4 === 0 ? [0.34, 0.72, 0.34] : [0.26, 0.42, 0.26],
+                y: index % 3 === 0 ? [8, 0, 8] : [0, -5, 0],
+              }}
+              transition={{ duration: 7 + (index % 5), repeat: Infinity, ease: "easeInOut", delay: index * 0.22 }}
+            >
+              <div className="font-mono text-[10px] text-current opacity-60">
+                {String(index + 1).padStart(2, "0")}
+              </div>
+              <div className="mt-5 font-medium text-current">{tile.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute inset-x-[-10%] top-[31%] h-[360px] opacity-55">
         <svg
           className="absolute inset-0 h-full w-full"
-          viewBox="0 0 1440 660"
+          viewBox="0 0 1440 360"
           preserveAspectRatio="none"
           role="img"
         >
           <defs>
-            <linearGradient id="documentFill" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(15,23,42,0.88)" />
-              <stop offset="100%" stopColor="rgba(7,10,15,0.74)" />
-            </linearGradient>
             <linearGradient id="evidenceLink" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(56,189,248,0.05)" />
-              <stop offset="48%" stopColor="rgba(56,189,248,0.52)" />
-              <stop offset="100%" stopColor="rgba(148,163,184,0.08)" />
+              <stop offset="0%" stopColor="rgba(56,189,248,0)" />
+              <stop offset="52%" stopColor="rgba(56,189,248,0.34)" />
+              <stop offset="100%" stopColor="rgba(56,189,248,0)" />
             </linearGradient>
             <linearGradient id="contradictionStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(251,191,36,0.10)" />
-              <stop offset="50%" stopColor="rgba(251,191,36,0.58)" />
-              <stop offset="100%" stopColor="rgba(251,191,36,0.10)" />
+              <stop offset="0%" stopColor="rgba(251,191,36,0)" />
+              <stop offset="50%" stopColor="rgba(251,191,36,0.42)" />
+              <stop offset="100%" stopColor="rgba(251,191,36,0)" />
             </linearGradient>
-            <pattern id="documentTexture" width="96" height="44" patternUnits="userSpaceOnUse">
-              <path d="M0 43.5H96" stroke="rgba(148,163,184,0.09)" strokeWidth="1" />
-              <path d="M24 0V44" stroke="rgba(148,163,184,0.055)" strokeWidth="1" />
-            </pattern>
           </defs>
-
-          <rect width="1440" height="660" fill="url(#documentTexture)" opacity="0.26" />
-
-          <g opacity="0.92">
-            <path d="M152 118h424c28 0 48 20 48 48v360c0 28-20 48-48 48H152c-28 0-48-20-48-48V166c0-28 20-48 48-48Z" fill="url(#documentFill)" stroke="rgba(255,255,255,0.10)" />
-            <path d="M846 92h438c30 0 52 22 52 52v382c0 30-22 52-52 52H846c-30 0-52-22-52-52V144c0-30 22-52 52-52Z" fill="url(#documentFill)" stroke="rgba(255,255,255,0.10)" />
-            <path d="M246 164h286M246 206h238M246 248h300M246 290h216M246 374h272M246 416h238M246 458h300" stroke="rgba(203,213,225,0.18)" strokeWidth="9" strokeLinecap="round" />
-            <path d="M896 150h284M896 192h226M896 234h312M896 318h288M896 360h220M896 444h312M896 486h246" stroke="rgba(203,213,225,0.16)" strokeWidth="9" strokeLinecap="round" />
-            <path d="M194 164h24M194 206h24M194 248h24M194 290h24M194 374h24M194 416h24M194 458h24M844 150h24M844 192h24M844 234h24M844 318h24M844 360h24M844 444h24M844 486h24" stroke="rgba(125,211,252,0.28)" strokeWidth="5" strokeLinecap="round" />
-          </g>
-
-          <motion.rect
-            x="226"
-            y="354"
-            width="344"
-            height="42"
-            rx="7"
-            fill="rgba(251,191,36,0.075)"
-            stroke="rgba(251,191,36,0.24)"
-            animate={{ opacity: [0.48, 0.86, 0.48] }}
-            transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.rect
-            x="876"
-            y="424"
-            width="378"
-            height="42"
-            rx="7"
-            fill="rgba(56,189,248,0.065)"
-            stroke="rgba(56,189,248,0.22)"
-            animate={{ opacity: [0.42, 0.78, 0.42] }}
-            transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut" }}
-          />
-
           <motion.path
-            d="M570 375 C 688 330, 750 314, 876 445"
-            fill="none"
-            stroke="url(#contradictionStroke)"
-            strokeWidth="2"
-            strokeDasharray="10 14"
-            initial={{ pathLength: 0.15, opacity: 0.26 }}
-            animate={{ pathLength: [0.32, 0.82, 0.32], opacity: [0.32, 0.72, 0.32] }}
-            transition={{ duration: 6.8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.path
-            d="M624 255 C 710 246, 744 248, 794 212"
+            d="M-80 210 C 215 76, 442 310, 690 178 S 1080 56, 1520 206"
             fill="none"
             stroke="url(#evidenceLink)"
-            strokeWidth="1.4"
-            initial={{ pathLength: 0.18, opacity: 0.18 }}
-            animate={{ pathLength: [0.22, 0.72, 0.22], opacity: [0.2, 0.5, 0.2] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            strokeWidth="2.3"
+            initial={{ pathLength: 0.2, pathOffset: 0 }}
+            animate={{ pathLength: [0.26, 0.62, 0.26], pathOffset: [0, 0.08, 0] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
           />
-          <motion.rect
-            x="82"
-            y="104"
-            width="1278"
-            height="2"
-            fill="rgba(226,232,240,0.18)"
-            animate={{ y: [104, 540, 104], opacity: [0.08, 0.22, 0.08] }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          <motion.path
+            d="M-40 248 C 240 190, 432 232, 606 250 S 984 312, 1500 162"
+            fill="none"
+            stroke="url(#contradictionStroke)"
+            strokeWidth="2.1"
+            strokeDasharray="10 14"
+            animate={{ pathLength: [0.18, 0.7, 0.18], opacity: [0.18, 0.5, 0.18] }}
+            transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut" }}
           />
         </svg>
-
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070A0F] to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#070A0F] to-transparent" />
       </div>
+
+      <div className="absolute inset-y-0 left-0 w-[58%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.97)_42%,rgba(7,10,15,0.72)_74%,transparent_100%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
 }
@@ -154,13 +179,14 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-white/10 bg-[#070A0F] px-4 pt-24">
       <EvidenceSurface />
+      <WorkflowRibbon />
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 py-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
+      <div className="relative z-10 mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-12 pb-32 pt-20 lg:grid-cols-[minmax(0,0.88fr)_minmax(500px,1fr)]">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-3xl"
+          className="max-w-3xl rounded-2xl border border-white/[0.07] bg-[#070A0F]/72 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-sm md:p-7"
         >
           <div className="inline-flex rounded-md border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs text-slate-400">
             Deposition review workspace

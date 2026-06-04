@@ -290,8 +290,8 @@ export function Dashboard() {
         <Sidebar />
 
         <section className="min-w-0 flex-1">
-          <header className="sticky top-20 z-30 mb-5 flex items-start gap-3 rounded-lg border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl">
-            <div className="relative flex flex-1 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
+          <header className="relative z-20 mb-4 grid gap-3 rounded-lg border border-white/10 bg-[#070A0F]/90 p-2.5 shadow-[0_12px_42px_rgba(0,0,0,0.32)] backdrop-blur-xl md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div className="relative flex min-w-0 items-center gap-2 rounded-lg border border-white/10 bg-[#0B0F17] px-3 py-2">
               <Search className="size-3.5 text-slate-500" />
               <Input
                 className="h-6 border-0 bg-transparent p-0 font-mono text-xs text-slate-300 placeholder:text-slate-600 focus-visible:ring-0"
@@ -349,7 +349,7 @@ export function Dashboard() {
                 </div>
               ) : null}
             </div>
-            <Badge variant="slate" className="hidden font-mono uppercase tracking-[0.16em] md:inline-flex">
+            <Badge variant="slate" className="justify-center font-mono uppercase tracking-[0.16em]">
               {statusLabel}
             </Badge>
             <Button variant="secondary" size="sm" className="text-xs">

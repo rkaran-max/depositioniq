@@ -8,21 +8,29 @@ import {
 } from "lucide-react";
 
 const items = [
+  "Transcript",
+  "Claims",
+  "Evidence",
+  "Contradictions",
+  "Cross-Exam",
+  "Report",
+  "Audio",
   "PDF",
-  "OCR",
-  "TXT",
-  "Depositions",
-  "Exhibits",
-  "Discovery",
-  "Transcripts",
-  "Court Records",
-  "Witness Testimony",
-  "Cross-Examination",
-  "Litigation Reports",
-  "Witness Review",
+  "Citations",
+  "Recall Gaps",
+  "Preservation",
+  "Attorney Review",
 ];
 
 const icons = [FileText, ScanText, FileArchive, Gavel, FileSearch, ScrollText];
+const iconTones = [
+  "text-slate-300",
+  "text-sky-300",
+  "text-cyan-300",
+  "text-amber-300",
+  "text-violet-300",
+  "text-emerald-300",
+];
 
 export function MarqueeBar() {
   const doubled = [...items, ...items];
@@ -38,7 +46,7 @@ export function MarqueeBar() {
                 key={`${item}-${index}`}
                 className="flex items-center gap-2 rounded-md border border-white/10 bg-[#0B0F17] px-4 py-2 text-xs text-slate-300"
               >
-                <Icon className="size-3.5 text-slate-400" />
+                <Icon className={`size-3.5 ${iconTones[index % iconTones.length]}`} />
                 {item}
               </div>
             );
