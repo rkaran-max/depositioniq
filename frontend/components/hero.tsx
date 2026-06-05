@@ -66,6 +66,7 @@ type NetworkNode = {
   tone: NetworkTone;
   position: [number, number, number];
   showLabel?: boolean;
+  subtle?: boolean;
 };
 
 const networkColors: Record<NetworkTone, number> = {
@@ -76,50 +77,70 @@ const networkColors: Record<NetworkTone, number> = {
 };
 
 const networkNodes: NetworkNode[] = [
-  { label: "Transcript", tone: "evidence", position: [-4.45, 1.1, 0.08], showLabel: true },
-  { label: "Audio", tone: "workflow", position: [-4.8, 2.15, -0.18] },
-  { label: "PDF", tone: "evidence", position: [-4.75, 0.0, -0.1] },
-  { label: "Claims", tone: "verified", position: [-3.05, 0.75, 0.14], showLabel: true },
-  { label: "Claim A", tone: "verified", position: [-2.55, 1.85, -0.1] },
-  { label: "Claim B", tone: "verified", position: [-2.2, -0.25, 0.04] },
-  { label: "Evidence", tone: "evidence", position: [-1.45, 0.3, 0.18], showLabel: true },
-  { label: "Citation Bundle", tone: "evidence", position: [-1.45, -1.15, -0.16] },
-  { label: "Preservation Issues", tone: "risk", position: [-0.15, -0.65, 0.08] },
-  { label: "Contradictions", tone: "risk", position: [0.2, 0.85, 0.15], showLabel: true },
-  { label: "Recall Gaps", tone: "risk", position: [1.15, -0.05, -0.1], showLabel: true },
-  { label: "Verified Claims", tone: "verified", position: [0.95, 2.0, -0.18] },
-  { label: "Cross-Exam", tone: "workflow", position: [1.95, 0.9, 0.05], showLabel: true },
-  { label: "Follow-Up Questions", tone: "workflow", position: [2.55, -0.35, -0.12] },
-  { label: "Attorney Review", tone: "verified", position: [3.25, 0.35, 0.12], showLabel: true },
-  { label: "Report", tone: "verified", position: [4.35, -0.25, -0.08], showLabel: true },
-  { label: "Risk Memo", tone: "risk", position: [1.0, -1.55, 0.04] },
-  { label: "Citation Index", tone: "evidence", position: [-0.25, 1.65, -0.16] },
+  { label: "Transcript", tone: "evidence", position: [-3.7, 2.62, 0.08], showLabel: true },
+  { label: "Audio", tone: "workflow", position: [-5.15, 2.82, -0.18] },
+  { label: "PDF", tone: "evidence", position: [-4.95, -2.08, -0.1] },
+  { label: "Claims", tone: "verified", position: [-2.15, 2.72, 0.14], showLabel: true },
+  { label: "Claim A", tone: "verified", position: [-0.85, 2.5, -0.1] },
+  { label: "Claim B", tone: "verified", position: [-2.65, -2.25, 0.04] },
+  { label: "Evidence", tone: "evidence", position: [0.22, 0.32, 0.18], showLabel: true, subtle: true },
+  { label: "Citation Bundle", tone: "evidence", position: [-0.95, -2.18, -0.16] },
+  { label: "Preservation Issues", tone: "risk", position: [0.5, -2.32, 0.08] },
+  { label: "Contradictions", tone: "risk", position: [0.2, 1.1, 0.15], showLabel: true, subtle: true },
+  { label: "Recall Gaps", tone: "risk", position: [0.22, -0.65, -0.1], showLabel: true, subtle: true },
+  { label: "Verified Claims", tone: "verified", position: [0.35, 2.78, -0.18] },
+  { label: "Cross-Exam", tone: "workflow", position: [2.05, 2.66, 0.05], showLabel: true },
+  { label: "Follow-Up Questions", tone: "workflow", position: [5.15, 1.55, -0.12] },
+  { label: "Attorney Review", tone: "verified", position: [5.2, 0.12, 0.12], showLabel: true },
+  { label: "Report", tone: "verified", position: [5.0, -1.72, -0.08], showLabel: true },
+  { label: "Risk Memo", tone: "risk", position: [0.85, -2.36, 0.04] },
+  { label: "Citation Index", tone: "evidence", position: [0.18, -1.35, -0.16], subtle: true },
 ];
 
 const networkEdges: Array<[number, number]> = [
   [1, 0],
-  [2, 0],
   [0, 3],
   [3, 4],
-  [3, 5],
-  [3, 6],
-  [6, 17],
-  [6, 7],
-  [7, 8],
-  [5, 8],
-  [6, 9],
-  [8, 9],
-  [9, 10],
   [4, 11],
-  [9, 12],
-  [10, 12],
+  [11, 12],
   [12, 13],
   [13, 14],
   [14, 15],
+  [2, 5],
+  [5, 7],
+  [7, 8],
   [8, 16],
   [16, 15],
-  [7, 17],
-  [17, 15],
+];
+
+const pulseRoutes: Array<{
+  tone: NetworkTone;
+  points: Array<[number, number, number]>;
+}> = [
+  {
+    tone: "evidence",
+    points: [
+      [-5.15, 2.82, -0.18],
+      [-3.7, 2.62, 0.08],
+      [-2.15, 2.72, 0.14],
+      [-0.85, 2.5, -0.1],
+      [0.35, 2.78, -0.18],
+      [2.05, 2.66, 0.05],
+      [4.85, 2.44, 0.08],
+      [5.2, 0.12, 0.12],
+    ],
+  },
+  {
+    tone: "risk",
+    points: [
+      [-4.95, -2.08, -0.1],
+      [-2.65, -2.25, 0.04],
+      [-0.95, -2.18, -0.16],
+      [0.5, -2.32, 0.08],
+      [0.85, -2.36, 0.04],
+      [5.0, -1.72, -0.08],
+    ],
+  },
 ];
 
 const ribbonItems = [
@@ -246,6 +267,32 @@ function colorToRgba(color: number, alpha = 1) {
   return `rgba(${Math.round(threeColor.r * 255)},${Math.round(threeColor.g * 255)},${Math.round(threeColor.b * 255)},${alpha})`;
 }
 
+function sampleRoute(points: THREE.Vector3[], t: number) {
+  if (points.length === 0) {
+    return new THREE.Vector3();
+  }
+
+  if (points.length === 1) {
+    return points[0].clone();
+  }
+
+  const segmentLengths = points.slice(0, -1).map((point, index) => point.distanceTo(points[index + 1]));
+  const routeLength = segmentLengths.reduce((total, length) => total + length, 0);
+  let distance = ((t % 1) + 1) % 1 * routeLength;
+
+  for (let index = 0; index < segmentLengths.length; index += 1) {
+    const segmentLength = segmentLengths[index];
+
+    if (distance <= segmentLength) {
+      return new THREE.Vector3().lerpVectors(points[index], points[index + 1], distance / Math.max(segmentLength, 0.001));
+    }
+
+    distance -= segmentLength;
+  }
+
+  return points[points.length - 1].clone();
+}
+
 function ThreeEvidenceNetwork() {
   const mountRef = useRef<HTMLDivElement | null>(null);
 
@@ -290,23 +337,30 @@ function ThreeEvidenceNetwork() {
       const color = networkColors[node.tone];
       const rgba = colorToRgba(color);
       const nodeTexture = createNodeTexture(rgba);
+      const nodeScale = node.subtle ? 0.13 : 0.22;
+      const haloScale = node.subtle ? 0.24 : 0.42;
+      const nodeOpacity = node.subtle ? 0.22 : 0.58;
+      const haloOpacity = node.subtle ? 0.035 : 0.08;
       nodeTextures.push(nodeTexture);
       const material = new THREE.SpriteMaterial({
         map: nodeTexture,
         transparent: true,
-        opacity: 0.94,
+        opacity: nodeOpacity,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
       const haloMaterial = material.clone();
-      haloMaterial.opacity = 0.18;
+      haloMaterial.opacity = haloOpacity;
 
       const nodeSprite = new THREE.Sprite(material);
       const halo = new THREE.Sprite(haloMaterial);
       nodeSprite.position.set(...node.position);
       halo.position.copy(nodeSprite.position);
-      nodeSprite.scale.set(0.22, 0.22, 1);
-      halo.scale.set(0.42, 0.42, 1);
+      nodeSprite.scale.set(nodeScale, nodeScale, 1);
+      halo.scale.set(haloScale, haloScale, 1);
+      nodeSprite.userData.baseScale = nodeScale;
+      halo.userData.baseScale = haloScale;
+      halo.userData.baseOpacity = haloOpacity;
       networkGroup.add(halo, nodeSprite);
       nodes.push(nodeSprite);
       halos.push(halo);
@@ -315,12 +369,12 @@ function ThreeEvidenceNetwork() {
         const labelMaterial = new THREE.SpriteMaterial({
           map: createLabelTexture(node.label, rgba),
           transparent: true,
-          opacity: 0.56,
+          opacity: node.subtle ? 0.22 : 0.34,
           depthWrite: false,
         });
         const label = new THREE.Sprite(labelMaterial);
         label.position.set(node.position[0], node.position[1] - 0.25, node.position[2]);
-        label.scale.set(0.82, 0.2, 1);
+        label.scale.set(node.subtle ? 0.66 : 0.82, node.subtle ? 0.16 : 0.2, 1);
         networkGroup.add(label);
         labelSprites.push(label);
       }
@@ -341,36 +395,32 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.LineBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.34,
+        opacity: 0.068,
         blending: THREE.AdditiveBlending,
       });
       networkGroup.add(new THREE.Line(geometry, material));
       lineMaterials.push(material);
     });
 
-    const pulseGeometry = new THREE.SphereGeometry(0.026, 18, 18);
-    const pulses = networkEdges.slice(0, 13).map(([from, to], index) => {
-      const tone =
-        networkNodes[from].tone === "risk" || networkNodes[to].tone === "risk"
-          ? "risk"
-          : networkNodes[from].tone === "verified" || networkNodes[to].tone === "verified"
-            ? "verified"
-            : "evidence";
+    const pulseGeometry = new THREE.SphereGeometry(0.017, 18, 18);
+    const pulses = pulseRoutes.flatMap((route, routeIndex) => {
+      const routePoints = route.points.map((point) => new THREE.Vector3(...point));
       const material = new THREE.MeshBasicMaterial({
-        color: networkColors[tone],
+        color: networkColors[route.tone],
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.38,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
-      const pulse = new THREE.Mesh(pulseGeometry, material);
-      networkGroup.add(pulse);
-      return {
-        pulse,
-        from: new THREE.Vector3(...networkNodes[from].position),
-        to: new THREE.Vector3(...networkNodes[to].position),
-        offset: index / 10,
-      };
+      return [0, 0.42].map((offset, pulseIndex) => {
+        const pulse = new THREE.Mesh(pulseGeometry, material.clone());
+        networkGroup.add(pulse);
+        return {
+          pulse,
+          routePoints,
+          offset: offset + routeIndex * 0.18 + pulseIndex * 0.07,
+        };
+      });
     });
 
     const resize = () => {
@@ -394,26 +444,29 @@ function ThreeEvidenceNetwork() {
       networkGroup.rotation.x = Math.sin(elapsed * 0.1) * 0.035;
 
       nodes.forEach((node, index) => {
-        node.scale.setScalar(0.22 * (1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.12));
+        const baseScale = typeof node.userData.baseScale === "number" ? node.userData.baseScale : 0.22;
+        node.scale.setScalar(baseScale * (1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.12));
       });
 
       halos.forEach((halo, index) => {
-        halo.scale.setScalar(0.42 * (1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.16));
-        (halo.material as THREE.SpriteMaterial).opacity = 0.09 + Math.sin(elapsed * 0.75 + index) * 0.024;
+        const baseScale = typeof halo.userData.baseScale === "number" ? halo.userData.baseScale : 0.42;
+        const baseOpacity = typeof halo.userData.baseOpacity === "number" ? halo.userData.baseOpacity : 0.18;
+        halo.scale.setScalar(baseScale * (1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.16));
+        (halo.material as THREE.SpriteMaterial).opacity = baseOpacity * 0.5 + Math.sin(elapsed * 0.75 + index) * (baseOpacity * 0.13);
       });
 
       lineMaterials.forEach((material, index) => {
-        material.opacity = 0.3 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.075;
+        material.opacity = 0.055 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.014;
       });
 
       labelSprites.forEach((label, index) => {
-        label.material.opacity = 0.48 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.07;
+        label.material.opacity = 0.25 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.035;
       });
 
-      pulses.forEach(({ pulse, from, to, offset }, index) => {
-        const t = (elapsed * 0.105 + offset) % 1;
-        pulse.position.lerpVectors(from, to, t);
-        (pulse.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * Math.PI) * (index % 3 === 0 ? 0.95 : 0.68);
+      pulses.forEach(({ pulse, routePoints, offset }, index) => {
+        const t = (elapsed * 0.075 + offset) % 1;
+        pulse.position.copy(sampleRoute(routePoints, t));
+        (pulse.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * Math.PI) * (index % 2 === 0 ? 0.36 : 0.24);
       });
 
       renderer.render(scene, camera);
