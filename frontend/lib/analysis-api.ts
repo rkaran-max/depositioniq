@@ -144,7 +144,10 @@ export function createMockAnalysisState(): DashboardAnalysisState {
   };
 }
 
-export async function analyzeTranscript(transcriptText: string): Promise<DashboardAnalysisState> {
+export async function analyzeTranscript(
+  transcriptText: string,
+  inputMode: DashboardAnalysisState["inputMode"] = "Text",
+): Promise<DashboardAnalysisState> {
   const response = await fetch(`${API_URL}/analyze`, {
     method: "POST",
     headers: {
@@ -159,7 +162,35 @@ export async function analyzeTranscript(transcriptText: string): Promise<Dashboa
   }
 
   const payload = (await response.json()) as BackendAnalysisResponse;
-  return normalizeBackendAnalysis(payload, transcriptText, "Text");
+  return normalizeBackendAnalysis(payload, transcriptText, inputMode);
+}
+
+export async function extractPdfTranscript(pdfFiles: File[]): Promise<{
+  transcriptText: string;
+  files: Array<{ filename: string; bytes: number; characters_extracted: number }>;
+}> {
+  const formData = new FormData();
+  pdfFiles.forEach((file) => formData.append("pdf_files", file));
+
+  const response = await fetch(`${API_URL}/extract-pdf`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(extractErrorMessage(message) || `PDF extraction request failed with ${response.status}`);
+  }
+
+  const payload = (await response.json()) as {
+    transcript_text: string;
+    files: Array<{ filename: string; bytes: number; characters_extracted: number }>;
+  };
+
+  return {
+    transcriptText: payload.transcript_text,
+    files: payload.files,
+  };
 }
 
 export async function transcribeAndAnalyzeAudio(

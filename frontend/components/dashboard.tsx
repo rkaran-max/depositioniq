@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   analyzeTranscript,
   createMockAnalysisState,
+  extractPdfTranscript,
   transcribeAndAnalyzeAudio,
   type DashboardAnalysisState,
 } from "@/lib/analysis-api";
@@ -239,6 +240,9 @@ export function Dashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isTranscribingAudio, setIsTranscribingAudio] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [isExtractingPdf, setIsExtractingPdf] = useState(false);
+  const [transcriptInputMode, setTranscriptInputMode] = useState<DashboardAnalysisState["inputMode"]>("Demo");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [analysisNotice, setAnalysisNotice] = useState(
@@ -320,7 +324,7 @@ export function Dashboard() {
     setIsAnalyzing(true);
     setAnalysisNotice("Sending transcript to DepositionIQ FastAPI backend...");
     try {
-      const nextAnalysis = await analyzeTranscript(transcriptText);
+      const nextAnalysis = await analyzeTranscript(transcriptText, transcriptInputMode === "PDF" ? "PDF" : "Text");
       setAnalysis(nextAnalysis);
       setAnalysisNotice(`Live backend analysis complete: ${nextAnalysis.transcriptId}`);
       scrollToResults();
@@ -348,6 +352,7 @@ export function Dashboard() {
       const result = await transcribeAndAnalyzeAudio(audioFile);
       setAnalysisNotice("Analyzing transcript...");
       setTranscriptText(result.transcriptText);
+      setTranscriptInputMode("Audio");
       setAnalysis(result.analysis);
       setAnalysisNotice(`Live audio analysis complete: ${result.analysis.transcriptId}`);
       scrollToResults();
@@ -362,10 +367,38 @@ export function Dashboard() {
     }
   }
 
+  async function handlePdfExtract() {
+    if (!pdfFiles.length) {
+      setAnalysisNotice("Choose one or more PDF transcripts before extracting text.");
+      return;
+    }
+
+    setIsExtractingPdf(true);
+    setAnalysisNotice("Extracting PDF transcript text...");
+    try {
+      const result = await extractPdfTranscript(pdfFiles);
+      setTranscriptText(result.transcriptText);
+      setTranscriptInputMode("PDF");
+      const fileSummary = result.files
+        .map((file) => `${file.filename}: ${file.characters_extracted.toLocaleString()} chars`)
+        .join("; ");
+      setAnalysisNotice(`PDF text extracted. Review the transcript, then click Analyze Deposition. ${fileSummary}`);
+    } catch (error) {
+      setAnalysisNotice(
+        error instanceof Error
+          ? error.message
+          : "PDF extraction failed. Try an OCR-enhanced PDF or paste the transcript text.",
+      );
+    } finally {
+      setIsExtractingPdf(false);
+    }
+  }
+
   function handleViewSampleCase() {
     const sampleAnalysis = createMockAnalysisState();
     setAnalysis(sampleAnalysis);
     setTranscriptText(sampleAnalysis.sampleTranscript);
+    setTranscriptInputMode("Demo");
     setAnalysisNotice("Loaded sample case in demo mode.");
     scrollToResults();
   }
@@ -604,6 +637,23 @@ export function Dashboard() {
                     <p className="mt-2 text-xs leading-5 text-slate-500">
                       OCR fallback, Q/A cleanup, page-line preservation, and citation-aware text extraction.
                     </p>
+                    <Input
+                      type="file"
+                      accept=".pdf,application/pdf"
+                      multiple
+                      className="mt-3 h-auto cursor-pointer bg-[#070A0F] py-2 text-xs file:mr-3 file:rounded-md file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-950"
+                      onChange={(event) => setPdfFiles(Array.from(event.target.files ?? []))}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="default"
+                      onClick={handlePdfExtract}
+                      disabled={!pdfFiles.length || isExtractingPdf || isAnalyzing || isTranscribingAudio}
+                      className="mt-3 w-full text-xs"
+                    >
+                      {isExtractingPdf ? "Extracting PDF..." : "Extract PDF Text"}
+                    </Button>
                     <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-500">
                       <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">OCR ready</span>
                       <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1">Citations on</span>
@@ -613,7 +663,10 @@ export function Dashboard() {
                 <Textarea
                   className="min-h-[420px] resize-y border-white/10 bg-[#070A0F] font-mono text-[13px] leading-6 text-slate-300 placeholder:text-slate-700 xl:min-h-[500px]"
                   value={transcriptText}
-                  onChange={(event) => setTranscriptText(event.target.value)}
+                  onChange={(event) => {
+                    setTranscriptText(event.target.value);
+                    setTranscriptInputMode("Text");
+                  }}
                 />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3">

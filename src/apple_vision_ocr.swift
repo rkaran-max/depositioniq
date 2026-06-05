@@ -2,6 +2,7 @@ import Foundation
 import PDFKit
 import Vision
 import AppKit
+import CoreGraphics
 
 if CommandLine.arguments.count < 2 {
     fputs("Usage: swift apple_vision_ocr.swift <pdf-path>\n", stderr)
@@ -15,32 +16,57 @@ guard let document = PDFDocument(url: pdfURL) else {
 }
 
 func renderedImage(for page: PDFPage, scale: CGFloat = 3.0) -> CGImage? {
-    let bounds = page.bounds(for: .mediaBox)
-    let width = Int(bounds.width * scale)
-    let height = Int(bounds.height * scale)
-    guard let bitmap = NSBitmapImageRep(
-        bitmapDataPlanes: nil,
-        pixelsWide: width,
-        pixelsHigh: height,
-        bitsPerSample: 8,
-        samplesPerPixel: 4,
-        hasAlpha: true,
-        isPlanar: false,
-        colorSpaceName: .deviceRGB,
+    guard let pageRef = page.pageRef else {
+        return nil
+    }
+
+    let bounds = pageRef.getBoxRect(.mediaBox)
+    let width = max(1, Int(bounds.width * scale))
+    let height = max(1, Int(bounds.height * scale))
+    let colorSpace = CGColorSpaceCreateDeviceRGB()
+    guard let context = CGContext(
+        data: nil,
+        width: width,
+        height: height,
+        bitsPerComponent: 8,
         bytesPerRow: 0,
-        bitsPerPixel: 0
+        space: colorSpace,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
     ) else {
         return nil
     }
 
-    bitmap.size = bounds.size
-    NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
-    NSColor.white.set()
-    NSBezierPath(rect: bounds).fill()
-    page.draw(with: .mediaBox, to: NSGraphicsContext.current!.cgContext)
-    NSGraphicsContext.restoreGraphicsState()
-    return bitmap.cgImage
+    context.setFillColor(NSColor.white.cgColor)
+    context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+    context.saveGState()
+    context.translateBy(x: 0, y: CGFloat(height))
+    context.scaleBy(x: scale, y: -scale)
+    context.translateBy(x: -bounds.origin.x, y: -bounds.origin.y)
+    context.drawPDFPage(pageRef)
+    context.restoreGState()
+
+    return context.makeImage()
+}
+
+func ocrLines(from image: CGImage) -> [String] {
+    let request = VNRecognizeTextRequest()
+    request.recognitionLevel = .accurate
+    request.usesLanguageCorrection = true
+
+    let handler = VNImageRequestHandler(
+        cgImage: image,
+        orientation: .up,
+        options: [:]
+    )
+    do {
+        try handler.perform([request])
+    } catch {
+        return []
+    }
+
+    return (request.results ?? []).compactMap { observation in
+        observation.topCandidates(1).first?.string
+    }
 }
 
 for pageIndex in 0..<document.pageCount {
@@ -48,17 +74,7 @@ for pageIndex in 0..<document.pageCount {
         continue
     }
 
-    let request = VNRecognizeTextRequest()
-    request.recognitionLevel = .accurate
-    request.usesLanguageCorrection = true
-    request.recognitionLanguages = ["en-US"]
-
-    let handler = VNImageRequestHandler(cgImage: image, options: [:])
-    try handler.perform([request])
-
-    let lines = (request.results ?? []).compactMap { observation in
-        observation.topCandidates(1).first?.string
-    }
+    let lines = ocrLines(from: image)
 
     print("[Page \(pageIndex + 1)]")
     print(lines.joined(separator: "\n"))

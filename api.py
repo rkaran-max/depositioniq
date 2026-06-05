@@ -16,6 +16,7 @@ from src.audio_transcriber import (
     AudioTranscriptionError,
     transcribe_audio,
 )
+from src.ingest import TranscriptIngestor
 from src.pipeline import run_pipeline, serialize_pipeline_result
 
 logger = logging.getLogger("depositioniq.api")
@@ -67,6 +68,59 @@ def analyze(request: AnalyzeRequest) -> dict:
         return serialize_pipeline_result(results)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Analysis failed: {exc}") from exc
+
+
+@app.post("/extract-pdf")
+async def extract_pdf(pdf_files: list[UploadFile] = File(...)) -> dict:
+    """Extract and clean transcript text from one or more uploaded PDFs."""
+
+    if not pdf_files:
+        raise HTTPException(status_code=400, detail="At least one PDF file is required.")
+
+    ingestor = TranscriptIngestor()
+    extracted_sections: list[str] = []
+    files: list[dict] = []
+
+    try:
+        for pdf_file in pdf_files:
+            filename = pdf_file.filename or "uploaded.pdf"
+            extension = Path(filename).suffix.lower()
+            if extension != ".pdf":
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported file type '{extension or 'unknown'}'. Upload PDF files only.",
+                )
+
+            pdf_bytes = await pdf_file.read()
+            if not pdf_bytes:
+                raise HTTPException(status_code=400, detail=f"Uploaded PDF '{filename}' was empty.")
+
+            text = ingestor.extract_pdf_text(pdf_bytes, filename)
+            extracted_sections.append(f"--- {filename} ---\n{text}")
+            files.append(
+                {
+                    "filename": filename,
+                    "bytes": len(pdf_bytes),
+                    "characters_extracted": len(text),
+                }
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("PDF extraction failed")
+        raise HTTPException(status_code=500, detail=f"PDF extraction failed: {exc}") from exc
+    finally:
+        for pdf_file in pdf_files:
+            await pdf_file.close()
+
+    transcript_text = "\n\n".join(extracted_sections).strip()
+    if not transcript_text:
+        raise HTTPException(status_code=422, detail="No transcript text could be extracted from the uploaded PDF.")
+
+    return {
+        "transcript_text": transcript_text,
+        "files": files,
+    }
 
 
 @app.post("/transcribe-analyze")

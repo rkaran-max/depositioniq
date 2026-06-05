@@ -6,6 +6,7 @@ python-dotenv>=1.0.1
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
+rapidocr-onnxruntime>=1.2.3
 
 # Optional audio transcription dependencies:
 # Install one of these locally to enable POST /transcribe-analyze.

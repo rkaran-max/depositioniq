@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from hashlib import sha256
 from io import BytesIO
+import os
 from pathlib import Path
 import platform
 import re
@@ -96,27 +97,37 @@ class TranscriptIngestor:
         )
 
     def _extract_pdf_text_with_ocr(self, pdf_bytes: bytes, filename: str) -> str:
-        """Run OCR for image-only PDFs using the local macOS Vision framework."""
+        """Run OCR for image-only PDFs using optional local OCR backends."""
+        rapidocr_text = self._extract_pdf_text_with_rapidocr(pdf_bytes)
+        if self._has_meaningful_ocr_text(rapidocr_text):
+            return rapidocr_text
+
         if platform.system() != "Darwin" or not shutil.which("swift"):
             raise ValueError(
                 f"No selectable text was found in '{filename}', and local OCR is not "
-                "available. On macOS, install Xcode Command Line Tools; otherwise OCR "
-                "the PDF externally and upload the extracted text."
+                "available. Install optional OCR dependencies or OCR the PDF externally "
+                "and upload the extracted text."
             )
 
         script_path = Path(__file__).with_name("apple_vision_ocr.swift")
         if not script_path.exists():
             raise RuntimeError("The Apple Vision OCR helper script is missing.")
 
-        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as temp_pdf:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".pdf", delete=True) as temp_pdf,
+            tempfile.TemporaryDirectory() as module_cache_dir,
+        ):
             temp_pdf.write(pdf_bytes)
             temp_pdf.flush()
+            env = os.environ.copy()
+            env["CLANG_MODULE_CACHE_PATH"] = module_cache_dir
             result = subprocess.run(
                 ["swift", str(script_path), temp_pdf.name],
                 check=False,
                 capture_output=True,
                 text=True,
                 timeout=180,
+                env=env,
             )
 
         if result.returncode != 0:
@@ -125,9 +136,58 @@ class TranscriptIngestor:
             )
 
         ocr_text = result.stdout.strip()
-        if not ocr_text:
+        if not self._has_meaningful_ocr_text(ocr_text):
             raise ValueError(f"OCR did not return text for '{filename}'.")
         return ocr_text
+
+    def _extract_pdf_text_with_rapidocr(self, pdf_bytes: bytes) -> str:
+        """Use optional RapidOCR on embedded page images from scanned PDFs."""
+        try:
+            from PIL import Image
+            from pypdf import PdfReader
+            from rapidocr_onnxruntime import RapidOCR
+        except ImportError:
+            return ""
+
+        try:
+            reader = PdfReader(BytesIO(pdf_bytes))
+            ocr = RapidOCR()
+        except Exception:
+            return ""
+
+        sections: list[str] = []
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            for page_number, page in enumerate(reader.pages, start=1):
+                page_lines: list[str] = []
+                for image_index, image_file in enumerate(page.images, start=1):
+                    try:
+                        image = Image.open(BytesIO(image_file.data)).convert("RGB")
+                        image_path = temp_root / f"page-{page_number}-{image_index}.png"
+                        image.save(image_path)
+                        result, _elapsed = ocr(str(image_path))
+                    except Exception:
+                        continue
+
+                    for item in result or []:
+                        if len(item) < 2:
+                            continue
+                        text = str(item[1]).strip()
+                        if text:
+                            page_lines.append(text)
+
+                if page_lines:
+                    sections.append(f"[Page {page_number}]\n" + "\n".join(page_lines))
+
+        return "\n\n".join(sections)
+
+    def _has_meaningful_ocr_text(self, text: str) -> bool:
+        """Return True when OCR output contains content beyond page markers."""
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped and not re.fullmatch(r"\[Page \d+\]", stripped):
+                return True
+        return False
 
     def _normalize_qa_markers(self, text: str) -> str:
         """Normalize common deposition and OCR speaker markers to Q:/A:."""
