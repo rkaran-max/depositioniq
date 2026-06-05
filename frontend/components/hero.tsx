@@ -339,8 +339,8 @@ function ThreeEvidenceNetwork() {
       const nodeTexture = createNodeTexture(rgba);
       const nodeScale = node.subtle ? 0.13 : 0.22;
       const haloScale = node.subtle ? 0.24 : 0.42;
-      const nodeOpacity = node.subtle ? 0.22 : 0.58;
-      const haloOpacity = node.subtle ? 0.035 : 0.08;
+      const nodeOpacity = node.subtle ? 0.24 : 0.64;
+      const haloOpacity = node.subtle ? 0.039 : 0.088;
       nodeTextures.push(nodeTexture);
       const material = new THREE.SpriteMaterial({
         map: nodeTexture,
@@ -369,7 +369,7 @@ function ThreeEvidenceNetwork() {
         const labelMaterial = new THREE.SpriteMaterial({
           map: createLabelTexture(node.label, rgba),
           transparent: true,
-          opacity: node.subtle ? 0.22 : 0.34,
+          opacity: node.subtle ? 0.24 : 0.37,
           depthWrite: false,
         });
         const label = new THREE.Sprite(labelMaterial);
@@ -395,7 +395,7 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.LineBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.068,
+        opacity: 0.076,
         blending: THREE.AdditiveBlending,
       });
       networkGroup.add(new THREE.Line(geometry, material));
@@ -408,7 +408,7 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.MeshBasicMaterial({
         color: networkColors[route.tone],
         transparent: true,
-        opacity: 0.38,
+        opacity: 0.42,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
@@ -456,17 +456,17 @@ function ThreeEvidenceNetwork() {
       });
 
       lineMaterials.forEach((material, index) => {
-        material.opacity = 0.055 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.014;
+        material.opacity = 0.062 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.016;
       });
 
       labelSprites.forEach((label, index) => {
-        label.material.opacity = 0.25 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.035;
+        label.material.opacity = 0.28 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.038;
       });
 
       pulses.forEach(({ pulse, routePoints, offset }, index) => {
         const t = (elapsed * 0.075 + offset) % 1;
         pulse.position.copy(sampleRoute(routePoints, t));
-        (pulse.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * Math.PI) * (index % 2 === 0 ? 0.36 : 0.24);
+        (pulse.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * Math.PI) * (index % 2 === 0 ? 0.4 : 0.27);
       });
 
       renderer.render(scene, camera);
