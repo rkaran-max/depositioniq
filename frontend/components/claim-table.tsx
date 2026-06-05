@@ -17,8 +17,8 @@ export function ClaimTable({ claims }: { claims: Claim[] }) {
         <CardTitle>Claims</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-hidden rounded-xl border border-white/10">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-slate-500">
               <tr>
                 <th className="px-4 py-3">Claim</th>
@@ -31,9 +31,9 @@ export function ClaimTable({ claims }: { claims: Claim[] }) {
             <tbody className="divide-y divide-white/10">
               {claims.map((claim) => (
                 <tr key={claim.id} className="transition hover:bg-white/[0.035]">
-                  <td className="max-w-xl px-4 py-4 text-slate-200">{claim.claim}</td>
+                  <td className="max-w-xl px-4 py-4 break-words text-slate-200">{claim.claim}</td>
                   <td className="px-4 py-4">
-                    <Badge variant="violet">{claim.topic}</Badge>
+                    <Badge variant="violet" className="text-left">{claim.topic}</Badge>
                   </td>
                   <td className="px-4 py-4">
                     <Badge variant={claim.certainty === "High" ? "green" : "amber"}>
@@ -41,7 +41,7 @@ export function ClaimTable({ claims }: { claims: Claim[] }) {
                     </Badge>
                   </td>
                   <td className="px-4 py-4 text-slate-300">{claim.confidence}</td>
-                  <td className="px-4 py-4 text-slate-500">{claim.citation}</td>
+                  <td className="px-4 py-4 break-all text-slate-500">{claim.citation}</td>
                 </tr>
               ))}
             </tbody>

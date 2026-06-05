@@ -21,14 +21,14 @@ export function AgentTrace({ events }: { events: AgentTraceEvent[] }) {
           transition={{ delay: 0.08 * index, duration: 0.35 }}
           className="rounded-lg border border-white/10 bg-[#070A0F] p-3"
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] text-slate-500">{event.time}</div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="break-all font-mono text-[10px] text-slate-500">{event.time}</div>
             <span className={cn("rounded-full px-2 py-0.5 font-mono text-[10px]", traceTone[event.status])}>
               {event.status}
             </span>
           </div>
-          <div className="mt-2 font-mono text-xs text-slate-200">{event.event}</div>
-          <p className="mt-1 text-xs leading-5 text-slate-500">{event.detail}</p>
+          <div className="mt-2 break-all font-mono text-xs text-slate-200">{event.event}</div>
+          <p className="mt-1 break-words text-xs leading-5 text-slate-500">{event.detail}</p>
         </motion.div>
       ))}
     </div>

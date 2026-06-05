@@ -78,14 +78,14 @@ function SectionLabel({
   action?: string;
 }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-4">
-      <div>
+    <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+      <div className="min-w-0">
         <div className="text-[11px] font-medium text-slate-500">
           {eyebrow}
         </div>
-        <h2 className="mt-1 text-sm font-medium text-slate-100">{title}</h2>
+        <h2 className="mt-1 break-words text-sm font-medium text-slate-100">{title}</h2>
       </div>
-      {action ? <div className="font-mono text-[10px] text-sky-300">{action}</div> : null}
+      {action ? <div className="max-w-full break-words font-mono text-[10px] text-sky-300">{action}</div> : null}
     </div>
   );
 }
@@ -213,7 +213,7 @@ function BackendStatusBanner({
         <div className="text-[11px] font-medium text-slate-500">
           Source
         </div>
-        <div className="mt-1 font-mono text-xs text-slate-300">
+        <div className="mt-1 break-all font-mono text-xs text-slate-300">
           {isLive ? "FastAPI /analyze" : "frontend/lib/mock-analysis.ts"}
         </div>
       </div>
@@ -222,7 +222,7 @@ function BackendStatusBanner({
         <div className="text-[11px] font-medium text-slate-500">
           Transcript ID
         </div>
-        <div className="mt-1 font-mono text-xs text-sky-300">
+        <div className="mt-1 break-all font-mono text-xs text-sky-300">
           {isLive ? transcriptId ?? "pending" : "N/A"}
         </div>
       </div>
@@ -420,7 +420,7 @@ export function Dashboard() {
                               {result.category}
                             </span>
                             {result.citation ? (
-                              <span className="font-mono text-[10px] text-sky-300">{result.citation}</span>
+                              <span className="break-all font-mono text-[10px] text-sky-300">{result.citation}</span>
                             ) : null}
                           </div>
                           <div className="mt-1 text-xs font-medium text-slate-100">{result.title}</div>
@@ -519,13 +519,13 @@ export function Dashboard() {
               {pipelineStages.map((stage, index) => (
                 <div key={stage.id} className="relative rounded-lg border border-white/10 bg-[#070A0F] p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="font-mono text-[11px] text-slate-200">{stage.label}</div>
+                    <div className="min-w-0 break-words font-mono text-[11px] text-slate-200">{stage.label}</div>
                     <span className={cn("rounded-md border px-2 py-0.5 font-mono text-[10px]", statusTone[stage.status])}>
                       {stage.status}
                     </span>
                   </div>
                   <div className="mt-4 flex items-end justify-between gap-2">
-                    <div className="text-xs text-slate-500">{stage.output}</div>
+                    <div className="min-w-0 break-words text-xs text-slate-500">{stage.output}</div>
                     <div className="font-mono text-[10px] text-slate-600">{stage.latency}</div>
                   </div>
                 </div>
@@ -552,7 +552,7 @@ export function Dashboard() {
                     <div className="text-sm font-medium text-white">{step.title}</div>
                   </div>
                   <p className="mt-3 text-xs leading-5 text-slate-500">{step.description}</p>
-                  <div className="mt-4 rounded border border-white/10 bg-[#111827] px-2 py-1.5 font-mono text-[10px] text-slate-400">
+                  <div className="mt-4 rounded border border-white/10 bg-[#111827] px-2 py-1.5 font-mono text-[10px] break-words text-slate-400">
                     output: {step.output}
                   </div>
                 </div>
@@ -644,7 +644,7 @@ export function Dashboard() {
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {contradiction.citations.map((citation, citationIndex) => (
-                        <span key={`${citation}-${citationIndex}`} className="rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] text-slate-400">
+                        <span key={`${citation}-${citationIndex}`} className="max-w-full rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] break-all text-slate-400">
                           {citation}
                         </span>
                       ))}
@@ -762,12 +762,12 @@ export function Dashboard() {
               <div className="space-y-3">
                 {strategyCards.map((card, index) => (
                   <div key={`${card.objective}-${index}`} className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-300/25 hover:bg-[#0B0F17]">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <div className="flex size-7 items-center justify-center rounded border border-sky-300/20 bg-sky-300/10 font-mono text-[10px] text-sky-200">
                         {String(index + 1).padStart(2, "0")}
                       </div>
-                      <div className="text-sm font-medium text-white">{card.objective}</div>
-                      <span className={cn("ml-auto rounded-md border px-2 py-1 font-mono text-[10px]", riskBadgeTone[card.risk])}>
+                      <div className="min-w-0 flex-1 break-words text-sm font-medium text-white">{card.objective}</div>
+                      <span className={cn("rounded-md border px-2 py-1 font-mono text-[10px]", riskBadgeTone[card.risk])}>
                         {card.risk}
                       </span>
                     </div>
@@ -791,8 +791,8 @@ export function Dashboard() {
                       </div>
                       <p className="mt-2 text-xs leading-5 text-slate-500">{card.attorneyNote}</p>
                     </div>
-                    <div className="mt-3 inline-flex items-center gap-1.5 rounded border border-white/10 bg-[#111827] px-2 py-1 font-mono text-[10px] text-sky-300">
-                      <Target className="size-3" />
+                    <div className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded border border-white/10 bg-[#111827] px-2 py-1 font-mono text-[10px] break-all text-sky-300">
+                      <Target className="size-3 shrink-0" />
                       {card.citation}
                     </div>
                   </div>
@@ -806,16 +806,16 @@ export function Dashboard() {
               <SectionLabel eyebrow="witness context" title="Record context and follow-up posture" action="attorney review" />
               <div className="rounded-lg border border-violet-300/15 bg-[#070A0F] p-4">
                 <div className="flex items-start gap-3">
-                  <Network className="mt-0.5 size-4 text-violet-300" />
-                  <div>
-                    <div className="text-sm font-medium text-white">{witnessContext.label}</div>
-                    <p className="mt-2 text-xs leading-6 text-slate-500">{witnessContext.summary}</p>
+                  <Network className="mt-0.5 size-4 shrink-0 text-violet-300" />
+                  <div className="min-w-0">
+                    <div className="break-words text-sm font-medium text-white">{witnessContext.label}</div>
+                    <p className="mt-2 break-words text-xs leading-6 text-slate-500">{witnessContext.summary}</p>
                   </div>
                 </div>
-                <div className="mt-4 grid gap-2 md:grid-cols-3">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {witnessContext.focusAreas.slice(0, 3).map((item) => (
-                    <div key={item} className="rounded border border-white/10 bg-[#111827] px-3 py-2 font-mono text-[10px] text-slate-400">
-                      {item.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "")}
+                    <div key={item} className="max-w-full rounded border border-white/10 bg-[#111827] px-3 py-2 font-mono text-[10px] break-words text-slate-400">
+                      {item}
                     </div>
                   ))}
                 </div>
@@ -825,11 +825,11 @@ export function Dashboard() {
                   witness profile summary
                 </div>
                 <div className="mt-2 text-sm text-white">{witnessProfile.name}</div>
-                <p className="mt-2 text-xs leading-6 text-slate-500">{witnessProfile.overview}</p>
+                <p className="mt-2 break-words text-xs leading-6 text-slate-500">{witnessProfile.overview}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {witnessContext.citations.length > 0 ? (
                     witnessContext.citations.map((citation) => (
-                      <span key={citation} className="rounded border border-sky-300/15 bg-sky-300/10 px-2 py-1 font-mono text-[10px] text-sky-300">
+                      <span key={citation} className="max-w-full rounded border border-sky-300/15 bg-sky-300/10 px-2 py-1 font-mono text-[10px] break-all text-sky-300">
                         {citation}
                       </span>
                     ))
@@ -839,7 +839,7 @@ export function Dashboard() {
                     </span>
                   )}
                 </div>
-                <div className="mt-3 text-[11px] leading-5 text-slate-500">{witnessContext.note}</div>
+                <div className="mt-3 break-words text-[11px] leading-5 text-slate-500">{witnessContext.note}</div>
               </div>
             </ConsolePanel>
 
@@ -847,14 +847,14 @@ export function Dashboard() {
               <SectionLabel eyebrow="evidence trace" title="Citation-grounded support spans" action="linked support" />
               <div className="space-y-2">
                 {evidenceTrace.map((evidence) => (
-                  <div key={evidence.id} className="grid gap-3 rounded-lg border border-white/10 bg-[#070A0F] p-3 md:grid-cols-[160px_1fr_70px]">
-                    <div>
-                      <div className="font-mono text-[10px] text-slate-600">{evidence.id}</div>
-                      <div className="mt-1 font-mono text-[11px] text-sky-300">{evidence.source}</div>
+                  <div key={evidence.id} className="grid gap-3 rounded-lg border border-white/10 bg-[#070A0F] p-3 md:grid-cols-[minmax(0,160px)_minmax(0,1fr)_minmax(64px,70px)]">
+                    <div className="min-w-0">
+                      <div className="break-all font-mono text-[10px] text-slate-600">{evidence.id}</div>
+                      <div className="mt-1 break-all font-mono text-[11px] text-sky-300">{evidence.source}</div>
                     </div>
-                    <div>
-                      <div className="font-mono text-[10px] text-slate-500">{evidence.signal}</div>
-                      <p className="mt-1 text-xs leading-5 text-slate-400">{evidence.excerpt}</p>
+                    <div className="min-w-0">
+                      <div className="break-all font-mono text-[10px] text-slate-500">{evidence.signal}</div>
+                      <p className="mt-1 break-words text-xs leading-5 text-slate-400">{evidence.excerpt}</p>
                     </div>
                     <div className="self-center rounded border border-emerald-300/20 bg-emerald-300/10 px-2 py-1 text-center font-mono text-[11px] text-emerald-200">
                       {evidence.confidence}
@@ -877,7 +877,7 @@ export function Dashboard() {
                   {reportArtifacts.map((artifact) => (
                     <div key={artifact} className="rounded border border-white/10 bg-[#111827] p-3">
                       <FileText className="size-4 text-slate-500" />
-                      <div className="mt-3 font-mono text-[10px] text-slate-300">{artifact}</div>
+                      <div className="mt-3 break-all font-mono text-[10px] text-slate-300">{artifact}</div>
                     </div>
                   ))}
                 </div>

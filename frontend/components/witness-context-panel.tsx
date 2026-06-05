@@ -24,15 +24,15 @@ export function WitnessContextPanel() {
               <Network className="size-5 text-violet-200" />
             </div>
             <div>
-              <div className="font-medium text-white">Retention or recall issue identified for attorney review.</div>
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <div className="break-words font-medium text-white">Retention or recall issue identified for attorney review.</div>
+              <p className="mt-2 break-words text-sm leading-6 text-slate-400">
                 The review panel summarizes potential preservation, retention, recall,
                 and citation-support issues using the currently loaded testimony. It
                 surfaces follow-up areas without drawing legal conclusions.
               </p>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 {["Retention practice", "Citation support", "Follow-up scope"].map((item) => (
-                  <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-sm text-slate-300">
+                  <div key={item} className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-sm break-words text-slate-300">
                     {item}
                   </div>
                 ))}

@@ -39,12 +39,12 @@ export function ProductConsole() {
           transition={{ duration: 0.6 }}
           className="h-fit rounded-xl border border-white/10 bg-[#0B0F17] p-5 shadow-[0_16px_48px_rgba(0,0,0,0.28)]"
         >
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex min-w-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
               <FileText className="size-4 text-slate-400" />
               analysis workspace
             </div>
-            <div className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-slate-400">
+            <div className="max-w-full rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[10px] break-words text-slate-400">
               evidence review
             </div>
           </div>
@@ -58,9 +58,9 @@ export function ProductConsole() {
                 transition={{ delay: index * 0.05, duration: 0.35 }}
                 className="rounded-lg border border-white/10 bg-[#070707] p-3.5"
               >
-                <div className="text-sm font-medium text-white">{label}</div>
-                <div className="mt-2 flex items-center gap-2 text-sm text-slate-400">
-                  <CheckCircle2 className="size-4 text-emerald-300" />
+                <div className="break-words text-sm font-medium text-white">{label}</div>
+                <div className="mt-2 flex min-w-0 items-center gap-2 text-sm text-slate-400">
+                  <CheckCircle2 className="size-4 shrink-0 text-emerald-300" />
                   {value}
                 </div>
               </motion.div>
@@ -79,8 +79,8 @@ export function ProductConsole() {
             {features.map((feature) => (
               <div key={feature.number} className="rounded-xl border border-white/10 bg-[#0A0D12] p-4">
                 <div className="font-mono text-[10px] text-slate-500">{feature.number}</div>
-                <div className="mt-2 text-lg text-white">{feature.title}</div>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{feature.body}</p>
+                <div className="mt-2 break-words text-lg text-white">{feature.title}</div>
+                <p className="mt-2 break-words text-sm leading-6 text-slate-500">{feature.body}</p>
               </div>
             ))}
           </div>

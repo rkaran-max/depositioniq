@@ -34,9 +34,9 @@ export default function EvidenceReviewPage() {
               {contradictions.map((contradiction) => (
                 <div key={contradiction.title} className="rounded-xl border border-white/10 bg-[#070A0F] p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-medium text-white">{contradiction.title}</div>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">{contradiction.summary}</p>
+                    <div className="min-w-0">
+                      <div className="break-words text-sm font-medium text-white">{contradiction.title}</div>
+                      <p className="mt-2 break-words text-sm leading-6 text-slate-500">{contradiction.summary}</p>
                     </div>
                     <Badge variant={contradiction.severity === "High" ? "red" : contradiction.severity === "Medium" ? "amber" : "slate"}>
                       {contradiction.severity}
@@ -44,8 +44,8 @@ export default function EvidenceReviewPage() {
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {contradiction.citations.map((citation) => (
-                      <span key={citation} className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] text-slate-400">
-                        <Link2 className="size-3" />
+                      <span key={citation} className="inline-flex max-w-full items-center gap-1 rounded-md border border-white/10 bg-[#0B0F17] px-2 py-1 font-mono text-[10px] break-all text-slate-400">
+                        <Link2 className="size-3 shrink-0" />
                         {citation}
                       </span>
                     ))}

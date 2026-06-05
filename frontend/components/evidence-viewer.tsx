@@ -21,7 +21,7 @@ function HighlightedTranscript({
   const parts = text.split(new RegExp(`(${escaped.join("|")})`, "gi"));
 
   return (
-    <p className="font-mono text-xs leading-6 text-slate-300">
+    <p className="break-words font-mono text-xs leading-6 text-slate-300">
       {parts.map((part, index) => {
         const isHighlighted = highlights.some(
           (phrase) => phrase.toLowerCase() === part.toLowerCase(),
@@ -47,14 +47,14 @@ export function EvidenceViewer({ excerpts }: { excerpts: TranscriptEvidence[] })
       {excerpts.map((excerpt) => (
         <div
           key={excerpt.id}
-          className="group rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-200/25 hover:bg-[#0D131D]"
+          className="group min-w-0 rounded-lg border border-white/10 bg-[#070A0F] p-4 transition hover:border-sky-200/25 hover:bg-[#0D131D]"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <BookOpenText className="size-4 text-sky-300/80 transition group-hover:text-sky-200" />
-              <div className="font-mono text-[11px] text-sky-300 transition group-hover:text-sky-200">{excerpt.citation}</div>
+              <div className="break-all font-mono text-[11px] text-sky-300 transition group-hover:text-sky-200">{excerpt.citation}</div>
             </div>
-            <span className={cn("rounded-full border px-2 py-1 font-mono text-[10px]", riskBadgeTone[excerpt.crossExamRelevance])}>
+            <span className={cn("max-w-full rounded-full border px-2 py-1 font-mono text-[10px] break-words", riskBadgeTone[excerpt.crossExamRelevance])}>
               {excerpt.crossExamRelevance} exam relevance
             </span>
           </div>
@@ -66,13 +66,13 @@ export function EvidenceViewer({ excerpts }: { excerpts: TranscriptEvidence[] })
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
                 extracted claim
               </div>
-              <p className="mt-2 text-xs leading-5 text-slate-400">{excerpt.extractedClaim}</p>
+              <p className="mt-2 break-words text-xs leading-5 text-slate-400">{excerpt.extractedClaim}</p>
             </div>
             <div className="rounded border border-white/10 bg-[#0B0F17] p-3">
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-600">
                 linked issue
               </div>
-              <p className="mt-2 text-xs leading-5 text-slate-400">
+              <p className="mt-2 break-words text-xs leading-5 text-slate-400">
                 {excerpt.relatedContradiction ?? "No contradiction currently linked"}
               </p>
             </div>

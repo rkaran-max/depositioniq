@@ -77,11 +77,11 @@ export default function SecurityPage() {
             <div className="grid gap-3 md:grid-cols-2">
               {safeguards.map((item) => (
                 <div key={item.title} className="rounded-xl border border-white/10 bg-[#070A0F] p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-white">
-                    <item.icon className="size-4 text-emerald-300" />
+                  <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-white">
+                    <item.icon className="size-4 shrink-0 text-emerald-300" />
                     {item.title}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{item.body}</p>
+                  <p className="mt-2 break-words text-sm leading-6 text-slate-500">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -118,7 +118,7 @@ export default function SecurityPage() {
             </p>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {firmControls.map((control) => (
-                <div key={control} className="rounded-lg border border-white/10 bg-[#070A0F] px-3 py-3 text-sm text-slate-400">
+                <div key={control} className="rounded-lg border border-white/10 bg-[#070A0F] px-3 py-3 text-sm break-words text-slate-400">
                   {control}
                 </div>
               ))}
