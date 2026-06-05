@@ -257,17 +257,22 @@ function ThreeEvidenceNetwork() {
     }
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-    camera.position.set(0.0, 0.08, 9.25);
+    const camera = new THREE.PerspectiveCamera(39, 1, 0.1, 100);
+    camera.position.set(0.0, 0.08, 8.85);
     camera.lookAt(0.0, 0.15, 0);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    } catch {
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
     const networkGroup = new THREE.Group();
-    networkGroup.position.set(0.15, -0.04, 0);
+    networkGroup.position.set(0.0, -0.02, 0);
     scene.add(networkGroup);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -289,19 +294,19 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.SpriteMaterial({
         map: nodeTexture,
         transparent: true,
-        opacity: 0.82,
+        opacity: 0.94,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
       const haloMaterial = material.clone();
-      haloMaterial.opacity = 0.22;
+      haloMaterial.opacity = 0.18;
 
       const nodeSprite = new THREE.Sprite(material);
       const halo = new THREE.Sprite(haloMaterial);
       nodeSprite.position.set(...node.position);
       halo.position.copy(nodeSprite.position);
-      nodeSprite.scale.set(0.18, 0.18, 1);
-      halo.scale.set(0.36, 0.36, 1);
+      nodeSprite.scale.set(0.22, 0.22, 1);
+      halo.scale.set(0.42, 0.42, 1);
       networkGroup.add(halo, nodeSprite);
       nodes.push(nodeSprite);
       halos.push(halo);
@@ -310,12 +315,12 @@ function ThreeEvidenceNetwork() {
         const labelMaterial = new THREE.SpriteMaterial({
           map: createLabelTexture(node.label, rgba),
           transparent: true,
-          opacity: 0.48,
+          opacity: 0.56,
           depthWrite: false,
         });
         const label = new THREE.Sprite(labelMaterial);
         label.position.set(node.position[0], node.position[1] - 0.25, node.position[2]);
-        label.scale.set(0.76, 0.18, 1);
+        label.scale.set(0.82, 0.2, 1);
         networkGroup.add(label);
         labelSprites.push(label);
       }
@@ -336,7 +341,7 @@ function ThreeEvidenceNetwork() {
       const material = new THREE.LineBasicMaterial({
         color,
         transparent: true,
-        opacity: 0.26,
+        opacity: 0.34,
         blending: THREE.AdditiveBlending,
       });
       networkGroup.add(new THREE.Line(geometry, material));
@@ -385,24 +390,24 @@ function ThreeEvidenceNetwork() {
 
     const animate = () => {
       const elapsed = clock.getElapsedTime();
-      networkGroup.rotation.y = Math.sin(elapsed * 0.13) * 0.08 - 0.14;
+      networkGroup.rotation.y = Math.sin(elapsed * 0.13) * 0.06 - 0.08;
       networkGroup.rotation.x = Math.sin(elapsed * 0.1) * 0.035;
 
       nodes.forEach((node, index) => {
-        node.scale.setScalar(0.18 * (1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.14));
+        node.scale.setScalar(0.22 * (1 + Math.sin(elapsed * 1.2 + index * 0.65) * 0.12));
       });
 
       halos.forEach((halo, index) => {
-        halo.scale.setScalar(0.36 * (1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.18));
-        (halo.material as THREE.SpriteMaterial).opacity = 0.08 + Math.sin(elapsed * 0.75 + index) * 0.022;
+        halo.scale.setScalar(0.42 * (1 + Math.sin(elapsed * 0.9 + index * 0.4) * 0.16));
+        (halo.material as THREE.SpriteMaterial).opacity = 0.09 + Math.sin(elapsed * 0.75 + index) * 0.024;
       });
 
       lineMaterials.forEach((material, index) => {
-        material.opacity = 0.22 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.06;
+        material.opacity = 0.3 + Math.sin(elapsed * 0.9 + index * 0.28) * 0.075;
       });
 
       labelSprites.forEach((label, index) => {
-        label.material.opacity = 0.42 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.06;
+        label.material.opacity = 0.48 + Math.sin(elapsed * 0.5 + index * 0.24) * 0.07;
       });
 
       pulses.forEach(({ pulse, from, to, offset }, index) => {
@@ -456,11 +461,11 @@ function EvidenceSurface() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_73%_16%,rgba(56,189,248,0.18),transparent_29rem),radial-gradient(circle_at_82%_61%,rgba(251,191,36,0.10),transparent_24rem),linear-gradient(180deg,#070A0F_0%,#05070B_78%,#070A0F_100%)]" />
-      <div className="pointer-events-none absolute inset-y-0 left-[-8%] right-[-8%] opacity-88">
+      <div className="pointer-events-none absolute inset-y-0 left-[-20%] right-[-10%] opacity-100">
         <ThreeEvidenceNetwork />
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[66%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.992)_46%,rgba(7,10,15,0.90)_70%,rgba(7,10,15,0.38)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_36%,rgba(0,0,0,0.66),transparent_32rem)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-[54%] bg-[linear-gradient(90deg,#070A0F_0%,rgba(7,10,15,0.98)_42%,rgba(7,10,15,0.72)_66%,rgba(7,10,15,0.12)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_28%_36%,rgba(0,0,0,0.48),transparent_29rem)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#070A0F] to-transparent" />
     </div>
   );
@@ -476,12 +481,12 @@ export function Hero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-3xl rounded-2xl border border-white/[0.07] bg-[#070A0F]/72 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-sm md:p-7"
+          className="max-w-3xl rounded-2xl border border-white/[0.09] bg-[#070A0F]/86 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.38)] backdrop-blur-md md:p-7"
         >
           <div className="inline-flex rounded-md border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs text-slate-400">
             Deposition review workspace
           </div>
-          <h1 className="mt-7 text-balance text-left font-serif text-5xl font-normal leading-[1.02] tracking-tight text-white md:text-7xl">
+          <h1 className="mt-7 text-balance text-left font-serif text-5xl font-normal leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_28px_rgba(0,0,0,0.85)] md:text-7xl">
             Find contradictions before opposing counsel does.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-slate-400 md:text-lg">
@@ -508,7 +513,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.08, ease: "easeOut" }}
-          className="rounded-xl border border-white/10 bg-[#0B0F17]/90 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-md"
+          className="rounded-xl border border-white/10 bg-[#0B0F17]/70 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.40)] backdrop-blur-lg"
         >
           <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
             <div>
@@ -524,7 +529,7 @@ export function Hero() {
 
           <div className="grid gap-3 sm:grid-cols-4">
             {workflowSteps.map((step, index) => (
-              <div key={step.label} className="group rounded-md border border-white/10 bg-[#070A0F]/90 p-3 transition hover:border-slate-200/20 hover:bg-[#0D131D]">
+              <div key={step.label} className="group rounded-md border border-white/10 bg-[#070A0F]/64 p-3 transition hover:border-slate-200/20 hover:bg-[#0D131D]/90">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-slate-500">{String(index + 1).padStart(2, "0")}</span>
                   <CheckCircle2 className="size-3.5 text-emerald-300/80 transition group-hover:text-emerald-200" />
@@ -536,17 +541,17 @@ export function Hero() {
             ))}
           </div>
 
-          <div className="mt-5 rounded-lg border border-white/10 bg-[#070A0F]/92 p-4">
+          <div className="mt-5 rounded-lg border border-white/10 bg-[#070A0F]/68 p-4">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-white">
               <FileText className="size-4 text-slate-400" />
               Transcript Evidence
             </div>
             <div className="space-y-3">
               {evidenceRows.map((row) => (
-                <div key={row.citation} className="group grid gap-3 rounded-md border border-white/10 bg-[#0B0F17] p-3 transition hover:border-slate-200/20 hover:bg-[#101722] md:grid-cols-[132px_1fr_150px]">
+                <div key={row.citation} className="group grid gap-3 rounded-md border border-white/10 bg-[#0B0F17]/68 p-3 transition hover:border-slate-200/20 hover:bg-[#101722]/90 md:grid-cols-[132px_1fr_150px]">
                   <div className="font-mono text-[10px] text-sky-300">{row.citation}</div>
                   <div className="text-xs leading-5 text-slate-300">{row.text}</div>
-                  <div className="rounded-md border border-white/10 bg-white/[0.025] px-2 py-1 text-[11px] text-slate-400 transition group-hover:border-sky-200/20 group-hover:text-slate-200">
+                  <div className="rounded-md border border-white/10 bg-white/[0.035] px-2 py-1 text-[11px] text-slate-400 transition group-hover:border-sky-200/20 group-hover:text-slate-200">
                     {row.result}
                   </div>
                 </div>
@@ -554,7 +559,7 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-lg border border-amber-300/15 bg-amber-300/[0.04] p-4">
+          <div className="mt-5 rounded-lg border border-amber-300/15 bg-amber-300/[0.055] p-4">
             <div className="flex items-start gap-3">
               <ShieldAlert className="mt-0.5 size-4 text-amber-200" />
               <div>
