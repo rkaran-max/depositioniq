@@ -1,6 +1,26 @@
 # DepositionIQ
 
 DepositionIQ is a prototype legal AI system for analyzing deposition transcripts.
+It addresses a common litigation-review problem: deposition transcripts can be
+long, repetitive, and difficult to convert quickly into attorney-useful issues.
+DepositionIQ turns testimony into structured claims, links those claims back to
+citations, identifies candidate contradictions, and drafts cross-examination
+strategy for attorney review.
+
+Core workflow:
+
+```text
+Deposition testimony
+  -> Structured claims
+  -> Citation-backed evidence
+  -> Candidate contradictions
+  -> Cross-examination strategy
+  -> Downloadable report
+```
+
+The prototype supports pasted text transcripts, PDF transcript ingestion with OCR
+fallback, and experimental audio upload with local/server-side transcription.
+
 This repository currently contains two complementary project tracks:
 
 1. **Python/Streamlit prototype backend** in `app.py` and `src/`
@@ -18,7 +38,8 @@ This repository currently contains two complementary project tracks:
 ## Features
 
 - Paste transcript text directly into the Streamlit interface.
-- Upload one or more text-layer PDF deposition transcripts.
+- Upload one or more PDF deposition transcripts, including OCR fallback for
+  image-only PDFs when supported locally.
 - Review and edit cleaned PDF-extracted text before running analysis.
 - Optionally upload deposition audio for experimental local/server-side
   transcription, then analyze the transcript through the same pipeline.
@@ -59,12 +80,16 @@ This repository currently contains two complementary project tracks:
 │   │   ├── product/page.tsx
 │   │   └── security/page.tsx
 │   ├── components
+│   │   ├── agent-trace.tsx
 │   │   ├── claim-table.tsx
 │   │   ├── contradiction-card.tsx
-│   │   ├── witness-context-panel.tsx
+│   │   ├── dashboard.tsx
+│   │   ├── evidence-viewer.tsx
+│   │   ├── hero.tsx
 │   │   ├── metric-card.tsx
 │   │   ├── report-panel.tsx
 │   │   ├── sidebar.tsx
+│   │   ├── witness-context-panel.tsx
 │   │   ├── witness-profile.tsx
 │   │   └── ui
 │   ├── lib
@@ -83,12 +108,15 @@ This repository currently contains two complementary project tracks:
 └── src
     ├── __init__.py
     ├── audio_transcriber.py
+    ├── apple_vision_ocr.swift
+    ├── case_summary.py
     ├── ingest.py
     ├── pipeline.py
     ├── segment.py
     ├── claim_extractor.py
     ├── contradiction_detector.py
     ├── verifier.py
+    ├── witness_profile.py
     ├── cross_exam_generator.py
     └── report_generator.py
 ```
@@ -137,7 +165,38 @@ Primary files:
 The frontend can call the Python FastAPI backend for live analysis. It preserves the
 mock data as a fallback so the UI remains usable if the backend is not running.
 
-## Architecture
+## System Architecture
+
+DepositionIQ uses a modular frontend/backend architecture. The Streamlit app and
+FastAPI service both call the same shared Python pipeline, while the Next.js demo
+interface can either call FastAPI for live analysis or fall back to realistic mock
+outputs for presentation safety.
+
+```text
+User input
+  ├─ Text transcript
+  ├─ PDF transcript -> pypdf text extraction -> macOS Vision OCR fallback
+  └─ Audio upload -> optional local Whisper/faster-whisper transcription
+
+Frontend
+  ├─ Streamlit prototype: app.py
+  └─ Next.js demo UI: frontend/
+
+Backend API
+  └─ FastAPI: api.py
+       ├─ GET /health
+       ├─ POST /analyze
+       └─ POST /transcribe-analyze
+
+Shared pipeline: src/pipeline.py
+  -> Ingestion
+  -> Segmentation
+  -> Claim extraction
+  -> Contradiction detection
+  -> Evidence/citation verification
+  -> Cross-exam generation
+  -> Witness profile and report export
+```
 
 DepositionIQ follows a pipeline architecture:
 
@@ -170,14 +229,20 @@ DepositionIQ follows a pipeline architecture:
    is the natural place to add LLM prompting for attorney-style questioning.
 
 7. **Report Generation (`src/report_generator.py`)**
-   Produces an attorney-facing Markdown report containing claims, contradictions,
-   generated questions, and caveats.
+   Produces downloadable Markdown output with claims, contradictions, questions,
+   citations, and review caveats.
 
 8. **Streamlit UI (`app.py`)**
-   Orchestrates the pipeline and presents results in five tabs:
+   Orchestrates the pipeline and presents results in six tabs:
    Overview, Witness Profile, Claims, Contradictions, Cross Examination, and Report.
    The Witness Profile tab includes an export button that adds the profile to the
    downloadable final report.
+
+9. **Next.js UI (`frontend/`)**
+    Provides the polished CS153 demo interface with landing, product, security,
+    evidence review, and demo routes. The `/demo` route sends transcript text to
+    FastAPI, displays live backend status, and renders claims, contradictions,
+    evidence, cross-examination strategy, and report export.
 
 ## Working Vertical Slice
 
@@ -208,7 +273,7 @@ Expected sample output is summarized in `samples/sample_output.md`.
 
 ## Input Options
 
-DepositionIQ supports two transcript input modes:
+DepositionIQ supports three transcript input modes:
 
 - **Raw text:** Paste transcript text directly into the app. This is the fastest path
   for demos and works best when transcript turns use `Q:` and `A:` prefixes.
@@ -216,6 +281,10 @@ DepositionIQ supports two transcript input modes:
   text with `pypdf`; when a PDF has no selectable text, it falls back to local macOS
   Vision OCR if available. It then cleans line breaks, normalizes `Q:` / `A:` turns,
   and displays the extracted text for review before analysis.
+- **Experimental audio upload:** Upload `.mp3`, `.wav`, `.m4a`, or compatible `.mp4`
+  audio to `POST /transcribe-analyze`. The backend transcribes the recording locally
+  or server-side when optional transcription dependencies are installed, then runs
+  the same analysis pipeline.
 
 OCR fallback currently targets macOS via the built-in Vision framework and Swift.
 On non-macOS systems, image-only PDFs should be OCR'd externally first, then uploaded
@@ -319,11 +388,11 @@ The script runs the backend pipeline on:
 
 For each transcript it prints:
 
-- number of claims extracted,
-- number of contradictions found,
-- contradiction summaries,
-- citations used,
-- generated cross-examination questions.
+- Number of claims extracted.
+- Number of contradictions found.
+- Contradiction summaries.
+- Citations used.
+- Generated cross-examination questions.
 
 Expected interpretation notes are documented in
 `examples/expected_findings.md`.
@@ -460,7 +529,34 @@ The app validates transcript input before analysis:
 - Unexpected pipeline failures are displayed in Streamlit with exception details for
   debugging.
 
-## Validation Checklist
+## Evaluation & Testing
+
+DepositionIQ is evaluated at the prototype level rather than through a formal
+benchmark. The current checks are designed to show that the end-to-end demo works
+on representative transcript inputs and that outputs remain citation-grounded.
+
+Validated workflows:
+
+- Text transcript workflow tested through Streamlit, FastAPI `POST /analyze`, and
+  the Next.js `/demo` workspace.
+- PDF ingestion workflow tested for text-layer PDFs and image-only PDFs using the
+  macOS Vision OCR fallback path when available.
+- Audio upload/transcription workflow tested through `POST /transcribe-analyze`
+  with optional local transcription dependencies.
+- Backend validation script tested on clean, obvious-contradiction, and
+  subtle-contradiction examples in `examples/`.
+- Contradiction detection examples include arrival-time inconsistencies,
+  preservation/deletion inconsistencies, and memory/recall inconsistencies.
+- Citation/evidence linking checks confirm that claims and contradictions retain
+  line references or transcript citations when available.
+- Cross-examination generation checks confirm that questions are tied to detected
+  issues and source claims.
+
+These checks provide evidence that the system is functional for a CS153 prototype.
+They are not a substitute for a legal accuracy benchmark, attorney validation, or
+production QA.
+
+### Validation Checklist
 
 Before demos or submissions, verify:
 
@@ -506,20 +602,46 @@ to understand and extend. Recommended next steps:
 - Add tests for each pipeline stage.
 - Add prompt templates and schema validation for model outputs.
 
+## Limitations
+
+- DepositionIQ is a prototype system built for research and educational use.
+- Contradictions are candidate review issues, not legal conclusions.
+- Outputs require attorney review before they are used in litigation strategy.
+- Results depend on transcript quality, formatting, and speaker labeling.
+- OCR quality may vary for scanned PDFs, handwritten notes, poor scans, or unusual
+  transcript layouts.
+- Audio transcription quality may vary with recording clarity, speaker overlap,
+  accents, background noise, and microphone quality.
+- The current contradiction logic is deterministic and heuristic where applicable;
+  it is designed for explainable demo behavior rather than exhaustive legal review.
+- The system is not legal advice and is not production-ready.
+
 ## AI Usage Disclosure
 
-This project was developed with AI-assisted coding tools, namely OpenAI Codex and ChatGPT. 
+This project was developed with AI-assisted coding tools, including OpenAI Codex
+and ChatGPT.
 
 These tools were used during development for:
-- Frontend development
-- Backend scaffolding
-- Debugging
-- Refactoring
-- Documentation
-- UI iteration
-- Test generation
 
-The project concept, legal workflow design, system architecture, contradiction-detection workflow, feature selection, evaluation design, and final product decisions were directed by the author. Any AI-generated code was reviewed, tested, modified, and integrated into the final system by the author.
+- Frontend development.
+- Backend scaffolding.
+- Debugging.
+- Refactoring.
+- Documentation.
+- UI iteration.
+- Test generation.
+
+The project concept, legal workflow design, system architecture, contradiction
+detection workflow, feature selection, evaluation design, and final product
+decisions were directed by the author. AI-generated code was reviewed, tested,
+modified, and integrated into the final system by the author.
+
+## External References / Examples Reviewed
+
+The README does not rely on named external legal technology products or
+organizations for claims about functionality, testing, or validation. Product
+inspiration and comparisons, where discussed in development, are not required to
+run or evaluate this repository.
 
 ## Legal Disclaimer
 
