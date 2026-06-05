@@ -534,20 +534,20 @@ export function Hero() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="max-w-3xl rounded-2xl border border-white/[0.10] bg-[#070A0F]/78 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.36)] backdrop-blur-md md:p-7"
+          className="max-w-3xl rounded-2xl border border-white/[0.14] bg-[#070A0F]/86 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.40)] backdrop-blur-md md:p-7"
         >
-          <div className="inline-flex rounded-md border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs text-slate-400">
+          <div className="inline-flex rounded-md border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs text-slate-300">
             Deposition review workspace
           </div>
-          <h1 className="mt-7 text-balance text-left font-serif text-5xl font-normal leading-[1.02] tracking-tight text-white drop-shadow-[0_2px_28px_rgba(0,0,0,0.85)] md:text-7xl">
+          <h1 className="mt-7 text-balance text-left font-serif text-5xl font-medium leading-[1.02] tracking-tight text-[#F8FAFC] drop-shadow-[0_2px_34px_rgba(0,0,0,0.95)] md:text-7xl">
             Find contradictions before opposing counsel does.
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-100 md:text-lg">
             DepositionIQ turns transcript testimony into citation-backed claims,
             contradiction review, and cross-examination strategy.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="group min-w-0">
+            <Button asChild size="lg" className="group min-w-0 border-white bg-[#F8FAFC] text-[#05070B] shadow-[0_12px_32px_rgba(248,250,252,0.16)] hover:bg-white">
               <Link href="/demo">
                 <span>Analyze Transcript</span>
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -566,11 +566,11 @@ export function Hero() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.08, ease: "easeOut" }}
-          className="rounded-xl border border-white/10 bg-[#0B0F17]/72 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.38)] backdrop-blur-md"
+          className="rounded-xl border border-white/10 bg-[#0B0F17]/86 p-5 shadow-[0_28px_90px_rgba(0,0,0,0.42)] backdrop-blur-md"
         >
           <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
             <div>
-              <div className="text-xs text-slate-400">Review packet</div>
+              <div className="text-xs text-slate-300">Review packet</div>
               <div className="mt-1 text-sm font-medium text-white">
                 Deposition analysis workflow
               </div>
@@ -582,28 +582,28 @@ export function Hero() {
 
           <div className="grid gap-3 sm:grid-cols-4">
             {workflowSteps.map((step, index) => (
-              <div key={step.label} className="group rounded-md border border-white/10 bg-[#070A0F]/72 p-3 backdrop-blur-sm transition hover:border-slate-200/20 hover:bg-[#0D131D]/82">
+              <div key={step.label} className="group rounded-md border border-white/10 bg-[#070A0F]/84 p-3 backdrop-blur-sm transition hover:border-slate-200/20 hover:bg-[#0D131D]/90">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-slate-500">{String(index + 1).padStart(2, "0")}</span>
                   <CheckCircle2 className="size-3.5 text-emerald-300/80 transition group-hover:text-emerald-200" />
                 </div>
                 <div className="mt-4 text-xs text-slate-400">{step.label}</div>
                 <div className="mt-1 text-sm text-white">{step.title}</div>
-                <div className="mt-2 text-xs leading-5 text-slate-400">{step.detail}</div>
+                <div className="mt-2 text-xs leading-5 text-slate-300">{step.detail}</div>
               </div>
             ))}
           </div>
 
-          <div className="mt-5 rounded-lg border border-white/10 bg-[#070A0F]/72 p-4 backdrop-blur-sm">
+          <div className="mt-5 rounded-lg border border-white/10 bg-[#070A0F]/84 p-4 backdrop-blur-sm">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-white">
               <FileText className="size-4 text-slate-400" />
               Transcript Evidence
             </div>
             <div className="space-y-3">
               {evidenceRows.map((row) => (
-                <div key={row.citation} className="group grid gap-3 rounded-md border border-white/10 bg-[#0B0F17]/72 p-3 backdrop-blur-sm transition hover:border-slate-200/20 hover:bg-[#101722]/84 md:grid-cols-[132px_1fr_150px]">
+                <div key={row.citation} className="group grid gap-3 rounded-md border border-white/10 bg-[#0B0F17]/84 p-3 backdrop-blur-sm transition hover:border-slate-200/20 hover:bg-[#101722]/90 md:grid-cols-[132px_1fr_150px]">
                   <div className="font-mono text-[10px] text-sky-300">{row.citation}</div>
-                  <div className="text-xs leading-5 text-slate-300">{row.text}</div>
+                  <div className="text-xs leading-5 text-slate-200">{row.text}</div>
                   <div className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] text-slate-300 transition group-hover:border-sky-200/20 group-hover:text-slate-100">
                     {row.result}
                   </div>
@@ -612,7 +612,7 @@ export function Hero() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-lg border border-amber-300/15 bg-[#0B0F17]/72 p-4 backdrop-blur-sm">
+          <div className="mt-5 rounded-lg border border-amber-300/15 bg-[#0B0F17]/84 p-4 backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <ShieldAlert className="mt-0.5 size-4 text-amber-200" />
               <div>
