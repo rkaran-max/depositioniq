@@ -216,7 +216,7 @@ function normalizeBackendAnalysis(
         item.description ||
         "This issue should be reviewed against the linked transcript excerpts before examination.",
       linkedEvidence: linkedClaims.map((claim) => claim.id),
-      objective: `Test ${item.entity || item.topic} testimony against the cited record.`,
+      objective: buildContradictionObjective(item),
     };
   });
 
@@ -338,7 +338,7 @@ function normalizeBackendAnalysis(
     lawyerWorkflow: mock.lawyerWorkflow,
     reportArtifacts: mock.reportArtifacts,
     witnessProfile: {
-      name: payload.witness_profile.name,
+      name: displayWitnessName(payload.witness_profile.name),
       overview: buildWitnessProfileOverview({
         name: payload.witness_profile.name,
         inputMode,
@@ -414,6 +414,22 @@ function signalFromTopic(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
 }
 
+function buildContradictionObjective(item: BackendContradiction): string {
+  const text = `${item.summary} ${item.description ?? ""} ${item.reasoning ?? ""} ${item.entity} ${item.topic}`.toLowerCase();
+  if (text.includes("preservation") || text.includes("deletion") || text.includes("deleted") || text.includes("email")) {
+    return "Test email preservation and deletion testimony against the cited record.";
+  }
+  return `Test ${item.entity || item.topic} testimony against the cited record.`;
+}
+
+function displayWitnessName(name: string): string {
+  const normalized = name?.trim();
+  if (!normalized || normalized.toLowerCase() === "unknown witness") {
+    return "Transcript witness";
+  }
+  return normalized;
+}
+
 function buildWitnessProfileOverview({
   name,
   inputMode,
@@ -431,7 +447,7 @@ function buildWitnessProfileOverview({
   contradictions: string[];
   transcriptText: string;
 }): string {
-  const witnessName = name?.trim() || "Unknown witness";
+  const witnessName = displayWitnessName(name);
   const inputLabel = inputMode === "Demo" ? "demo transcript" : `${inputMode.toLowerCase()} transcript`;
   const safeTopics = transcriptText.toLowerCase().includes("dr dos")
     ? topics

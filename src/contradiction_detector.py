@@ -134,9 +134,8 @@ class ContradictionDetector:
             )
         if contradiction_type == "preservation_deletion_conflict":
             return (
-                f"The witness gave testimony that related emails were preserved "
-                f"({left['citation']} or {right['citation']}) while also testifying "
-                "that related emails were deleted after reading."
+                "The witness testified both that relevant emails were preserved "
+                "and that most such emails were deleted after reading."
             )
         if contradiction_type == "memory_recall_conflict":
             specific, uncertain = self._specific_and_uncertain(left, right)

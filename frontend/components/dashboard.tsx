@@ -148,7 +148,10 @@ function buildWitnessContext({
     label = "Recall limitation detected";
   }
 
-  const witnessName = witnessProfile.name?.trim() || "Unknown witness";
+  const witnessName =
+    !witnessProfile.name?.trim() || witnessProfile.name.trim().toLowerCase() === "unknown witness"
+      ? "Transcript witness"
+      : witnessProfile.name.trim();
   const inputLabel = inputMode === "Demo" ? "demo transcript" : `${inputMode.toLowerCase()} transcript`;
   const highestPriority = contradictions[0]?.title;
   const hasDrDos = transcriptLower.includes("dr dos");

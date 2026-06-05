@@ -90,7 +90,7 @@ class CrossExamGenerator:
                     "theme": "Retention record foundation",
                     "question": (
                         "What retention policy, legal hold notice, or email log would show "
-                        "which product review emails were preserved and which were deleted?"
+                        "which relevant emails were preserved and which were deleted?"
                     ),
                     "purpose": "Identify records that can verify the preservation account.",
                 },
