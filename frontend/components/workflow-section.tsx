@@ -23,7 +23,7 @@ const features = [
 
 export function WorkflowSection() {
   return (
-    <section id="courtshadow-product" className="border-b border-white/10 bg-[#070707] px-4 py-28">
+    <section id="witness-context-product" className="border-b border-white/10 bg-[#070707] px-4 py-28">
       <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.78fr_1.22fr]">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">

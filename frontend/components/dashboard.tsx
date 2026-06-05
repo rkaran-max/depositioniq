@@ -27,6 +27,7 @@ import {
   analyzeTranscript,
   createMockAnalysisState,
   transcribeAndAnalyzeAudio,
+  type DashboardAnalysisState,
 } from "@/lib/analysis-api";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +59,14 @@ type SearchResult = {
 };
 
 const RESULTS_SECTION_ID = "demo-results";
+
+type WitnessContext = {
+  label: string;
+  summary: string;
+  focusAreas: string[];
+  citations: string[];
+  note: string;
+};
 
 function SectionLabel({
   eyebrow,
@@ -102,6 +111,68 @@ function ConsolePanel({
       {children}
     </motion.section>
   );
+}
+
+function buildWitnessContext({
+  claims,
+  contradictions,
+  transcriptEvidence,
+  transcriptText,
+  witnessProfile,
+  inputMode,
+}: Pick<
+  DashboardAnalysisState,
+  "claims" | "contradictions" | "transcriptEvidence" | "witnessProfile" | "inputMode"
+> & {
+  transcriptText: string;
+}): WitnessContext {
+  const claimText = claims.map((claim) => claim.claim).join(" ").toLowerCase();
+  const issueText = contradictions.map((issue) => `${issue.title} ${issue.summary}`).join(" ").toLowerCase();
+  const transcriptLower = transcriptText.toLowerCase();
+  const combined = `${claimText} ${issueText} ${transcriptLower}`;
+  const verifiedIssues = contradictions.filter((issue) => issue.verified).length;
+  const topics = witnessProfile.topics.length
+    ? witnessProfile.topics.slice(0, 3)
+    : Array.from(new Set(claims.map((claim) => claim.topic))).slice(0, 3);
+  const topicLabel = topics.length ? topics.join(", ") : "the transcript topics";
+  const hasAffirmativePreservation = /\b(preserved|preserve|retained|retain|kept|saved)\b/.test(combined);
+  const hasDeletion = /\b(delete|deleted|deletion|discard|discarded|did not preserve|do not preserve|not preserved)\b/.test(combined);
+  const hasRecall = /\b(do not recall|don't recall|cannot recall|can't recall|memory|recollection)\b/.test(combined);
+
+  let label = "No preservation or recall issue detected";
+  if (hasAffirmativePreservation && hasDeletion) {
+    label = "Preservation/deletion tension detected";
+  } else if (hasDeletion) {
+    label = "Retention gap detected";
+  } else if (hasRecall) {
+    label = "Recall limitation detected";
+  }
+
+  const witnessName = witnessProfile.name?.trim() || "Unknown witness";
+  const inputLabel = inputMode === "Demo" ? "demo transcript" : `${inputMode.toLowerCase()} transcript`;
+  const highestPriority = contradictions[0]?.title;
+  const hasDrDos = transcriptLower.includes("dr dos");
+  const topicPhrase = hasDrDos ? topicLabel : topicLabel.replace(/DR DOS[^,]*/gi, "disputed communications");
+
+  return {
+    label,
+    summary: `${witnessName} provided testimony from a ${inputLabel} concerning ${topicPhrase}. The current analysis identified ${claims.length} extracted claim${claims.length === 1 ? "" : "s"} and ${verifiedIssues} verified review issue${verifiedIssues === 1 ? "" : "s"}. ${
+      highestPriority
+        ? `The highest-priority issue is "${highestPriority}", which may merit attorney review.`
+        : "No verified contradiction is currently prioritized, but the claims should remain tied to their citations for attorney review."
+    } Outputs are review aids and not legal conclusions.`,
+    focusAreas: [
+      ...topics,
+      ...(hasDeletion ? ["Retention and preservation practice"] : []),
+      ...(hasRecall ? ["Memory and recall limitations"] : []),
+      ...(contradictions.length ? ["Contradiction review"] : ["Citation support review"]),
+    ].slice(0, 5),
+    citations: Array.from(new Set(transcriptEvidence.map((evidence) => evidence.citation).filter(Boolean))).slice(0, 4),
+    note:
+      verifiedIssues > 0
+        ? "Potential examination vector for attorney review."
+        : "Use the linked citations to confirm whether follow-up is warranted.",
+  };
 }
 
 function BackendStatusBanner({
@@ -187,7 +258,21 @@ export function Dashboard() {
     sourceMode,
     statusLabel,
     transcriptId,
+    inputMode,
   } = analysis;
+
+  const witnessContext = useMemo(
+    () =>
+      buildWitnessContext({
+        claims,
+        contradictions,
+        transcriptEvidence,
+        transcriptText,
+        witnessProfile,
+        inputMode,
+      }),
+    [claims, contradictions, inputMode, transcriptEvidence, transcriptText, witnessProfile],
+  );
 
   const searchResults = useMemo(
     () =>
@@ -717,34 +802,44 @@ export function Dashboard() {
           </section>
 
           <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(380px,0.72fr)_minmax(0,1fr)]">
-            <ConsolePanel id="courtshadow" className="p-4">
-              <SectionLabel eyebrow="discourse review" title="Record context and examination posture" action="review module" />
+            <ConsolePanel id="witness-context" className="p-4">
+              <SectionLabel eyebrow="witness context" title="Record context and follow-up posture" action="attorney review" />
               <div className="rounded-lg border border-violet-300/15 bg-[#070A0F] p-4">
                 <div className="flex items-start gap-3">
                   <Network className="mt-0.5 size-4 text-violet-300" />
                   <div>
-                    <div className="text-sm font-medium text-white">Preservation shadow detected</div>
-                    <p className="mt-2 text-xs leading-6 text-slate-500">
-                      The witness acknowledges broad deletion behavior while disclaiming
-                      recall of specific DR DOS messages. The discourse layer marks the
-                      missing-message path as an examination vector, not a legal conclusion.
-                    </p>
+                    <div className="text-sm font-medium text-white">{witnessContext.label}</div>
+                    <p className="mt-2 text-xs leading-6 text-slate-500">{witnessContext.summary}</p>
                   </div>
                 </div>
                 <div className="mt-4 grid gap-2 md:grid-cols-3">
-                  {["retention.policy", "custodian.timeline", "backup.surface"].map((item) => (
+                  {witnessContext.focusAreas.slice(0, 3).map((item) => (
                     <div key={item} className="rounded border border-white/10 bg-[#111827] px-3 py-2 font-mono text-[10px] text-slate-400">
-                      {item}
+                      {item.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "")}
                     </div>
                   ))}
                 </div>
               </div>
               <div className="mt-3 rounded-lg border border-white/10 bg-[#070A0F] p-4">
                 <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
-                  witness profile
+                  witness profile summary
                 </div>
                 <div className="mt-2 text-sm text-white">{witnessProfile.name}</div>
                 <p className="mt-2 text-xs leading-6 text-slate-500">{witnessProfile.overview}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {witnessContext.citations.length > 0 ? (
+                    witnessContext.citations.map((citation) => (
+                      <span key={citation} className="rounded border border-sky-300/15 bg-sky-300/10 px-2 py-1 font-mono text-[10px] text-sky-300">
+                        {citation}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="rounded border border-white/10 bg-white/[0.03] px-2 py-1 font-mono text-[10px] text-slate-500">
+                      citations pending
+                    </span>
+                  )}
+                </div>
+                <div className="mt-3 text-[11px] leading-5 text-slate-500">{witnessContext.note}</div>
               </div>
             </ConsolePanel>
 

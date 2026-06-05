@@ -61,7 +61,7 @@ This repository currently contains two complementary project tracks:
 │   ├── components
 │   │   ├── claim-table.tsx
 │   │   ├── contradiction-card.tsx
-│   │   ├── courtshadow-panel.tsx
+│   │   ├── witness-context-panel.tsx
 │   │   ├── metric-card.tsx
 │   │   ├── report-panel.tsx
 │   │   ├── sidebar.tsx
@@ -519,7 +519,7 @@ These tools were used during development for:
 - UI iteration
 - Test generation
 
-The project concept, legal workflow design, system architecture, contradiction-detection workflow, feature selection, CourtShadow/RJA direction, evaluation design, and final product decisions were directed by the author. Any AI-generated code was reviewed, tested, modified, and integrated into the final system by the author.
+The project concept, legal workflow design, system architecture, contradiction-detection workflow, feature selection, evaluation design, and final product decisions were directed by the author. Any AI-generated code was reviewed, tested, modified, and integrated into the final system by the author.
 
 ## Legal Disclaimer
 

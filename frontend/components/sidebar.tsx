@@ -18,7 +18,7 @@ const navItems = [
   { label: "Review Priorities", icon: FileSearch, id: "demo-results" },
   { label: "Workflow", icon: FileSearch, id: "lawyer-workflow" },
   { label: "Cross-Exam Strategy", icon: MessageSquareQuote, id: "cross-examination" },
-  { label: "Witness Profile", icon: UserRound, id: "courtshadow" },
+  { label: "Witness Context", icon: UserRound, id: "witness-context" },
   { label: "Report Export", icon: ScrollText, id: "report" },
 ];
 
@@ -70,7 +70,7 @@ export function Sidebar() {
         <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
           sample matter
         </div>
-        <div className="mt-2 text-sm font-medium text-white">microsoft / drdos</div>
+        <div className="mt-2 text-sm font-medium text-white">sample deposition</div>
         <p className="mt-2 text-xs leading-5 text-slate-500">
           Retention issues, custodian uncertainty, testimony conflicts, and
           cross-examination target synthesis.

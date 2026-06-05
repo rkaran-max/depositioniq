@@ -49,7 +49,7 @@ const evidenceRows = [
   },
   {
     citation: "Gates Dep. 589:20-25",
-    text: "I don't recall any specific message relating to DR DOS.",
+    text: "I don't recall any specific message relating to the disputed communications.",
     result: "Memory limitation",
   },
   {

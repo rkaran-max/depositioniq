@@ -76,6 +76,7 @@ export type DashboardAnalysisState = {
   sourceMode: "mock" | "api";
   statusLabel: string;
   transcriptId?: string;
+  inputMode: "Demo" | "Text" | "Audio" | "PDF";
   sampleTranscript: string;
   depositionMetrics: Array<{
     label: string;
@@ -108,9 +109,23 @@ export type DashboardAnalysisState = {
 const API_URL = process.env.NEXT_PUBLIC_DEPOSITIONIQ_API_URL ?? "http://localhost:8000";
 
 export function createMockAnalysisState(): DashboardAnalysisState {
+  const witnessProfile = {
+    ...mock.witnessProfile,
+    overview: buildWitnessProfileOverview({
+      name: mock.witnessProfile.name,
+      inputMode: "Demo",
+      claimsCount: mock.claims.length,
+      verifiedIssues: mock.contradictions.filter((issue) => issue.verified).length,
+      topics: mock.witnessProfile.topics,
+      contradictions: mock.contradictions.map((issue) => issue.title),
+      transcriptText: mock.sampleTranscript,
+    }),
+  };
+
   return {
     sourceMode: "mock",
     statusLabel: "demo.fallback",
+    inputMode: "Demo",
     sampleTranscript: mock.sampleTranscript,
     depositionMetrics: mock.depositionMetrics,
     pipelineStages: mock.pipelineStages,
@@ -124,7 +139,7 @@ export function createMockAnalysisState(): DashboardAnalysisState {
     transcriptEvidence: mock.transcriptEvidence,
     lawyerWorkflow: mock.lawyerWorkflow,
     reportArtifacts: mock.reportArtifacts,
-    witnessProfile: mock.witnessProfile,
+    witnessProfile,
     reportMarkdown: "# DepositionIQ Demo Report\n\nStart the FastAPI backend to export a live analysis report.",
   };
 }
@@ -144,7 +159,7 @@ export async function analyzeTranscript(transcriptText: string): Promise<Dashboa
   }
 
   const payload = (await response.json()) as BackendAnalysisResponse;
-  return normalizeBackendAnalysis(payload, transcriptText);
+  return normalizeBackendAnalysis(payload, transcriptText, "Text");
 }
 
 export async function transcribeAndAnalyzeAudio(
@@ -166,7 +181,7 @@ export async function transcribeAndAnalyzeAudio(
   const payload = (await response.json()) as BackendAnalysisResponse;
   const transcriptText = payload.transcript_text ?? "";
   return {
-    analysis: normalizeBackendAnalysis(payload, transcriptText),
+    analysis: normalizeBackendAnalysis(payload, transcriptText, "Audio"),
     transcriptText,
   };
 }
@@ -174,6 +189,7 @@ export async function transcribeAndAnalyzeAudio(
 function normalizeBackendAnalysis(
   payload: BackendAnalysisResponse,
   transcriptText: string,
+  inputMode: DashboardAnalysisState["inputMode"],
 ): DashboardAnalysisState {
   const claims = payload.claims.map((claim): Claim => ({
     id: claim.id,
@@ -261,6 +277,7 @@ function normalizeBackendAnalysis(
     sourceMode: "api",
     statusLabel: "backend.connected",
     transcriptId: payload.transcript_id,
+    inputMode,
     sampleTranscript: transcriptText,
     depositionMetrics: [
       {
@@ -322,7 +339,15 @@ function normalizeBackendAnalysis(
     reportArtifacts: mock.reportArtifacts,
     witnessProfile: {
       name: payload.witness_profile.name,
-      overview: payload.witness_profile.overview,
+      overview: buildWitnessProfileOverview({
+        name: payload.witness_profile.name,
+        inputMode,
+        claimsCount: payload.claims.length,
+        verifiedIssues: verifiedCount,
+        topics: payload.witness_profile.key_topics,
+        contradictions: payload.contradictions.map((issue) => issue.summary),
+        transcriptText,
+      }),
       topics: payload.witness_profile.key_topics,
       vulnerabilities: payload.witness_profile.potential_vulnerabilities,
       strengths: payload.witness_profile.potential_strengths,
@@ -387,6 +412,37 @@ function countBy(values: string[]): Record<string, number> {
 
 function signalFromTopic(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
+}
+
+function buildWitnessProfileOverview({
+  name,
+  inputMode,
+  claimsCount,
+  verifiedIssues,
+  topics,
+  contradictions,
+  transcriptText,
+}: {
+  name: string;
+  inputMode: DashboardAnalysisState["inputMode"];
+  claimsCount: number;
+  verifiedIssues: number;
+  topics: string[];
+  contradictions: string[];
+  transcriptText: string;
+}): string {
+  const witnessName = name?.trim() || "Unknown witness";
+  const inputLabel = inputMode === "Demo" ? "demo transcript" : `${inputMode.toLowerCase()} transcript`;
+  const safeTopics = transcriptText.toLowerCase().includes("dr dos")
+    ? topics
+    : topics.map((topic) => topic.replace(/DR DOS[^,]*/gi, "Disputed communications"));
+  const topicLabel = safeTopics.length ? safeTopics.slice(0, 3).join(", ") : "the transcript topics";
+  const priority = contradictions[0];
+  return `${witnessName} provided testimony from a ${inputLabel} concerning ${topicLabel}. The analysis identified ${claimsCount} extracted claim${claimsCount === 1 ? "" : "s"} and ${verifiedIssues} verified review issue${verifiedIssues === 1 ? "" : "s"}. ${
+    priority
+      ? `The highest-priority issue concerns ${priority}.`
+      : "No verified contradiction is currently prioritized."
+  } Outputs are intended for attorney review and are not legal conclusions.`;
 }
 
 function extractErrorMessage(message: string): string {
